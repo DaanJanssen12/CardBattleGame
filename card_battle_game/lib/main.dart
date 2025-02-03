@@ -48,8 +48,8 @@ class _GameScreenState extends State<GameScreen> {
 
   void initGame() {
     setState(() {
-      drawCard(player, 3);
-      drawCard(enemy, 3);
+      player.drawCard(3);
+      enemy.drawCard(3);
     });
 
     nextTurn();
@@ -70,31 +70,19 @@ class _GameScreenState extends State<GameScreen> {
 
   void startPlayerTurn(Player player) {
     setState(() {
-      drawCard(player, 1);
+      player.startTurn();
     });
   }
 
   Future<void> enemyTurn(Player enemy) async {
-    print('Enemy turn');
-    drawCard(enemy, 1);
+    setState(() {
+      enemy.startTurn();
+    });
     await CPU.executeTurn(enemy, () {
       setState(() {});
     });
     setState(() {});
     nextTurn(); // Continue to the next turn
-  }
-
-  void drawCard(Player player, int amount) {
-    for (int i = 0; i < amount; i++) {
-      if (player.deck.isEmpty) shuffleDiscardPile(player);
-      if (player.deck.isNotEmpty) player.hand.add(player.deck.removeAt(0));
-    }
-  }
-
-  void shuffleDiscardPile(Player player) {
-    player.deck.addAll(player.discardPile);
-    player.discardPile.clear();
-    player.deck.shuffle();
   }
 
   void playCard(GameCard card, int monsterZoneIndex) {
@@ -125,48 +113,90 @@ class _GameScreenState extends State<GameScreen> {
       },
     );
   }
+  // Handle the attack by dragging a monster card to an enemy monster zone
+  void attackMonster(MonsterCard attackingMonster, Player enemy, int targetIndex) {
+    setState(() {
+      enemy.monsters[targetIndex]?.takeDamage(attackingMonster.attack);
+      //soundPlayerService.playAttackSound();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Card Battle Game')),
-      body: Stack(
-        children: [
-          // Main content of the game
-          SingleChildScrollView(
-            child: Column(
+      appBar: AppBar(
+        title: Text('Card Battle Game', style: TextStyle(
+          color: Colors.white
+        )),
+        backgroundColor: Colors.black,
+        actions: [
+          // End Turn Button: Positioned at the top-right of the app bar
+          TextButton(
+            onPressed: playerTurn ? nextTurn : null, // Disable when it's the enemy's turn
+            child: Text(
+              'End Turn',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              backgroundColor: playerTurn ? Colors.green : Colors.grey, // Green when active, grey when inactive
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.jpg'), // Path to your background image
+            fit: BoxFit.cover, // Makes sure the image covers the entire screen
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Main content of the game
+            Column(
               children: [
                 // Player Info in a fixed Top Bar
                 Container(
-                  height: 105,
+                  height: 125,
                   padding: EdgeInsets.all(8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: PlayerInfoWidget(player: player)),
+                      Expanded(child: PlayerInfoWidget(player: player, isActive: playerTurn)),
                       SizedBox(width: 16),
-                      Expanded(child: PlayerInfoWidget(player: enemy)),
+                      Expanded(child: PlayerInfoWidget(player: enemy, isActive: !playerTurn)),
                     ],
                   ),
                 ),
-                // Message
-                Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text(message, style: TextStyle(fontSize: 14)),
-                ),
+                SizedBox(height: 25),
                 // Game Board
                 GameBoardWidget(
-                    player: player, enemy: enemy, onCardDrop: playCard, onCardTap: showCardDetails),
-                // Player's Hand (horizontal scroll)
-                PlayerHandWidget(player: player, onCardTap: showCardDetails),
-                // End Turn Button
-                ElevatedButton(
-                    onPressed: playerTurn ? nextTurn : null,
-                    child: Text('End Turn')),
+                    player: player, 
+                    enemy: enemy, 
+                    onCardDrop: playCard, 
+                    onCardTap: showCardDetails,
+                    onMonsterAttack: attackMonster),
               ],
             ),
-          ),
-        ],
+            // Player's Hand at the bottom of the screen
+            Positioned(
+              bottom: 0, // Fixes the hand at the bottom
+              left: 0,
+              right: 0,
+              child: Container(
+                color: Colors.grey[200], // Adding visual separation for the player hand
+                child: PlayerHandWidget(player: player, onCardTap: showCardDetails),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

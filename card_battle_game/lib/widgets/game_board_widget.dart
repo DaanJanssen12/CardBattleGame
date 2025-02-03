@@ -8,13 +8,15 @@ class GameBoardWidget extends StatelessWidget {
   final Player enemy;
   final Function(GameCard, int) onCardDrop;
   final Function(GameCard) onCardTap;
+  final Function(MonsterCard, Player, int) onMonsterAttack;
 
   const GameBoardWidget({
     super.key,
     required this.player,
     required this.enemy,
     required this.onCardDrop,
-    required this.onCardTap
+    required this.onCardTap,
+    required this.onMonsterAttack
   });
 
   @override
@@ -40,8 +42,7 @@ class GameBoardWidget extends StatelessWidget {
               );
             }),
           ),
-          SizedBox(height: 16),
-
+          SizedBox(height: 25),
           // Player monster zones
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

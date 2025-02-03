@@ -10,7 +10,7 @@ class Player {
   List<GameCard> discardPile;
 
   Player({required this.name})
-      : health = 30,
+      : health = 3,
         mana = 5,
         deck = [],
         hand = [],
@@ -30,6 +30,24 @@ class Player {
       UpgradeCard("Strengthen", "", 1,
           upgradeCardType: UpgradeCardType.boostAtk, value: 1),
     ];
+    deck.shuffle();
+  }
+
+  void startTurn() {
+    drawCard(1);
+    mana += 2;
+  }
+
+  void drawCard(int amount) {
+    for (int i = 0; i < amount; i++) {
+      if (deck.isEmpty) shuffleDiscardPile();
+      if (deck.isNotEmpty) hand.add(deck.removeAt(0));
+    }
+  }
+
+  void shuffleDiscardPile() {
+    deck.addAll(discardPile);
+    discardPile.clear();
     deck.shuffle();
   }
 
@@ -55,10 +73,13 @@ class Player {
     if (card.isMonster()) {
       summonMonster(card as MonsterCard, monsterZoneIndex);
     }
-    if(card.isUpgrade()){
+    if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
     }
-    discardPile.add(card);
+
+    if (!card.isMonster()) {
+      discardPile.add(card);
+    }
   }
 
   void summonMonster(MonsterCard monster, int monsterZoneIndex) {

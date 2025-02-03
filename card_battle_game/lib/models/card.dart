@@ -35,6 +35,10 @@ class MonsterCard extends GameCard {
       break;
     }
   }
+
+  void takeDamage(int damage){
+    health -= damage;
+  }
 }
 
 class ActionCard extends GameCard {
