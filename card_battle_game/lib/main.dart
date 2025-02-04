@@ -93,9 +93,8 @@ class _GameScreenState extends State<GameScreen> {
       });
       soundPlayerService.playDropSound();
     } else {
-      NotificationService.showDialogMessage(context, 
-        canPlayCard.$2,
-        title: "Can't play card!");
+      NotificationService.showDialogMessage(context, canPlayCard.$2,
+          title: "Can't play card!");
     }
   }
 
@@ -113,26 +112,68 @@ class _GameScreenState extends State<GameScreen> {
       },
     );
   }
+
   // Handle the attack by dragging a monster card to an enemy monster zone
-  void attackMonster(MonsterCard attackingMonster, Player enemy, int targetIndex) {
+  void attackMonster(
+      MonsterCard attackingMonster, Player enemy, int targetIndex) {
     setState(() {
-      enemy.monsters[targetIndex]?.takeDamage(attackingMonster.attack);
+      attackingMonster.doAttack(enemy.monsters[targetIndex]!);
       //soundPlayerService.playAttackSound();
     });
+    Future.sync(() async {
+      await Future.delayed(Duration(seconds: 1));
+    }).then((_) {
+      checkForFaintedMonsters(player);
+      checkForFaintedMonsters(enemy);
+    });
+  }
+
+  void checkForFaintedMonsters(Player _player) {
+    for (var monster in _player.monsters.where((w) => w != null)) {
+      if (monster!.currentHealth <= 0) {
+        setState(() {
+          _player.faintMonster(monster);
+        });
+      }
+    }
+  }
+
+  void handleAttackPlayerDirectly(
+      Player attackedPlayer, MonsterCard attackingMonster) {
+    setState(() {
+      attackingMonster.attackPlayer(attackedPlayer);
+    });
+
+    Future.sync(() async {
+      await Future.delayed(Duration(seconds: 1));
+    }).then((_) {
+      checkGameEnd();
+    });
+  }
+
+  void checkGameEnd() {
+    if (enemy.health <= 0) {
+      NotificationService.showDialogMessage(context, 'You won!',
+          title: "Winner");
+    }
+    if (player.health <= 0) {
+      NotificationService.showDialogMessage(context, 'You lost!',
+          title: "Loser");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Card Battle Game', style: TextStyle(
-          color: Colors.white
-        )),
+        title: Text('Card Battle Game', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         actions: [
           // End Turn Button: Positioned at the top-right of the app bar
           TextButton(
-            onPressed: playerTurn ? nextTurn : null, // Disable when it's the enemy's turn
+            onPressed: playerTurn
+                ? nextTurn
+                : null, // Disable when it's the enemy's turn
             child: Text(
               'End Turn',
               style: TextStyle(
@@ -142,7 +183,9 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
             style: TextButton.styleFrom(
-              backgroundColor: playerTurn ? Colors.green : Colors.grey, // Green when active, grey when inactive
+              backgroundColor: playerTurn
+                  ? Colors.green
+                  : Colors.grey, // Green when active, grey when inactive
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -153,7 +196,8 @@ class _GameScreenState extends State<GameScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/background.jpg'), // Path to your background image
+            image: AssetImage(
+                'assets/images/background.jpg'), // Path to your background image
             fit: BoxFit.cover, // Makes sure the image covers the entire screen
           ),
         ),
@@ -169,18 +213,27 @@ class _GameScreenState extends State<GameScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: PlayerInfoWidget(player: player, isActive: playerTurn)),
+                      Expanded(
+                          child: PlayerInfoWidget(
+                              player: player,
+                              isActive: playerTurn,
+                              handleAttackPlayerDirectly: null)),
                       SizedBox(width: 16),
-                      Expanded(child: PlayerInfoWidget(player: enemy, isActive: !playerTurn)),
+                      Expanded(
+                          child: PlayerInfoWidget(
+                              player: enemy,
+                              isActive: !playerTurn,
+                              handleAttackPlayerDirectly:
+                                  handleAttackPlayerDirectly)),
                     ],
                   ),
                 ),
                 SizedBox(height: 12),
                 // Game Board
                 GameBoardWidget(
-                    player: player, 
-                    enemy: enemy, 
-                    onCardDrop: playCard, 
+                    player: player,
+                    enemy: enemy,
+                    onCardDrop: playCard,
                     onCardTap: showCardDetails,
                     onMonsterAttack: attackMonster),
               ],
@@ -191,8 +244,10 @@ class _GameScreenState extends State<GameScreen> {
               left: 0,
               right: 0,
               child: Container(
-                color: Colors.grey[200], // Adding visual separation for the player hand
-                child: PlayerHandWidget(player: player, onCardTap: showCardDetails),
+                color: Colors
+                    .grey[200], // Adding visual separation for the player hand
+                child: PlayerHandWidget(
+                    player: player, onCardTap: showCardDetails),
               ),
             ),
           ],

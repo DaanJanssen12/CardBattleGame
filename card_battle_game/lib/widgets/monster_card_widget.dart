@@ -89,9 +89,9 @@ class MonsterCardWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min, 
                   children: [
                     _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
-                        monster.health, Colors.redAccent),
+                        monster.currentHealth, Colors.redAccent),
                     _buildStatRow(FontAwesomeIcons.handFist, 'Attack',
-                        monster.attack, Colors.orangeAccent),
+                        monster.currentAttack, Colors.orangeAccent),
                   ],
                 ),
               ),

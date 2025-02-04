@@ -36,6 +36,10 @@ class Player {
   void startTurn() {
     drawCard(1);
     mana += 2;
+
+    for (var monster in monsters.where((w) => w != null)) {
+      monster!.startnewTurn();
+    }
   }
 
   void drawCard(int amount) {
@@ -84,6 +88,14 @@ class Player {
 
   void summonMonster(MonsterCard monster, int monsterZoneIndex) {
     monsters[monsterZoneIndex] = monster;
+    monster.summon();
+  }
+
+  void faintMonster(MonsterCard monster){
+    monster.faint();
+    var i = monsters.indexOf(monster);
+    monsters[i] = null;
+    discardPile.add(monster);
   }
 }
 
