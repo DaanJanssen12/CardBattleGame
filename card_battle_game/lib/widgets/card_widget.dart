@@ -7,68 +7,127 @@ class CardWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isHovered; // Add this to represent whether the widget is hovered
 
-  const CardWidget({super.key, required this.card, this.onTap, this.isHovered = false});
+  const CardWidget(
+      {super.key, required this.card, this.onTap, this.isHovered = false});
 
   @override
   Widget build(BuildContext context) {
-    double cardWidth = MediaQuery.of(context).size.width * 0.20;
-    // BoxShadow logic for hover effect
-    BoxShadow boxShadow = BoxShadow(
-      color: isHovered ? Colors.blueAccent.withOpacity(0.6) : Colors.black26,
-      blurRadius: isHovered ? 12 : 8,
-      spreadRadius: isHovered ? 3 : 0,
-      offset: Offset(0, 2),
-    );
-
-    return GestureDetector(
-      onTap: onTap,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 100, // Ensures it doesn't exceed 250px width
+      ),
       child: Container(
-        width: cardWidth,
+        width: 100,
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.orange[100], // Set the background color to orange
-          boxShadow: [boxShadow], // Apply the shadow
-        ),
-        padding: EdgeInsets.all(8.0),
-        margin: EdgeInsets.all(4.0), // Optional: Add margin for spacing
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              card.name,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade200, Colors.blue.shade100], // Brighter
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black45,
+              offset: Offset(4, 4),
+              blurRadius: 6,
             ),
-            // Wrap LayoutBuilder inside a Container with a set maxHeight
-            Container(
-              constraints: BoxConstraints(
-                  maxHeight:
-                      100), // Optional: Set maxHeight to avoid overflow
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  double imageHeight = constraints.maxHeight * 0.3; // 30% of available space
-                  return Image.asset(card.imagePath, height: imageHeight);
-                },
-              ),
-            ),
-            SizedBox(height: 8), // Add space between image and stats
-            if (card is MonsterCard) ...[
-              Row(
-                children: [
-                  Icon(FontAwesomeIcons.solidHeart, color: Colors.red, size: 14),
-                  SizedBox(width: 4),
-                  Text('${(card as MonsterCard).health}'),
-                ],
-              ),
-              Row(
-                children: [
-                  Icon(FontAwesomeIcons.handFist, color: Colors.orange, size: 14),
-                  SizedBox(width: 4),
-                  Text('${(card as MonsterCard).attack}'),
-                ],
-              ),
-            ]
           ],
+          //border: Border.all(color: Colors.blue.s, width: 2),
         ),
+        child: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
+          //shrinkWrap: true, // Fixes bottom overflow
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Card Name
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  card.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                          color: Colors.black,
+                          offset: Offset(1, 1),
+                          blurRadius: 2),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 6),
+
+              // Card Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  card.imagePath,
+                  width: 200,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              SizedBox(height: 6),
+
+              // Stats Section
+              if (card is MonsterCard) ...[
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple.shade700,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
+                          (card as MonsterCard).health, Colors.redAccent),
+                      _buildStatRow(FontAwesomeIcons.handFist, 'Attack',
+                          (card as MonsterCard).attack, Colors.orangeAccent),
+                    ],
+                  ),
+                ),
+              ]
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(IconData icon, String label, int value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 12),
+          SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              '$label: $value',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -21,9 +21,9 @@ class Player {
 
   void initDeck() {
     deck = [
-      MonsterCard("Starter Monster 1", "assets/images/buddy1.png", 4,
-          health: 15, attack: 4),
-      MonsterCard("Starter Monster 2", "assets/images/buddy2.png", 3,
+      MonsterCard("Penguin Mage", "assets/images/PenguinMage.png", 4,
+          health: 8, attack: 7),
+      MonsterCard("Flame Dog", "assets/images/FlameDog.png", 3,
           health: 10, attack: 3),
       UpgradeCard("Heal", "", 1,
           upgradeCardType: UpgradeCardType.heal, value: 1),

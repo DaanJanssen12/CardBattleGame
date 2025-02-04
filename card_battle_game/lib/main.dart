@@ -175,7 +175,7 @@ class _GameScreenState extends State<GameScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 25),
+                SizedBox(height: 12),
                 // Game Board
                 GameBoardWidget(
                     player: player, 

@@ -51,11 +51,11 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         width: 120,
-        height: 180,
+        height: 220,
         margin: EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: widget.card == null ? Colors.blueGrey[100] : Colors.orange[100],
+          color: widget.card == null ? Colors.blueGrey[100] : Colors.transparent,
           boxShadow: [
             BoxShadow(
               color: widget.isHovered
