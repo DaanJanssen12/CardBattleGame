@@ -19,6 +19,7 @@ class CardBattleGame extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: GameScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -128,11 +129,11 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void checkForFaintedMonsters(Player _player) {
-    for (var monster in _player.monsters.where((w) => w != null)) {
+  void checkForFaintedMonsters(Player player) {
+    for (var monster in player.monsters.where((w) => w != null)) {
       if (monster!.currentHealth <= 0) {
         setState(() {
-          _player.faintMonster(monster);
+          player.faintMonster(monster);
         });
       }
     }
@@ -173,21 +174,21 @@ class _GameScreenState extends State<GameScreen> {
           TextButton(
             onPressed: playerTurn
                 ? nextTurn
-                : null, // Disable when it's the enemy's turn
-            child: Text(
-              'End Turn',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                : null,
             style: TextButton.styleFrom(
               backgroundColor: playerTurn
                   ? Colors.green
                   : Colors.grey, // Green when active, grey when inactive
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
+              ),
+            ), // Disable when it's the enemy's turn
+            child: Text(
+              'End Turn',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

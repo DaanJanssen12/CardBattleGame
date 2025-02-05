@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/widgets/monster_card_widget.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,7 @@ class MonsterZoneWidget extends StatefulWidget {
   const MonsterZoneWidget({
     super.key,
     required this.card,
-    required this.isHovered, // Required hover state
+    required this.isHovered,
     required this.onCardTap,
   });
 
@@ -35,6 +34,14 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
   }
 
   @override
+  void didUpdateWidget(covariant MonsterZoneWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isHovered && !oldWidget.isHovered) {
+      _pulseController.forward().then((_) => _pulseController.reverse());
+    }
+  }
+
+  @override
   void dispose() {
     _pulseController.dispose();
     super.dispose();
@@ -42,10 +49,6 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isHovered) {
-      _pulseController.forward().then((_) => _pulseController.reverse());
-    }
-
     return ScaleTransition(
       scale: _pulseController,
       child: AnimatedContainer(
@@ -55,7 +58,8 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
         margin: EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: widget.card == null ? Colors.blueGrey[100] : Colors.transparent,
+          color:
+              widget.card == null ? Colors.blueGrey[100] : Colors.transparent,
           boxShadow: [
             BoxShadow(
               color: widget.isHovered
@@ -80,14 +84,13 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
             : GestureDetector(
                 onTap: () {
                   if (widget.card != null) {
-                    widget.onCardTap(widget.card!); // Call onCardTap when tapped
+                    widget.onCardTap(widget.card!);
                   }
                 },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    MonsterCardWidget(monster: widget.card!.toMonster())
-                  ],
+                child: SizedBox(
+                  width: 100, // Fixed size
+                  height: 180,
+                  child: MonsterCardWidget(monster: widget.card!.toMonster()),
                 ),
               ),
       ),

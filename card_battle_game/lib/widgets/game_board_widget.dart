@@ -56,27 +56,31 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(3, (index) {
-                  return Flexible(
+                  return Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                      child: DragTarget<MonsterCard>(
-                        onWillAcceptWithDetails: (details) {
-                          return widget.enemy.monsters[index] != null && draggingMonster != null && draggingMonster!.canAttack();
-                        },
-                        onAcceptWithDetails: (details) {
-                          endDrag(index); // Trigger the attack when dropped
-                        },
-                        builder: (context, candidateData, rejectedData) {
-                          return MonsterZoneWidget(
-                            card: widget.enemy.monsters.length > index
-                                ? widget.enemy.monsters[index]
-                                : null,
-                            isHovered: candidateData.isNotEmpty,
-                            onCardTap: widget.onCardTap,
-                          );
-                        },
-                      ),
-                    ),
+                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.20,
+                          child: DragTarget<MonsterCard>(
+                            onWillAcceptWithDetails: (details) {
+                              return widget.enemy.monsters[index] != null &&
+                                  draggingMonster != null &&
+                                  draggingMonster!.canAttack();
+                            },
+                            onAcceptWithDetails: (details) {
+                              endDrag(index); // Trigger the attack when dropped
+                            },
+                            builder: (context, candidateData, rejectedData) {
+                              return MonsterZoneWidget(
+                                card: widget.enemy.monsters.length > index
+                                    ? widget.enemy.monsters[index]
+                                    : null,
+                                isHovered: candidateData.isNotEmpty,
+                                onCardTap: widget.onCardTap,
+                              );
+                            },
+                          ),
+                        )),
                   );
                 }),
               ),
@@ -85,59 +89,61 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(3, (index) {
-                  return Flexible(
+                  return Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                      child: DragTarget<GameCard>(
-                        onWillAcceptWithDetails: (details) =>
-                            details.data.canBePlayed(), // Accept any draggable card
-                        onAcceptWithDetails: (details) {
-                          // Place card in player's monster zone if it's a monster card
-                          if (details.data is GameCard) {
-                            widget.onCardDrop(details.data,
-                                index); // Drop logic remains unchanged
-                          }
-                        },
-                        builder: (context, candidateData, rejectedData) {
-                          return Draggable<MonsterCard>(
-                            data: widget.player.monsters.length > index
-                                ? widget.player.monsters[index]
-                                : null,
-                            onDragStarted: () {
-                              if (widget.player.monsters.length > index &&
-                                  widget.player.monsters[index] != null &&
-                                  widget.player.monsters[index]!.hasAttacked ==
-                                      false) {
-                                startDrag(widget.player.monsters[index]!);
-                              }
+                      child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.20,
+                          child: DragTarget<GameCard>(
+                            onWillAcceptWithDetails: (details) => details.data
+                                .canBePlayed(), // Accept any draggable card
+                            onAcceptWithDetails: (details) {
+                              // Place card in player's monster zone if it's a monster card
+                              widget.onCardDrop(details.data,
+                                  index); // Drop logic remains unchanged
                             },
-                            onDraggableCanceled: (_, __) {
-                              setState(() {
-                                draggingMonster = null; // Reset on cancel
-                              });
-                            },
-                            childWhenDragging:
-                                Container(), // Show nothing when dragging
-                            feedback: Material(
-                              color: Colors.transparent,
-                              child: MonsterZoneWidget(
-                                card: widget.player.monsters.length > index
+                            builder: (context, candidateData, rejectedData) {
+                              return Draggable<MonsterCard>(
+                                data: widget.player.monsters.length > index
                                     ? widget.player.monsters[index]
                                     : null,
-                                isHovered: candidateData.isNotEmpty, // No hover during drag
-                                onCardTap: widget.onCardTap,
-                              ),
-                            ),
-                            child: MonsterZoneWidget(
-                              card: widget.player.monsters.length > index
-                                  ? widget.player.monsters[index]
-                                  : null,
-                              isHovered: candidateData.isNotEmpty,
-                              onCardTap: widget.onCardTap,
-                            ),
-                          );
-                        },
-                      ),
+                                onDragStarted: () {
+                                  if (widget.player.monsters.length > index &&
+                                      widget.player.monsters[index] != null &&
+                                      widget.player.monsters[index]!
+                                              .hasAttacked ==
+                                          false) {
+                                    startDrag(widget.player.monsters[index]!);
+                                  }
+                                },
+                                onDraggableCanceled: (_, __) {
+                                  setState(() {
+                                    draggingMonster = null; // Reset on cancel
+                                  });
+                                },
+                                childWhenDragging:
+                                    Container(), // Show nothing when dragging
+                                feedback: Material(
+                                  color: Colors.transparent,
+                                  child: MonsterZoneWidget(
+                                    card: widget.player.monsters.length > index
+                                        ? widget.player.monsters[index]
+                                        : null,
+                                    isHovered: candidateData
+                                        .isNotEmpty, // No hover during drag
+                                    onCardTap: widget.onCardTap,
+                                  ),
+                                ),
+                                child: MonsterZoneWidget(
+                                  card: widget.player.monsters.length > index
+                                      ? widget.player.monsters[index]
+                                      : null,
+                                  isHovered: candidateData.isNotEmpty,
+                                  onCardTap: widget.onCardTap,
+                                ),
+                              );
+                            },
+                          )),
                     ),
                   );
                 }),

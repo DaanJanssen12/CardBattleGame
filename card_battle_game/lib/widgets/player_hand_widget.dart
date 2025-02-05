@@ -1,7 +1,7 @@
-import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import '../models/card.dart';
 import '../models/player.dart';
+import 'card_widget.dart';
 import 'monster_card_widget.dart';
 
 class PlayerHandWidget extends StatelessWidget {
@@ -13,7 +13,7 @@ class PlayerHandWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -30,15 +30,27 @@ class PlayerHandWidget extends StatelessWidget {
               onTap: () => onCardTap(card),
               child: Draggable<GameCard>(
                 data: card,
-                child: CardWidget(card: card), // No translation here
                 feedback: Material(
                   color: Colors.transparent,
-                  child: Transform.translate(
-                    offset: Offset(offset, 0), // Apply the offset to the feedback
-                    child: CardWidget(card: card),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: 100, // Define max width for feedback
+                      maxHeight: 150, // Define max height for feedback
+                    ),
+                    child: Transform.translate(
+                      offset: Offset(offset, 0), // Apply the offset to the feedback
+                      child: CardWidget(card: card),
+                    ),
                   ),
                 ),
-                childWhenDragging: Container(), // Empty container while dragging
+                childWhenDragging: Container(),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: 100, // Define max width for static card
+                    maxHeight: 150, // Define max height for static card
+                  ),
+                  child: CardWidget(card: card),
+                ),
               ),
             ),
           );

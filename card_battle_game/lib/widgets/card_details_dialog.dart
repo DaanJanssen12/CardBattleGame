@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class CardDetailsDialog extends StatelessWidget {
   final GameCard card;
 
-  const CardDetailsDialog({required this.card});
+  const CardDetailsDialog({super.key, required this.card});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class CardDetailsDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
+            SizedBox(
               height: 150, // Set a fixed height for the image
               child: Image.asset(card.imagePath, fit: BoxFit.contain),
             ),

@@ -3,101 +3,102 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/card.dart';
 
 class MonsterCardWidget extends StatelessWidget {
-  final MonsterCard monster;
+  final MonsterCard? monster;
 
   const MonsterCardWidget({super.key, required this.monster});
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: 250, // Ensures it doesn't exceed 250px width
-      ),
-      child: Container(
-        width: 250,
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade200, Colors.blue.shade100], // Brighter
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              offset: Offset(4, 4),
-              blurRadius: 6,
-            ),
-          ],
-          //border: Border.all(color: Colors.blue.s, width: 2),
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade200, Colors.blue.shade100],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        child: SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
-          //shrinkWrap: true, // Fixes bottom overflow
-          child: Column(
-            mainAxisSize: MainAxisSize.min, 
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          const BoxShadow(
+            color: Colors.black45,
+            offset: Offset(4, 4),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Card Name
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple, 
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  monster.name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                          color: Colors.black,
-                          offset: Offset(1, 1),
-                          blurRadius: 2),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 6),
-
-              // Card Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  monster.imagePath,
-                  width: 200,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(height: 6),
-
-              // Stats Section
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.shade700,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, 
-                  children: [
-                    _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
-                        monster.currentHealth, Colors.redAccent),
-                    _buildStatRow(FontAwesomeIcons.handFist, 'Attack',
-                        monster.currentAttack, Colors.orangeAccent),
-                  ],
-                ),
-              ),
+              _buildNameHeader(),
+              _buildImage(constraints),
+              _buildStatsSection(),
             ],
-          ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNameHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        monster?.name ?? 'Unknown',
+        textAlign: TextAlign.center,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: Colors.white
         ),
+      ),
+    );
+  }
+
+  Widget _buildImage(BoxConstraints constraints) {
+    return SizedBox(
+      height: constraints.maxHeight * 0.4,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(
+          monster?.imagePath ?? 'assets/images/placeholder.png',
+          width: 200,
+          height: 100,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.image_not_supported,
+                size: 50, color: Colors.grey);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.shade700,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
+              monster?.currentHealth ?? 0, Colors.redAccent),
+          _buildStatRow(FontAwesomeIcons.handFist, 'Attack',
+              monster?.currentAttack ?? 0, Colors.orangeAccent),
+        ],
       ),
     );
   }
@@ -108,15 +109,15 @@ class MonsterCardWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 12),
-          SizedBox(width: 4),
+          Icon(icon, color: color, size: 10),
+          const SizedBox(width: 4),
           Flexible(
             child: Text(
               '$label: $value',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 10,
               ),
               overflow: TextOverflow.ellipsis,
               softWrap: false,

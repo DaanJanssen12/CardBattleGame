@@ -4,8 +4,7 @@ class ArrowWidget extends StatelessWidget {
   final Offset start;
   final Offset end;
 
-  const ArrowWidget({Key? key, required this.start, required this.end})
-      : super(key: key);
+  const ArrowWidget({super.key, required this.start, required this.end});
 
   @override
   Widget build(BuildContext context) {
