@@ -9,10 +9,12 @@ class GameCard {
   int cost;
   String? shortDescription;
   String? fullDescription;
+  late bool isInDeck;
 
   GameCard(this.name, this.imagePath, this.cost, this.shortDescription,
       this.fullDescription) {
     id = Uuid().v4();
+    isInDeck = false;
   }
 
   bool isMonster() => type == 'Monster';

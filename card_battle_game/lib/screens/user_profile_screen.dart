@@ -2,7 +2,8 @@ import 'package:card_battle_game/models/user_storage.dart';
 import 'package:flutter/material.dart';
 
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key});
+  final UserData userData;
+  const UserProfileScreen({super.key, required this.userData});
 
   @override
   _UserProfileScreenState createState() => _UserProfileScreenState();
@@ -10,6 +11,13 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   TextEditingController _nameController = TextEditingController();
+  //UserData? userData;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = widget.userData.name;
+  }
 
   void saveName(String name) async {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -71,41 +79,47 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
-
-                // Save Button
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle saving name (you can extend this with local storage)
-                    String name = _nameController.text.trim();
-                    if (name.isNotEmpty) {
-                      saveName(name);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    textStyle:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                SizedBox(
+                  width: 300,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Go back to the main menu
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 15),
+                          textStyle: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        child: Text("Back"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle saving name (you can extend this with local storage)
+                          String name = _nameController.text.trim();
+                          if (name.isNotEmpty) {
+                            saveName(name);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.blue,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 15),
+                          textStyle: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        child: Text("Save"),
+                      ),
+                    ],
                   ),
-                  child: Text("Save"),
-                ),
-                SizedBox(height: 20),
-
-                // Back Button
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Go back to the main menu
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.red,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    textStyle:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  child: Text("Back"),
-                ),
+                )
               ],
             ),
           ),

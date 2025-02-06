@@ -1,11 +1,34 @@
+import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/screens/deck_builder_screen.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
 import 'package:card_battle_game/screens/how_to_play_screen.dart';
 import 'package:card_battle_game/screens/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class MainMenu extends StatelessWidget {
+class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
+
+  @override
+  _MainMenuState createState() => _MainMenuState();
+}
+
+class _MainMenuState extends State<MainMenu> {
+  UserData? _userData; // Store user data
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  /// Fetch user data when the screen loads
+  Future<void> _loadUserData() async {
+    final userData = await UserStorage.getUserData();
+    setState(() {
+      _userData = userData;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,19 +55,19 @@ class MainMenu extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                      MaterialPageRoute(builder: (context) => UserProfileScreen(userData: _userData!)),
                     );
                   },
                 ),
                 SizedBox(width: 10),
                 // Deck Builder Button
                 _buildRoundButton(
-                  icon: FontAwesomeIcons.database, // You can use Icons.deck or another relevant icon
+                  icon: FontAwesomeIcons.database,
                   color: Colors.green,
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HowToPlayScreen()),
+                      MaterialPageRoute(builder: (context) => DeckBuilderScreen(userData: _userData!)),
                     );
                   },
                 ),
@@ -74,6 +97,7 @@ class MainMenu extends StatelessWidget {
                   child: Text('Start Game!'),
                 ),
                 SizedBox(height: 20),
+
                 // How to Play Button
                 ElevatedButton(
                   onPressed: () {
