@@ -7,5 +7,9 @@
             "upgrade_heal",
             "upgrade_strengthen"
         ]
-    }
+    },
+    "otherCards":[
+        "monster_fire_dog",
+        "upgrade_strengthen"
+    ]
 }

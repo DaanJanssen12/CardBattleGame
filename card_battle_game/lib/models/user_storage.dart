@@ -54,11 +54,15 @@ class UserStorage {
 class UserData {
   late Deck deck;
   late String name;
+  late List<String> cards;
   UserData();
   factory UserData.fromJson(Map<String, dynamic> json) {
     var data = UserData();
     data.name = json['name'];
     data.deck = Deck.fromJson(json['deck']);
+    data.cards = json['cards'] != null 
+        ? (json['cards'] as List<dynamic>).map((m) => m.toString()).toList()
+        : [];
     return data;
   }
 
@@ -73,6 +77,11 @@ class UserData {
     var player = Player(name: name);
     player.deck = await deck.asDeck();
     return player;
+  }
+
+  Future<List<GameCard>> availableCards() async{
+    var availableCards = await CardDatabase.getCards(cards);
+    return availableCards;
   }
 }
 

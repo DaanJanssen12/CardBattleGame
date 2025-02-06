@@ -1,5 +1,6 @@
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/widgets/card_widget.dart'; // Your existing card widget
 
@@ -23,7 +24,18 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
 
   void _loadData() async {
     deck = await widget.userData.deck.asDeck();
+    availableCards = await widget.userData.availableCards();
     setState(() {});
+  }
+
+  void showCardDetails(GameCard card) {
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allows dismiss by tapping outside
+      builder: (BuildContext context) {
+        return CardDetailsDialog(card: card);
+      },
+    );
   }
 
   @override
@@ -31,7 +43,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Deck Builder"),
-        backgroundColor: Colors.white,  // Change to suit your design
+        backgroundColor: Colors.white, // Change to suit your design
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -76,7 +88,8 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
                     });
                   },
                   builder: (context, candidateData, rejectedData) {
-                    return _buildCardList(availableCards, "Available Cards", false);
+                    return _buildCardList(
+                        availableCards, "Available Cards", false);
                   },
                 ),
               ),
@@ -91,54 +104,52 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
           child: Text(
             title,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
-        // Wrap the GridView with Expanded to provide it a bounded height
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Calculate the width of each card based on screen width and 3 items per row
-              double cardWidth = (constraints.maxWidth - 40) / 3; // Subtract 40 for spacing
-              double cardHeight = cardWidth * 1.5; // Height scales proportionally based on width
-
-              return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // 3 items per row
-                  crossAxisSpacing: 10, // Space between the cards horizontally
-                  mainAxisSpacing: 10,  // Space between the cards vertically
-                ),
-                itemCount: cards.length,
-                itemBuilder: (context, index) {
-                  return Draggable<GameCard>(
-                    data: cards[index],
-                    feedback: Material(
-                      child: SizedBox(
-                        width: cardWidth,
-                        height: cardHeight,
-                        child: CardWidget(card: cards[index]),
-                      ),
-                    ),
-                    childWhenDragging: Opacity(
-                      opacity: 0.5,
-                      child: SizedBox(
-                        width: cardWidth,
-                        height: cardHeight,
-                        child: CardWidget(card: cards[index]),
-                      ),
-                    ),
+        // Set a fixed height for each section (deck or available cards)
+        Container(
+          height: 300, // Fixed height for each section (change as needed)
+          child: SingleChildScrollView(
+            child: Wrap(
+              spacing: 10, // Horizontal space between cards
+              runSpacing: 10, // Vertical space between rows
+              children: cards.map((card) {
+                return Draggable<GameCard>(
+                  data: card,
+                  feedback: Material(
                     child: SizedBox(
-                      width: cardWidth,
-                      height: cardHeight,
-                      child: CardWidget(card: cards[index]),
+                      width: 100, // Fixed width for the card
+                      height: 160, // Fixed height for the card
+                      child: CardWidget(
+                        card: card,
+                        onTap: () => showCardDetails(card),
+                      ),
                     ),
-                  );
-                },
-              );
-            },
+                  ),
+                  childWhenDragging: Opacity(
+                    opacity: 0.5,
+                    child: SizedBox(
+                      width: 100,
+                      height: 160,
+                      child: CardWidget(card: card),
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 100,
+                    height: 160,
+                    child: CardWidget(
+                      card: card,
+                      onTap: () => showCardDetails(card),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ),
       ],
