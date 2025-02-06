@@ -29,10 +29,14 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
       onWillAcceptWithDetails: (details) {
         bool canAttack = details.data.canAttack();
         setState(() {
-          canAcceptAttack = canAttack && (widget.player.monsters.isEmpty || widget.player.monsters.every((e) => e == null));
+          canAcceptAttack = canAttack &&
+              (widget.player.monsters.isEmpty ||
+                  widget.player.monsters.every((e) => e == null));
           isHovered = canAcceptAttack; // Only hover when conditions are met
         });
-        return canAttack && (widget.player.monsters.isEmpty || widget.player.monsters.every((e) => e == null));
+        return canAttack &&
+            (widget.player.monsters.isEmpty ||
+                widget.player.monsters.every((e) => e == null));
       },
       onLeave: (data) => {
         setState(() {
@@ -41,14 +45,19 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
       },
       onAcceptWithDetails: (details) {
         if (widget.handleAttackPlayerDirectly != null &&
-            (widget.player.monsters.isEmpty || widget.player.monsters.every((e) => e == null))) {
+            (widget.player.monsters.isEmpty ||
+                widget.player.monsters.every((e) => e == null))) {
           widget.handleAttackPlayerDirectly!(widget.player, details.data);
+          setState(() {
+            isHovered = false;
+          });
         }
       },
       builder: (context, candidateData, rejectedData) {
         return AnimatedScale(
           duration: Duration(milliseconds: 300),
-          scale: isHovered ? 1.05 : 1.0, // Pulsing effect (scale slightly larger)
+          scale:
+              isHovered ? 1.05 : 1.0, // Pulsing effect (scale slightly larger)
           child: Container(
             width: 200,
             padding: EdgeInsets.all(12),
@@ -75,9 +84,7 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
                       margin: EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: widget.isActive
-                            ? Colors.green
-                            : Colors.grey,
+                        color: widget.isActive ? Colors.green : Colors.grey,
                       ),
                     ),
                     Text(
@@ -92,10 +99,10 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
                     ),
                   ],
                 ),
-                _buildStatBar(
-                    'Health', widget.player.health, Colors.red, FontAwesomeIcons.heart),
-                _buildStatBar(
-                    'Mana', widget.player.mana, Colors.blue, FontAwesomeIcons.gem),
+                _buildStatBar('Health', widget.player.health, Colors.red,
+                    FontAwesomeIcons.heart),
+                _buildStatBar('Mana', widget.player.mana, Colors.blue,
+                    FontAwesomeIcons.gem),
                 Expanded(
                   child: Container(),
                 ),

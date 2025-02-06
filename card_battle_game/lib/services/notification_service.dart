@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class NotificationService {
   // Show a simple dialog with a message
-  static Future<void> showDialogMessage(BuildContext context, String message, {String title = 'Notification'}) async {
+  static Future<void> showDialogMessage(BuildContext context, String message, {String title = 'Notification', Function? callback = null}) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // Allow dismiss on tap outside
@@ -14,6 +14,9 @@ class NotificationService {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                if(callback != null){
+                  callback();
+                }
               },
               child: Text('OK'),
             ),

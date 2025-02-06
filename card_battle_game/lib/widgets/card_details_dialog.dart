@@ -37,7 +37,14 @@ class CardDetailsDialog extends StatelessWidget {
                   Text('Attack: ${(card as MonsterCard).attack}'),
                 ],
               ),
-            ]
+            ],
+              Row(
+                children: [
+                  Icon(FontAwesomeIcons.gem, color: Colors.lightBlue, size: 14),
+                  SizedBox(width: 4),
+                  Text('Cost: ${card.cost}'),
+                ],
+              ),
           ],
         ),
       ),

@@ -1,0 +1,11 @@
+{
+    "name": "Player",
+    "deck": {
+        "cards":[
+            "monster_penguin_mage",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_strengthen"
+        ]
+    }
+}

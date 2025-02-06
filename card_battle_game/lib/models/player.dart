@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/card_database.dart';
 
 class Player {
   String name;
@@ -16,20 +17,21 @@ class Player {
         hand = [],
         discardPile = [],
         monsters = List.filled(3, null) {
-    initDeck();
+    //initDeck();
   }
 
-  void initDeck() {
-    deck = [
-      MonsterCard("Penguin Mage", "assets/images/PenguinMage.png", 4,
-          health: 8, attack: 7),
-      MonsterCard("Flame Dog", "assets/images/FlameDog.png", 3,
-          health: 10, attack: 3),
-      UpgradeCard("Heal", "", 1,
-          upgradeCardType: UpgradeCardType.heal, value: 1),
-      UpgradeCard("Strengthen", "", 1,
-          upgradeCardType: UpgradeCardType.boostAtk, value: 1),
-    ];
+  Future<void> initDeck() async {
+    // deck = [
+    //   MonsterCard("Penguin Mage", "assets/images/PenguinMage.png", 4,
+    //       health: 8, attack: 7),
+    //   MonsterCard("Flame Dog", "assets/images/FlameDog.png", 3,
+    //       health: 10, attack: 3),
+    //   UpgradeCard("Heal", "assets/images/Heal.png", 1,
+    //       upgradeCardType: UpgradeCardType.heal, value: 3),
+    //   UpgradeCard("Strengthen", "assets/images/Strengthen.png", 1,
+    //       upgradeCardType: UpgradeCardType.boostAtk, value: 2),
+    // ];
+    deck = await CardDatabase.generateDeck(5);
     deck.shuffle();
   }
 
@@ -88,10 +90,10 @@ class Player {
 
   void summonMonster(MonsterCard monster, int monsterZoneIndex) {
     monsters[monsterZoneIndex] = monster;
-    monster.summon();
+    monster.summon(monsterZoneIndex);
   }
 
-  void faintMonster(MonsterCard monster){
+  void faintMonster(MonsterCard monster) {
     monster.faint();
     var i = monsters.indexOf(monster);
     monsters[i] = null;
@@ -101,19 +103,35 @@ class Player {
 
 class CPU {
   static Future<void> executeTurn(
-      Player enemy, Function updateGameState) async {
+      Player player, Player opponent, Function updateGameState) async {
     print('Enemy turn initiated');
 
     // If the enemy has cards to play, play them.
-    for (var card in List.from(enemy.hand)) {
-      print('Enemy plays card: ${card.name}');
-      await Future.delayed(
-          Duration(seconds: 1)); // Simulate delay between actions
+    for (var card in List.from(player.hand)) {
       for (var i = 0; i < 3; i++) {
-        if (enemy.canPlayCard(card, i).$1) {
-          enemy.playCard(card, i);
+        if (player.canPlayCard(card, i).$1) {
+          print('Enemy plays card: ${card.name}');
+          player.playCard(card, i);
           updateGameState();
+          await Future.delayed(Duration(seconds: 1));
         }
+      }
+    }
+
+    for (var monster in List.from(player.monsters)) {
+      if (monster == null) continue;
+
+      if (monster.canAttack()) {
+        if (opponent.monsters.isEmpty 
+            || !opponent.monsters.any((w) => w != null)) {
+          monster.attackPlayer(opponent);
+        } else {
+          var opponentMonster = opponent.monsters.where((w) => w != null).first;
+          if(opponentMonster == null) continue;
+          monster.doAttack(opponentMonster);
+        }
+        updateGameState();
+        await Future.delayed(Duration(seconds: 1));
       }
     }
 

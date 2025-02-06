@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   font_awesome_flutter: ^10.5.0
   audioplayers: ^6.1.1
+  uuid: ^3.0.4
 
 dev_dependencies:
   flutter_test:
@@ -23,3 +24,5 @@ flutter:
   assets:
     - assets/sounds/
     - assets/images/
+    - assets/card_database.json
+    - assets/user_data.json

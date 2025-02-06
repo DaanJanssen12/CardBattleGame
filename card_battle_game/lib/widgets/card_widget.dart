@@ -7,7 +7,8 @@ class CardWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isHovered;
 
-  const CardWidget({super.key, required this.card, this.onTap, this.isHovered = false});
+  const CardWidget(
+      {super.key, required this.card, this.onTap, this.isHovered = false});
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +38,11 @@ class CardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _buildNameHeader(),
+                const SizedBox(height: 4), // Space between icon and number
                 _buildImage(constraints),
-                if (card is MonsterCard) _buildStatsSection(card as MonsterCard),
+                const SizedBox(height: 4), // Space between icon and number
+                if (card is MonsterCard)
+                  _buildStatsSection(card as MonsterCard),
               ],
             );
           },
@@ -70,24 +74,60 @@ class CardWidget extends StatelessWidget {
   }
 
   Widget _buildImage(BoxConstraints constraints) {
-    return SizedBox(
-      height: constraints.maxHeight * 0.4,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(
-          card.imagePath.isNotEmpty ? card.imagePath : 'assets/images/placeholder.png',
-          width: 200,
-          height: 100,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(
-              Icons.image_not_supported,
-              size: 50,
-              color: Colors.grey,
-            );
-          },
+    return Stack(
+      alignment:
+          Alignment.bottomLeft, // Positioning the badge to the bottom-left
+      children: [
+        SizedBox(
+          height: constraints.maxHeight * 0.4,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              card.imagePath.isNotEmpty == true
+                  ? card.imagePath
+                  : 'assets/images/placeholder.png',
+              width: 200,
+              height: 100,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.image_not_supported,
+                  size: 50,
+                  color: Colors.grey,
+                );
+              },
+            ),
+          ),
         ),
-      ),
+        _buildCostBadge(), // Cost badge now overlaying slightly on the image
+      ],
+    );
+  }
+
+  // Widget for displaying the cost badge
+  Widget _buildCostBadge() {
+    return Positioned(
+      bottom: 0, // Adjusted to be closer to the bottom-left corner
+      right: 0, // Added a slight left offset for more overlap
+      child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(FontAwesomeIcons.gem, color: Colors.lightBlue, size: 14),
+              const SizedBox(width: 4), // Space between icon and number
+              Text('${card.cost}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  )),
+            ],
+          )),
     );
   }
 
@@ -102,8 +142,10 @@ class CardWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildStatRow(FontAwesomeIcons.solidHeart, 'Health', monster.currentHealth, Colors.redAccent),
-          _buildStatRow(FontAwesomeIcons.handFist, 'Attack', monster.currentAttack, Colors.orangeAccent),
+          _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
+              monster.currentHealth, Colors.redAccent),
+          _buildStatRow(FontAwesomeIcons.handFist, 'Attack',
+              monster.currentAttack, Colors.orangeAccent),
         ],
       ),
     );

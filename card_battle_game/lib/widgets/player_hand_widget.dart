@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/card.dart';
 import '../models/player.dart';
 import 'card_widget.dart';
-import 'monster_card_widget.dart';
 
 class PlayerHandWidget extends StatelessWidget {
   final Player player;

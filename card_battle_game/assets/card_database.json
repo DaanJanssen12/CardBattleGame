@@ -1,0 +1,47 @@
+[
+    {
+      "id": "monster_penguin_mage",
+      "name": "Penguin Mage",
+      "imagePath": "assets/images/PenguinMage.png",
+      "type": "monster",
+      "health": 8,
+      "attack": 7,
+      "cost": 4,
+      "shortDescription": null,
+      "fullDescription": ""
+    },
+    {
+      "id": "monster_fire_dog",
+      "name": "Fire Dog",
+      "imagePath": "assets/images/FlameDog.png",
+      "type": "monster",
+      "health": 10,
+      "attack": 3,
+      "cost": 3,
+      "shortDescription": null,
+      "fullDescription": ""
+    },
+    {
+      "id": "upgrade_heal",
+      "name": "Heal",
+      "imagePath": "assets/images/Heal.png",
+      "type": "upgrade",
+      "cost": 1,
+      "upgradeCardType": "heal",
+      "value": 3,
+      "shortDescription": null,
+      "fullDescription": ""
+    },
+    {
+      "id": "upgrade_strengthen",
+      "name": "Strengthen",
+      "imagePath": "assets/images/Strengthen.png",
+      "type": "upgrade",
+      "cost": 2,
+      "upgradeCardType": "boostAtk",
+      "value": 2,
+      "shortDescription": null,
+      "fullDescription": ""
+    }
+  ]
+  
