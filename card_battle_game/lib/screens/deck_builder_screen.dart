@@ -38,6 +38,30 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
     );
   }
 
+  void addCardToDeck(GameCard card) {
+    setState(() {
+      availableCards.remove(card);
+      deck.add(card);
+      card.isInDeck = true;
+    });
+    saveData();
+  }
+
+  void removeCardFromDeck(GameCard card) {
+    setState(() {
+      deck.remove(card);
+      availableCards.add(card);
+      card.isInDeck = false;
+    });
+    saveData();
+  }
+
+  void saveData() async {
+    widget.userData.deck.cards = deck.map((m) => m.id).toList();
+    widget.userData.cards = availableCards.map((m) => m.id).toList();
+    await UserStorage.saveUserData(widget.userData);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,18 +86,13 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
                     return !card!.isInDeck;
                   },
                   onAccept: (card) {
-                    setState(() {
-                      availableCards.remove(card);
-                      deck.add(card);
-                      card.isInDeck = true;
-                    });
+                    addCardToDeck(card);
                   },
                   builder: (context, candidateData, rejectedData) {
                     return _buildCardList(deck, "Your Deck", true);
                   },
                 ),
               ),
-              Divider(thickness: 2, color: Colors.white),
               // Available Cards Column
               Expanded(
                 child: DragTarget<GameCard>(
@@ -81,11 +100,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
                     return card!.isInDeck;
                   },
                   onAccept: (card) {
-                    setState(() {
-                      deck.remove(card);
-                      availableCards.add(card);
-                      card.isInDeck = false;
-                    });
+                    removeCardFromDeck(card);
                   },
                   builder: (context, candidateData, rejectedData) {
                     return _buildCardList(
@@ -103,13 +118,30 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
   Widget _buildCardList(List<GameCard> cards, String title, bool isDeck) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-          child: Text(
-            title,
-            style: TextStyle(
-                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        // Title with background and card count
+        Container(
+          color: Colors.blueGrey, // Background color for the title section
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              Text(
+                '${cards.length} Cards', // Display the number of cards
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ],
           ),
+        ),
+        // Divider with background color
+        Container(
+          color: Colors.blueGrey, // Background color for the divider
         ),
         // Set a fixed height for each section (deck or available cards)
         Container(

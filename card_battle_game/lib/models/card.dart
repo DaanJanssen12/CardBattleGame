@@ -10,10 +10,11 @@ class GameCard {
   String? shortDescription;
   String? fullDescription;
   late bool isInDeck;
+  late String cloneId;
 
   GameCard(this.name, this.imagePath, this.cost, this.shortDescription,
       this.fullDescription) {
-    id = Uuid().v4();
+    //id = Uuid().v4();
     isInDeck = false;
   }
 
@@ -35,7 +36,11 @@ class GameCard {
   }
 
   GameCard clone() {
-    return GameCard(name, imagePath, cost, shortDescription, fullDescription);
+    var clone =
+        GameCard(name, imagePath, cost, shortDescription, fullDescription);
+    clone.id = id;
+    cloneId = Uuid().v4();
+    return clone;
   }
 
   Map<String, dynamic> toJson() {
@@ -66,6 +71,7 @@ class MonsterCard extends GameCard {
   //Stats
   int health;
   int attack;
+  late MascotEffects mascotEffects;
 
   //Game info
   late bool hasAttacked;
@@ -82,7 +88,8 @@ class MonsterCard extends GameCard {
     type = 'Monster';
     currentHealth = health;
     currentAttack = attack;
-    id = Uuid().v4();
+    mascotEffects = MascotEffects.fromJson(null);
+    //id = Uuid().v4();
   }
   void apply(UpgradeCard card) {
     switch (card.upgradeCardType) {
@@ -147,6 +154,7 @@ class MonsterCard extends GameCard {
       attack: json['attack'],
     );
     card.id = json['id'];
+    card.mascotEffects = MascotEffects.fromJson(json['mascotEffects']);
     return card;
   }
 
@@ -161,8 +169,28 @@ class MonsterCard extends GameCard {
 
   @override
   GameCard clone() {
-    return MonsterCard(name, imagePath, cost, shortDescription, fullDescription,
+    var card = MonsterCard(
+        name, imagePath, cost, shortDescription, fullDescription,
         health: health, attack: attack);
+    card.id = id;
+    return card;
+  }
+}
+
+class MascotEffects {
+  int startingHealth;
+  int startingMana;
+  int regainManaPerTurn;
+  MascotEffects(this.startingHealth, this.startingMana, this.regainManaPerTurn);
+  factory MascotEffects.fromJson(Map<String, dynamic>? json) {
+    var data = MascotEffects(3, 4, 1);
+    if(json == null || json.isEmpty){
+      return data;
+    }
+    data.startingHealth = json['startingHealth'];
+    data.startingMana = json['startingMana'];
+    data.regainManaPerTurn = json['regainManaPerTurn'];
+    return data;
   }
 }
 
@@ -174,7 +202,7 @@ class ActionCard extends GameCard {
       super.fullDescription,
       {this.actionCardType = ActionCardType.draw, this.value = 1}) {
     type = 'Action';
-    id = Uuid().v4();
+    //id = Uuid().v4();
   }
 
   factory ActionCard.fromJson(Map<String, dynamic> json) {
@@ -203,8 +231,11 @@ class ActionCard extends GameCard {
 
   @override
   GameCard clone() {
-    return ActionCard(name, imagePath, cost, shortDescription, fullDescription,
+    var card = ActionCard(
+        name, imagePath, cost, shortDescription, fullDescription,
         actionCardType: actionCardType, value: value);
+    card.id = id;
+    return card;
   }
 }
 
@@ -216,7 +247,7 @@ class UpgradeCard extends GameCard {
       super.fullDescription,
       {this.upgradeCardType = UpgradeCardType.boostAtk, this.value = 1}) {
     type = 'Upgrade';
-    id = Uuid().v4();
+    //id = Uuid().v4();
   }
 
   factory UpgradeCard.fromJson(Map<String, dynamic> json) {
@@ -245,8 +276,11 @@ class UpgradeCard extends GameCard {
 
   @override
   GameCard clone() {
-    return UpgradeCard(name, imagePath, cost, shortDescription, fullDescription,
+    var card = UpgradeCard(
+        name, imagePath, cost, shortDescription, fullDescription,
         upgradeCardType: upgradeCardType, value: value);
+    card.id = id;
+    return card;
   }
 }
 

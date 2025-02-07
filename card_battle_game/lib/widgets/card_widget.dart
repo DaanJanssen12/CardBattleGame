@@ -6,9 +6,10 @@ class CardWidget extends StatelessWidget {
   final GameCard card;
   final VoidCallback? onTap;
   final bool isHovered;
+  final bool isSelected;
 
   const CardWidget(
-      {super.key, required this.card, this.onTap, this.isHovered = false});
+      {super.key, required this.card, this.onTap, this.isHovered = false, this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,10 @@ class CardWidget extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
           borderRadius: BorderRadius.circular(16),
+          border: isSelected ? Border.all(
+            color: Colors.yellowAccent,
+            width: 3
+          ) : null,
           boxShadow: const [
             BoxShadow(
               color: Colors.black45,
@@ -41,8 +46,11 @@ class CardWidget extends StatelessWidget {
                 const SizedBox(height: 4), // Space between icon and number
                 _buildImage(constraints),
                 const SizedBox(height: 4), // Space between icon and number
-                if (card is MonsterCard)
+                if (card is MonsterCard) ...[
                   _buildStatsSection(card as MonsterCard),
+                ] else ...[
+                  _buildDescriptionSection()
+                ]
               ],
             );
           },
@@ -129,6 +137,25 @@ class CardWidget extends StatelessWidget {
             ],
           )),
     );
+  }
+
+  Widget _buildDescriptionSection() {
+    return Container(
+      height: 48,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.deepPurple.shade700,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          card.shortDescription!,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 8,
+          ),
+        ));
   }
 
   Widget _buildStatsSection(MonsterCard monster) {

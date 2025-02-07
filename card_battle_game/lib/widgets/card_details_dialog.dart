@@ -20,7 +20,7 @@ class CardDetailsDialog extends StatelessWidget {
               child: Image.asset(card.imagePath, fit: BoxFit.contain),
             ),
             SizedBox(height: 8),
-            Text('This is the description of the card.'),
+            Text(card.fullDescription!),
             SizedBox(height: 8),
             if (card is MonsterCard) ...[
               Row(

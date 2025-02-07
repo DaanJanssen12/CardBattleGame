@@ -1,6 +1,8 @@
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 void main() {
   runApp(CardBattleGame());
 }
@@ -11,8 +13,9 @@ class CardBattleGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MainMenu(),
+      home: MainMenu(userData: null),
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [routeObserver],
     );
   }
 }

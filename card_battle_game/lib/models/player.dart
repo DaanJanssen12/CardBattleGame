@@ -10,34 +10,67 @@ class Player {
   List<GameCard> deck;
   List<GameCard> discardPile;
 
+  late int startingHealth;
+  late int startingMana;
+  late int regainManaPerTurn;
+  late String mascot; 
+
   Player({required this.name})
       : health = 3,
         mana = 5,
         deck = [],
         hand = [],
         discardPile = [],
-        monsters = List.filled(3, null) {
-    //initDeck();
+        monsters = List.filled(3, null){
+          startingHealth = 3;
+          startingMana = 0;
+          regainManaPerTurn = 1;
+          mascot = '';
+        }
+
+  factory Player.fromJson(Map<String, dynamic> json) {
+    var data = Player(name: 'Player');
+    if (json.isEmpty) {
+      return data;
+    }
+
+    data.name = json['name'];
+    data.health = json['health'];
+    data.mana = json['mana'];
+    data.hand = json['hand'] == null
+        ? json['hand'].map((cardJson) {
+            return GameCard.fromJson(
+                cardJson);
+          }).toList()
+        : [];
+    data.deck = json['deck'] == null
+        ? json['deck'].map((cardJson) {
+            return GameCard.fromJson(
+                cardJson);
+          }).toList()
+        : [];
+    return data;
   }
 
   Future<void> initDeck() async {
-    // deck = [
-    //   MonsterCard("Penguin Mage", "assets/images/PenguinMage.png", 4,
-    //       health: 8, attack: 7),
-    //   MonsterCard("Flame Dog", "assets/images/FlameDog.png", 3,
-    //       health: 10, attack: 3),
-    //   UpgradeCard("Heal", "assets/images/Heal.png", 1,
-    //       upgradeCardType: UpgradeCardType.heal, value: 3),
-    //   UpgradeCard("Strengthen", "assets/images/Strengthen.png", 1,
-    //       upgradeCardType: UpgradeCardType.boostAtk, value: 2),
-    // ];
     deck = await CardDatabase.generateDeck(5);
     deck.shuffle();
   }
 
+  void startGame(){
+    health = startingHealth;
+    mana = startingMana;
+    if(mascot.isEmpty){
+      mascot = deck.firstWhere((w) => w.isMonster()).id;
+    }
+    var mascotCard = deck.firstWhere((w) => w.id == mascot);
+    deck.remove(mascotCard);
+    summonMonster(mascotCard.toMonster(), 1);
+  }
+
   void startTurn() {
     drawCard(1);
-    mana += 2;
+    mana += regainManaPerTurn;
 
     for (var monster in monsters.where((w) => w != null)) {
       monster!.startnewTurn();
@@ -122,12 +155,12 @@ class CPU {
       if (monster == null) continue;
 
       if (monster.canAttack()) {
-        if (opponent.monsters.isEmpty 
-            || !opponent.monsters.any((w) => w != null)) {
+        if (opponent.monsters.isEmpty ||
+            !opponent.monsters.any((w) => w != null)) {
           monster.attackPlayer(opponent);
         } else {
           var opponentMonster = opponent.monsters.where((w) => w != null).first;
-          if(opponentMonster == null) continue;
+          if (opponentMonster == null) continue;
           monster.doAttack(opponentMonster);
         }
         updateGameState();

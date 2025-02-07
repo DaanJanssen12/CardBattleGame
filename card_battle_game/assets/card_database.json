@@ -8,7 +8,12 @@
       "attack": 7,
       "cost": 4,
       "shortDescription": null,
-      "fullDescription": ""
+      "fullDescription": "A penguin mage",
+      "mascotEffects": {
+        "startingHealth": 3,
+        "startingMana": 4,
+        "regainManaPerTurn": 1
+      }
     },
     {
       "id": "monster_fire_dog",
@@ -19,7 +24,12 @@
       "attack": 3,
       "cost": 3,
       "shortDescription": null,
-      "fullDescription": ""
+      "fullDescription": "A fire dog",
+      "mascotEffects": {
+        "startingHealth": 3,
+        "startingMana": 4,
+        "regainManaPerTurn": 1
+      }
     },
     {
       "id": "upgrade_heal",
@@ -29,8 +39,8 @@
       "cost": 1,
       "upgradeCardType": "heal",
       "value": 3,
-      "shortDescription": null,
-      "fullDescription": ""
+      "shortDescription": "Heal a monster by 3.",
+      "fullDescription": "Heal a monster by 3."
     },
     {
       "id": "upgrade_strengthen",
@@ -40,8 +50,8 @@
       "cost": 2,
       "upgradeCardType": "boostAtk",
       "value": 2,
-      "shortDescription": null,
-      "fullDescription": ""
+      "shortDescription": "Boost a monster's attack by 2.",
+      "fullDescription": "Boost a monster's attack by 2."
     }
   ]
   

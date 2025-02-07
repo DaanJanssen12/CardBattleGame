@@ -1,6 +1,7 @@
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:card_battle_game/services/notification_service.dart';
 import 'package:card_battle_game/services/sound_player_service.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
@@ -10,7 +11,8 @@ import 'package:card_battle_game/widgets/player_info_widget.dart';
 import 'package:flutter/material.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, required this.userData});
+    final UserData userData;
 
   @override
   _GameScreenState createState() => _GameScreenState();
@@ -32,7 +34,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _loadData() async {
-    player = await (await UserStorage.getUserData()).asPlayer();
+    player = widget.userData.activeGame!.player;
     await enemy.initDeck();
     setState(() {
       _isLoading = false;
@@ -42,6 +44,8 @@ class _GameScreenState extends State<GameScreen> {
 
   void initGame() {
     setState(() {
+      player.startGame();
+      enemy.startGame();
       player.drawCard(3);
       enemy.drawCard(3);
     });
@@ -156,7 +160,7 @@ class _GameScreenState extends State<GameScreen> {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
-          Navigator.pop(context);
+          toMainMenu();
         });
       });
     }
@@ -166,10 +170,17 @@ class _GameScreenState extends State<GameScreen> {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
-          Navigator.pop(context);
+          toMainMenu();
         });
       });
     }
+  }
+
+  void toMainMenu(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MainMenu(userData: widget.userData)),
+    );
   }
 
   @override

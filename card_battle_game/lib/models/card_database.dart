@@ -13,6 +13,7 @@ class CardDatabase {
 
     List<GameCard> returnCards = [];
     for (var id in cardIds) {
+      print('Getting $id');
       var card = filteredCards.firstWhere((w) => w.id == id).clone();
       returnCards.add(card);
     }

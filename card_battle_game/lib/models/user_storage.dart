@@ -23,6 +23,7 @@ class UserStorage {
       // Read existing file
       final String jsonString = await file.readAsString();
       final dynamic jsonResponse = json.decode(jsonString);
+      print(jsonResponse);
       return UserData.fromJson(jsonResponse);
     } else {
       // First time: Load from assets & create file
@@ -40,7 +41,6 @@ class UserStorage {
     final filePath = await _getFilePath();
     final file = File(filePath);
     var jsonStr = jsonEncode(userData.toJson());
-
     await file.writeAsString(jsonStr);
   }
 
@@ -55,20 +55,31 @@ class UserData {
   late Deck deck;
   late String name;
   late List<String> cards;
+  late Game? activeGame;
+
   UserData();
   factory UserData.fromJson(Map<String, dynamic> json) {
     var data = UserData();
     data.name = json['name'];
     data.deck = Deck.fromJson(json['deck']);
-    data.cards = json['cards'] != null 
+    data.cards = json['cards'] != null
         ? (json['cards'] as List<dynamic>).map((m) => m.toString()).toList()
         : [];
+    data.activeGame =
+        json['activeGame'] != null ? Game.fromJson(json['activeGame']) : null;
     return data;
+  }
+
+  Future<void> newGame() async{
+    activeGame = Game();
+    var player = await this.asPlayer();
+    activeGame!.setPlayer(player);
   }
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'cards': cards,
       'deck': deck.toJson(),
     };
   }
@@ -79,7 +90,7 @@ class UserData {
     return player;
   }
 
-  Future<List<GameCard>> availableCards() async{
+  Future<List<GameCard>> availableCards() async {
     var availableCards = await CardDatabase.getCards(cards);
     return availableCards;
   }
@@ -106,5 +117,39 @@ class Deck {
       card.isInDeck = true;
     }
     return deck;
+  }
+}
+
+class Game {
+  late int stage;
+  late String mascot;
+  late Player player;
+  Game() {
+    stage = 0;
+    mascot = '';
+    player = Player(name: '');
+  }
+
+  factory Game.fromJson(Map<String, dynamic> json) {
+    var data = Game();
+    data.stage = json['name'];
+    data.mascot = json['mascot'];
+    data.player = Player.fromJson(json['player']);
+    return data;
+  }
+
+  void setMascot(MonsterCard card) {
+    mascot = card.id;
+    player.startingHealth = card.mascotEffects.startingHealth;
+    player.startingMana = card.mascotEffects.startingMana;
+    player.regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
+  }
+
+  void stageUp() {
+    stage++;
+  }
+
+  void setPlayer(Player player) {
+    this.player = player;
   }
 }
