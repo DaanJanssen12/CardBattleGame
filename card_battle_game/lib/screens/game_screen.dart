@@ -2,6 +2,7 @@ import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:card_battle_game/models/user_storage.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
+import 'package:card_battle_game/screens/stage_selection_screen.dart';
 import 'package:card_battle_game/services/notification_service.dart';
 import 'package:card_battle_game/services/sound_player_service.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
@@ -160,7 +161,9 @@ class _GameScreenState extends State<GameScreen> {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
-          toMainMenu();
+          player.endGame();
+          enemy.endGame();
+          toStageSelection();
         });
       });
     }
@@ -170,12 +173,20 @@ class _GameScreenState extends State<GameScreen> {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
+          player.endGame();
+          enemy.endGame();
           toMainMenu();
         });
       });
     }
   }
 
+void toStageSelection(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => StageSelectionScreen(userData: widget.userData)),
+    );
+  }
   void toMainMenu(){
     Navigator.push(
       context,
@@ -187,7 +198,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Card Battle Game', style: TextStyle(color: Colors.white)),
+        title: Text('Stage ${widget.userData.activeGame!.stage}', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         actions: [
           // End Turn Button: Positioned at the top-right of the app bar

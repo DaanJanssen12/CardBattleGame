@@ -57,6 +57,16 @@ class Player {
     deck.shuffle();
   }
 
+  void endGame(){
+    for(var monster in monsters){
+      if(monster != null){
+        faintMonster(monster);
+      }
+    }
+    shuffleDiscardPile();
+    shuffleHandIntoDeck();
+  }
+
   void startGame(){
     health = startingHealth;
     mana = startingMana;
@@ -87,6 +97,12 @@ class Player {
   void shuffleDiscardPile() {
     deck.addAll(discardPile);
     discardPile.clear();
+    deck.shuffle();
+  }
+
+  void shuffleHandIntoDeck(){
+    deck.addAll(hand);
+    hand.clear();
     deck.shuffle();
   }
 

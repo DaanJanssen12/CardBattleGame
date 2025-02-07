@@ -94,10 +94,14 @@ class MonsterCard extends GameCard {
   void apply(UpgradeCard card) {
     switch (card.upgradeCardType) {
       case UpgradeCardType.boostAtk:
-        currentAttack += card.value;
+        currentAttack += card.value!;
         break;
       case UpgradeCardType.heal:
-        currentHealth += card.value;
+        if (card.value == null) {
+          currentHealth = health;
+        } else {
+          currentHealth += card.value!;
+        }
         break;
     }
   }
@@ -184,7 +188,7 @@ class MascotEffects {
   MascotEffects(this.startingHealth, this.startingMana, this.regainManaPerTurn);
   factory MascotEffects.fromJson(Map<String, dynamic>? json) {
     var data = MascotEffects(3, 4, 1);
-    if(json == null || json.isEmpty){
+    if (json == null || json.isEmpty) {
       return data;
     }
     data.startingHealth = json['startingHealth'];
@@ -241,7 +245,7 @@ class ActionCard extends GameCard {
 
 class UpgradeCard extends GameCard {
   UpgradeCardType upgradeCardType;
-  int value;
+  int? value;
 
   UpgradeCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,

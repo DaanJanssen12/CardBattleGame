@@ -47,6 +47,7 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
 
   void startGame() {
     widget.userData.activeGame!.setMascot(_selectedMascot!.toMonster());
+    widget.userData.activeGame!.stage = 1;
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => GameScreen(userData: widget.userData)),

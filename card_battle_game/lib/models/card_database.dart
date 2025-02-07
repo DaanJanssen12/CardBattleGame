@@ -29,6 +29,16 @@ class CardDatabase {
     }
     return deck;
   }
+
+  static Future<List<GameCard>> generateRewards(int stage, int amount) async{
+    var allCards = await loadCardsFromJson(filePath);
+    List<GameCard> rewards = [];
+    for (var i = 0; i < amount; i++) {
+      var card = allCards[Random().nextInt(allCards.length)].clone();
+      rewards.add(card);
+    }
+    return rewards;
+  }
 }
 
 Future<List<GameCard>> loadCardsFromJson(String filePath) async {
