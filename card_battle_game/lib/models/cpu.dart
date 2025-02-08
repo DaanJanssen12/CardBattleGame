@@ -14,8 +14,8 @@ class CpuPlayer extends Player {
     strategy = CpuStrategy.random;
   }
 
-  Future<void> executeTurn(Player opponent, Function updateGameState) async {
-    await CPU.executeTurn(this, opponent, updateGameState);
+  Future<void> executeTurn(Player opponent, Function updateGameState, List<String> battleLog) async {
+    await CPU.executeTurn(this, opponent, updateGameState, battleLog);
   }
 }
 
@@ -25,20 +25,20 @@ enum CpuStrategy { random, defensive, offensive }
 
 class CPU {
   static Future<void> executeTurn(
-      CpuPlayer cpu, Player opponent, Function updateGameState) async {
-    await playCardsFromHand(cpu, opponent, updateGameState);
-    await attackWithAllActiveMonsters(cpu, opponent, updateGameState);
+      CpuPlayer cpu, Player opponent, Function updateGameState, List<String> battleLog) async {
+    await playCardsFromHand(cpu, opponent, updateGameState, battleLog);
+    await attackWithAllActiveMonsters(cpu, opponent, updateGameState, battleLog);
   }
 
   static Future<void> playCardsFromHand(
-      CpuPlayer cpu, Player opponent, Function updateGameState) async {
+      CpuPlayer cpu, Player opponent, Function updateGameState, List<String> battleLog) async {
     // If the enemy has cards to play, play them.
     if (cpu.strategy == CpuStrategy.random) {
       cpu.hand.shuffle();
       for (var card in List.from(cpu.hand)) {
         for (var i = 0; i < 3; i++) {
           if (cpu.canPlayCard(card, i).$1) {
-            cpu.playCard(card, i);
+            cpu.playCard(card, i, battleLog);
             updateGameState();
             await Future.delayed(Duration(seconds: 1));
           }
@@ -48,26 +48,27 @@ class CPU {
     //Do 2 loops
     for (var x = 0; x < 2; x++) {
       if (cpu.strategy == CpuStrategy.offensive) {
-        await playMonsterCards(cpu, opponent, updateGameState);
-        await playOtherCards(cpu, opponent, updateGameState);
+        await playMonsterCards(cpu, opponent, updateGameState, battleLog);
+        await playOtherCards(cpu, opponent, updateGameState, battleLog);
       }
       if (cpu.strategy == CpuStrategy.defensive) {
-        await playOtherCards(cpu, opponent, updateGameState);
-        await playMonsterCards(cpu, opponent, updateGameState);
+        await playOtherCards(cpu, opponent, updateGameState, battleLog);
+        await playMonsterCards(cpu, opponent, updateGameState, battleLog);
       }
     }
   }
 
   static Future<void> playMonsterCards(
-      CpuPlayer cpu, Player opponent, Function updateGameState) async {
+      CpuPlayer cpu, Player opponent, Function updateGameState, List<String> battleLog) async {
     //Open monster zones ?
     if (cpu.monsters.any((a) => a == null)) {
-      for (var monsterCard in cpu.hand.where((w) => w.isMonster())) {
+      var monsterCards = cpu.hand.where((w) => w.isMonster()).toList();
+      for (var monsterCard in monsterCards) {
         //Do a loop for every monster zone
         for (var i = 0; i < 3; i++) {
           //If monster can be played > play it
           if (cpu.canPlayCard(monsterCard, i).$1) {
-            cpu.playCard(monsterCard, i);
+            cpu.playCard(monsterCard, i, battleLog);
             updateGameState();
             await Future.delayed(Duration(seconds: 1));
           }
@@ -77,7 +78,7 @@ class CPU {
   }
 
   static Future<void> playOtherCards(
-      CpuPlayer cpu, Player opponent, Function updateGameState) async {
+      CpuPlayer cpu, Player opponent, Function updateGameState, List<String> battleLog) async {
     var noneMonsterCards = cpu.hand.where((w) => !w.isMonster()).toList();
     noneMonsterCards.sort((a, b) {
       int aVal = getGameCardSortValue(a, cpu.strategy);
@@ -89,7 +90,7 @@ class CPU {
       for (var i = 0; i < 3; i++) {
         //If card can be played > play it
         if (cpu.canPlayCard(gameCard, i).$1) {
-          cpu.playCard(gameCard, i);
+          cpu.playCard(gameCard, i, battleLog);
           updateGameState();
           await Future.delayed(Duration(seconds: 1));
         }
@@ -135,8 +136,8 @@ class CPU {
   }
 
   static Future<void> attackWithAllActiveMonsters(
-      CpuPlayer cpu, Player opponent, Function updateGameState) async {
-    for (var monster in List.from(cpu.monsters)) {
+      CpuPlayer cpu, Player opponent, Function updateGameState, List<String> battleLog) async {
+    for (var monster in cpu.monsters) {
       //No monster in spot so no attack
       if (monster == null) {
         continue;
@@ -154,12 +155,12 @@ class CPU {
           if (cpu.strategy == CpuStrategy.random) {
             //Attack a random opponent monster
             monster.doAttack(
-                opponentMonsters[Random().nextInt(opponentMonsters.length)]);
+                opponentMonsters[Random().nextInt(opponentMonsters.length)]!, battleLog);
           } else {
             //Attack the opponent monster with the least health
             var weakestMonster = opponentMonsters
                 .reduce((a, b) => a!.currentHealth < b!.currentHealth ? a : b);
-            monster.doAttack(weakestMonster);
+            monster.doAttack(weakestMonster!, battleLog);
           }
         }
         updateGameState();

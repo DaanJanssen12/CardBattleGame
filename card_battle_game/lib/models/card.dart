@@ -129,9 +129,11 @@ class MonsterCard extends GameCard {
     return !hasAttacked && isActive;
   }
 
-  void doAttack(MonsterCard target) {
+  void doAttack(MonsterCard target, List<String> battleLog) {
     target.takeDamage(currentAttack);
     hasAttacked = true;
+
+    battleLog.add('$name attacked ${target.name} ($currentAttack dmg)');
   }
 
   void attackPlayer(Player player) {
@@ -235,7 +237,7 @@ class ActionCard extends GameCard {
     switch(actionCardType){
       case ActionCardType.draw:
         for(var i = 0; i < value; i++){
-          player.drawCard();
+          player.drawCard([]);
         }
       break;
     }

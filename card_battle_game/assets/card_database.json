@@ -3,7 +3,7 @@
       {
         "id": "monster_penguin_mage",
         "name": "Penguin Mage",
-        "imagePath": "assets/images/PenguinMage.png",
+        "imagePath": "assets/images/monsters/PenguinMage.png",
         "type": "monster",
         "health": 2,
         "attack": 2,
@@ -19,7 +19,7 @@
       {
         "id": "monster_fire_dog",
         "name": "Fire Dog",
-        "imagePath": "assets/images/FlameDog.png",
+        "imagePath": "assets/images/monsters/FlameDog.png",
         "type": "monster",
         "health": 3,
         "attack": 1,
@@ -35,7 +35,7 @@
       {
         "id": "monster_mushroom_man",
         "name": "Mushroom Man",
-        "imagePath": "assets/images/MushroomMan.png",
+        "imagePath": "assets/images/monsters/MushroomMan.png",
         "type": "monster",
         "health": 2,
         "attack": 1,
@@ -55,7 +55,7 @@
       {
         "id": "monster_mushroom_boy",
         "name": "Fun Guy",
-        "imagePath": "assets/images/MushroomBoy.png",
+        "imagePath": "assets/images/monsters/MushroomBoy.png",
         "type": "monster",
         "health": 1,
         "attack": 1,
@@ -63,7 +63,7 @@
         "shortDescription": null,
         "fullDescription": "a Fun Guy",
         "mascotEffects": {
-          "startingHealth": 1,
+          "startingHealth": 3,
           "startingMana": 1,
           "regainManaPerTurn": 1
         }
@@ -73,7 +73,7 @@
       {
         "id": "upgrade_heal",
         "name": "Heal",
-        "imagePath": "assets/images/Heal.png",
+        "imagePath": "assets/images/upgrades/Heal.png",
         "type": "upgrade",
         "cost": 1,
         "upgradeCardType": "heal",
@@ -84,7 +84,7 @@
       {
         "id": "upgrade_strengthen",
         "name": "Strengthen",
-        "imagePath": "assets/images/Strengthen.png",
+        "imagePath": "assets/images/upgrades/Strengthen.png",
         "type": "upgrade",
         "cost": 2,
         "upgradeCardType": "boostAtk",
@@ -95,20 +95,31 @@
       {
         "id": "upgrade_health_potion",
         "name": "Health Potion",
-        "imagePath": "assets/images/HealthPotion.png",
+        "imagePath": "assets/images/upgrades/HealthPotion.png",
         "type": "upgrade",
         "cost": 4,
         "upgradeCardType": "heal",
         "value": null,
         "shortDescription": "Heal a monster to it's original health.",
         "fullDescription": "Heal a monster to it's original health."
+      },
+      {
+        "id": "upgrade_water_gun",
+        "name": "Water Gun",
+        "imagePath": "assets/images/upgrades/WaterGun.png",
+        "type": "upgrade",
+        "cost": 3,
+        "upgradeCardType": "boostAtk",
+        "value": 3,
+        "shortDescription": "Boost a monster's attack by 3.",
+        "fullDescription": "Boost a monster's attack by 3."
       }
     ],
     "actions": [
       {
         "id": "action_draw",
         "name": "Draw",
-        "imagePath": "assets/images/Draw.png",
+        "imagePath": "assets/images/actions/Draw.png",
         "type": "action",
         "cost": 1,
         "actionCardType": "draw",

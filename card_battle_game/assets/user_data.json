@@ -12,5 +12,6 @@
         "monster_fire_dog",
         "action_draw",
         "monster_mushroom_man"
-    ]
+    ],
+    "background": "background1.jpg"
 }

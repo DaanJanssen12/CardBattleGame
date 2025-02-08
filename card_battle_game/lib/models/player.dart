@@ -58,7 +58,7 @@ class Player {
   void endGame() {
     for (var monster in monsters) {
       if (monster != null) {
-        faintMonster(monster.monsterZoneIndex!);
+        faintMonster(monster.monsterZoneIndex!, []);
       }
     }
     shuffleDiscardPile();
@@ -72,7 +72,7 @@ class Player {
     regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
   }
 
-  Future<void> startGame() async {
+  Future<void> startGame(List<String> battleLog) async {
     if (mascot.isEmpty) {
       var newMascot = deck.firstWhere((w) => w.isMonster());
       mascot = newMascot.id;
@@ -82,7 +82,7 @@ class Player {
     mana = startingMana;
     var mascotCard = deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
-    await summonMonster(mascotCard.toMonster(), 1);
+    await summonMonster(mascotCard.toMonster(), 1, battleLog);
     deck.shuffle();
   }
 
@@ -97,7 +97,7 @@ class Player {
     }
   }
 
-  GameCard drawCard() {
+  GameCard drawCard(List<String> battleLog) {
     if (deck.isEmpty) {
       shuffleDiscardPile();
     }
@@ -107,7 +107,8 @@ class Player {
     if (deck.isEmpty) {
       shuffleDiscardPile();
     }
-
+    
+    battleLog.add('$name drew a card');
     return drawnCard;
   }
 
@@ -139,17 +140,19 @@ class Player {
     return (true, '');
   }
 
-  void playCard(GameCard card, int monsterZoneIndex) {
+  void playCard(GameCard card, int monsterZoneIndex, List<String> battleLog) {
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
-      summonMonster(card as MonsterCard, monsterZoneIndex);
+      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog);
     }
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
+      battleLog.add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
     }
     if (card.isAction()) {
       (card as ActionCard).doAction(this);
+      battleLog.add('${card.name} played');
     }
 
     if (!card.isMonster()) {
@@ -157,16 +160,16 @@ class Player {
     }
   }
 
-  Future<void> summonMonster(MonsterCard monster, int monsterZoneIndex) async {
+  Future<void> summonMonster(MonsterCard monster, int monsterZoneIndex, List<String> battleLog) async {
     monsters[monsterZoneIndex] = monster;
     monster.summon(monsterZoneIndex);
     if (monster.summonEffect != null) {
-      print('triggering summon effect');
       await monster.summonEffect!.apply(monster, this);
     }
+    battleLog.add('${monster.name} summoned');
   }
 
-  void faintMonster(int monsterZoneIndex) {
+  void faintMonster(int monsterZoneIndex, List<String> battleLog) {
     var monster = monsters[monsterZoneIndex];
     monster!.faint();
     monsters[monsterZoneIndex] = null;

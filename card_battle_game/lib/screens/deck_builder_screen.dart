@@ -74,7 +74,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
         children: [
           // Background Image
           Image.asset(
-            'assets/images/background.jpg',
+            'assets/images/${widget.userData.background}',
             fit: BoxFit.cover,
           ),
           Column(

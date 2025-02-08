@@ -24,6 +24,9 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   bool _isLoading = true;
+  int turn = 1;
+  bool addTurn = false;
+  List<String> battleLog = [];
   Player player = Player(name: 'Player');
   CpuPlayer enemy = CpuPlayer(name: 'Enemy');
   bool playerTurn = true;
@@ -47,10 +50,64 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> initGame() async {
-    await player.startGame();
-    await enemy.startGame();
+    battleLog.add('Game Started');
+    await player.startGame(battleLog);
+    await enemy.startGame(battleLog);
     setState(() {});
     showCoinFlipDialog();
+  }
+
+  void showBattleLog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title:
+              Text("Battle Log", style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Container(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: battleLog.length,
+                    itemBuilder: (context, index) {
+                      return battleLog[index] == '-'
+                          ? Padding(
+                              padding: EdgeInsets.symmetric(vertical: 4),
+                              child: Divider(
+                                color: Colors.blueGrey,
+                                thickness: 2,
+                              ),
+                            )
+                          : Card(
+                              elevation: 2,
+                              margin: EdgeInsets.symmetric(vertical: 4),
+                              child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Text(
+                                    battleLog[index],
+                                    style: TextStyle(fontSize: 16),
+                                  )),
+                            );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void showCoinFlipDialog() async {
@@ -62,16 +119,25 @@ class _GameScreenState extends State<GameScreen> {
         return CoinFlipWidget(onFlipComplete: (bool isPlayerFirst) async {
           setState(() {
             playerTurn = isPlayerFirst;
-            message = playerTurn ? "Player starts!" : "Enemy starts!";
+            if (playerTurn) {
+              battleLog.add('${player.name} won the coin toss');
+            } else {
+              battleLog.add('${enemy.name} won the coin toss');
+            }
           });
 
           // Proceed with normal game initialization
           setState(() {
-            player.drawCard();
-            player.drawCard();
-            enemy.drawCard();
-            enemy.drawCard();
+            player.drawCard([]);
+            player.drawCard([]);
+            enemy.drawCard([]);
+            enemy.drawCard([]);
           });
+
+          battleLog.add('-');
+          battleLog.add('TURN $turn');
+          battleLog.add(
+              playerTurn ? "${player.name}'s Turn" : "${enemy.name}'s Turn");
 
           if (playerTurn) {
             startPlayerTurn(player);
@@ -84,9 +150,19 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void nextTurn() async {
+    battleLog.add('-');
+    if (addTurn) {
+      turn++;
+      addTurn = false;
+      battleLog.add('TURN $turn');
+      battleLog.add('-');
+    } else {
+      addTurn = true;
+    }
     setState(() {
       playerTurn = !playerTurn;
-      message = playerTurn ? "Player's Turn" : "Enemy's Turn";
+      battleLog
+          .add(playerTurn ? "${player.name}'s Turn" : "${enemy.name}'s Turn");
     });
 
     if (playerTurn) {
@@ -108,7 +184,7 @@ class _GameScreenState extends State<GameScreen> {
     await Future.delayed(Duration(seconds: 1));
     setState(() {
       enemy.startTurn();
-      enemy.drawCard();
+      enemy.drawCard(battleLog);
     });
     await Future.delayed(Duration(seconds: 1));
     await CPU.executeTurn(enemy, player, () {
@@ -117,7 +193,7 @@ class _GameScreenState extends State<GameScreen> {
         checkForFaintedMonsters(enemy);
         checkGameEnd();
       });
-    });
+    }, battleLog);
     setState(() {});
     await Future.delayed(Duration(seconds: 1));
     nextTurn(); // Continue to the next turn
@@ -127,7 +203,7 @@ class _GameScreenState extends State<GameScreen> {
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
       setState(() {
-        player.playCard(card, monsterZoneIndex);
+        player.playCard(card, monsterZoneIndex, battleLog);
       });
       soundPlayerService.playDropSound();
     } else {
@@ -155,7 +231,7 @@ class _GameScreenState extends State<GameScreen> {
   void attackMonster(
       MonsterCard attackingMonster, Player enemy, int targetIndex) {
     setState(() {
-      attackingMonster.doAttack(enemy.monsters[targetIndex]!);
+      attackingMonster.doAttack(enemy.monsters[targetIndex]!, battleLog);
       //soundPlayerService.playAttackSound();
     });
     Future.sync(() async {
@@ -170,7 +246,7 @@ class _GameScreenState extends State<GameScreen> {
     for (var monster in player.monsters.where((w) => w != null)) {
       if (monster!.currentHealth <= 0) {
         setState(() {
-          player.faintMonster(monster.monsterZoneIndex!);
+          player.faintMonster(monster.monsterZoneIndex!, battleLog);
         });
       }
     }
@@ -243,6 +319,17 @@ class _GameScreenState extends State<GameScreen> {
                 style: TextStyle(color: Colors.white)),
             backgroundColor: Colors.black,
             actions: [
+              TextButton(
+                onPressed: showBattleLog, // Disable when it's the enemy's turn
+                child: Text(
+                  'Log',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               // End Turn Button: Positioned at the top-right of the app bar
               TextButton(
                 onPressed: playerTurn ? nextTurn : null,
@@ -269,7 +356,7 @@ class _GameScreenState extends State<GameScreen> {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                    'assets/images/background.jpg'), // Path to your background image
+                    'assets/images/${widget.userData.background}'), // Path to your background image
                 fit: BoxFit
                     .cover, // Makes sure the image covers the entire screen
               ),
@@ -334,7 +421,7 @@ class _GameScreenState extends State<GameScreen> {
   void showDeckOverlay() {
     showDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -378,7 +465,7 @@ class _GameScreenState extends State<GameScreen> {
                         onTap: () {
                           GameCard? gameCard;
                           setState(() {
-                            gameCard = player.drawCard();
+                            gameCard = player.drawCard(battleLog);
                           });
                           Navigator.of(context).pop(); // Close overlay
                           showDrawnCardAnimation(gameCard!);

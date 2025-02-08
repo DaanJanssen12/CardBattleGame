@@ -1,5 +1,8 @@
 import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class UserProfileScreen extends StatefulWidget {
   final UserData userData;
@@ -11,19 +14,29 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
-  //UserData? userData;
+  File? _backgroundImage;
+  String? _selectedBackground; // Variable to store selected background
 
   @override
   void initState() {
     super.initState();
     _nameController.text = widget.userData.name;
+    _selectedBackground = widget.userData.background; // Set initial background
   }
 
   void saveName(String name) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Saved")),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text("Saved")),
+    // );
     await UserStorage.setName(name);
+  }
+
+  void selectBackground(String? newBackground) async {
+    setState(() {
+      _selectedBackground = newBackground;
+    });
+    widget.userData.background = newBackground!;
+    await UserStorage.setBackground(newBackground);
   }
 
   @override
@@ -33,10 +46,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         fit: StackFit.expand,
         children: [
           // Background Image
-          Image.asset(
-            'assets/images/background.jpg',
-            fit: BoxFit.cover,
-          ),
+          _backgroundImage != null
+              ? Image.file(
+                  _backgroundImage!,
+                  fit: BoxFit.cover,
+                )
+              : Image.asset(
+                  'assets/images/$_selectedBackground',
+                  fit: BoxFit.cover,
+                ),
 
           // Profile UI
           Center(
@@ -58,6 +76,25 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                     ],
                   ),
+                ),
+                SizedBox(height: 20),
+
+                // Background Selection Dropdown
+                DropdownButton<String>(
+                  value: _selectedBackground,
+                  onChanged: selectBackground,
+                  items: <String>[
+                    'background1.jpg',
+                    'background2.jpg',
+                    'background3.jpg'
+                  ] // Predefined backgrounds
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  hint: Text("Select Background"),
                 ),
                 SizedBox(height: 20),
 
@@ -84,7 +121,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context); // Go back to the main menu
@@ -105,6 +141,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           String name = _nameController.text.trim();
                           if (name.isNotEmpty) {
                             saveName(name);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      MainMenu(userData: widget.userData)),
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(

@@ -50,6 +50,12 @@ class UserStorage {
     data.name = name;
     await saveUserData(data);
   }
+
+  static Future<void> setBackground(String background) async{
+    var data = await getUserData();
+    data.background = background;
+    await saveUserData(data);
+  }
 }
 
 class UserData {
@@ -57,11 +63,13 @@ class UserData {
   late String name;
   late List<String> cards;
   late Game? activeGame;
+  late String background;
 
   UserData();
   factory UserData.fromJson(Map<String, dynamic> json) {
     var data = UserData();
     data.name = json['name'];
+    data.background = json['background'] ?? "background1.jpg";
     data.deck = Deck.fromJson(json['deck']);
     data.cards = json['cards'] != null
         ? (json['cards'] as List<dynamic>).map((m) => m.toString()).toList()

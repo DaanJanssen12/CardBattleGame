@@ -62,7 +62,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
         children: [
           // Background image
           Image.asset(
-            'assets/images/background.jpg',
+            'assets/images/${widget.userData.background}',
             fit: BoxFit.cover,
           ),
 

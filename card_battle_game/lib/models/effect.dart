@@ -26,7 +26,7 @@ class SummonEffect{
         if(player.monsters[i] == null){
           var swarmMonster = swarmCard[0].toMonster().clone().toMonster();
           swarmMonster.oneTimeUse = true;
-          player.summonMonster(swarmMonster, i);
+          player.summonMonster(swarmMonster, i, []);
         }
       }
       break;
