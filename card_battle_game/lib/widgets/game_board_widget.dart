@@ -28,7 +28,6 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
 
   // Handle drag start for summoning or attacking
   void startDrag(MonsterCard card) {
-    print('start drag with ${card.name}');
     setState(() {
       draggingMonster = card;
     });
@@ -37,7 +36,6 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
   // Handle drag end for attacking an enemy monster
   void endDrag(int index) {
     if (draggingMonster != null) {
-      print('end drag with attack on enemy monster at index $index');
       widget.onMonsterAttack(draggingMonster!, widget.enemy, index);
     }
     setState(() {

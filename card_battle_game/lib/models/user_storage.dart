@@ -23,7 +23,6 @@ class UserStorage {
       // Read existing file
       final String jsonString = await file.readAsString();
       final dynamic jsonResponse = json.decode(jsonString);
-      print(jsonResponse);
       return UserData.fromJson(jsonResponse);
     } else {
       // First time: Load from assets & create file
@@ -72,7 +71,7 @@ class UserData {
 
   Future<void> newGame() async{
     activeGame = Game();
-    var player = await this.asPlayer();
+    var player = await asPlayer();
     activeGame!.setPlayer(player);
   }
 

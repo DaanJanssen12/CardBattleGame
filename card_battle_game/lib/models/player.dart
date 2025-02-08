@@ -153,13 +153,10 @@ class Player {
 class CPU {
   static Future<void> executeTurn(
       Player player, Player opponent, Function updateGameState) async {
-    print('Enemy turn initiated');
-
     // If the enemy has cards to play, play them.
     for (var card in List.from(player.hand)) {
       for (var i = 0; i < 3; i++) {
         if (player.canPlayCard(card, i).$1) {
-          print('Enemy plays card: ${card.name}');
           player.playCard(card, i);
           updateGameState();
           await Future.delayed(Duration(seconds: 1));
@@ -183,10 +180,5 @@ class CPU {
         await Future.delayed(Duration(seconds: 1));
       }
     }
-
-    // Optionally, simulate attack or other actions after card play
-    // If there are other actions to simulate, you can add them here
-
-    print('Enemy turn finished');
   }
 }

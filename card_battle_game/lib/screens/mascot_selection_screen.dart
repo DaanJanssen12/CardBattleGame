@@ -24,24 +24,14 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
   }
 
   void _loadData() async {
-    print("Deck size: ${widget.userData.deck.cards.length}");
     await widget.userData.newGame(); // Ensure game and player are initialized
 
-    if (widget.userData.activeGame != null &&
-        widget.userData.activeGame!.player != null) {
+    if (widget.userData.activeGame != null) {
       setState(() {
         deck = widget.userData.activeGame!.player.deck
             .where((card) => card.isMonster()) // Filter only monster cards
             .toList();
       });
-
-      // Debugging: Print deck contents
-      print("Deck size: ${deck.length}");
-      for (var card in deck) {
-        print("Card ID: ${card.id}, Name: ${card.name}");
-      }
-    } else {
-      print("Error: activeGame or player is null");
     }
   }
 
@@ -50,7 +40,8 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
     widget.userData.activeGame!.stage = 1;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => GameScreen(userData: widget.userData)),
+      MaterialPageRoute(
+          builder: (context) => GameScreen(userData: widget.userData)),
     );
   }
 
@@ -145,21 +136,21 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Starting Health: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects?.startingHealth ?? 'N/A'}',
+                              'Starting Health: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects.startingHealth}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                               ),
                             ),
                             Text(
-                              'Starting Mana: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects?.startingMana ?? 'N/A'}',
+                              'Starting Mana: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects.startingMana}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                               ),
                             ),
                             Text(
-                              'Regain Mana Per Turn: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects?.regainManaPerTurn ?? 'N/A'}',
+                              'Regain Mana Per Turn: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects.regainManaPerTurn}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

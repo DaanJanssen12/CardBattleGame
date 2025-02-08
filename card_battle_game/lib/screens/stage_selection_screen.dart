@@ -47,7 +47,6 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
     if (_selectedReward != null) {
       widget.userData.activeGame!.stageUp();
       widget.userData.activeGame!.player.deck.add(_selectedReward!);
-      print('Onto stage ${widget.userData.activeGame!.stage}');
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => GameScreen(userData: widget.userData)),

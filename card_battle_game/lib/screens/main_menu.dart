@@ -1,7 +1,6 @@
 import 'package:card_battle_game/main.dart';
 import 'package:card_battle_game/models/user_storage.dart';
 import 'package:card_battle_game/screens/deck_builder_screen.dart';
-import 'package:card_battle_game/screens/game_screen.dart';
 import 'package:card_battle_game/screens/how_to_play_screen.dart';
 import 'package:card_battle_game/screens/mascot_selection_screen.dart';
 import 'package:card_battle_game/screens/user_profile_screen.dart';
@@ -39,7 +38,6 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
 
   @override
   void didPopNext() {
-    print("Main Menu is now active!");
     _loadUserData();
   }
 

@@ -68,7 +68,7 @@ class CardWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        card.name ?? 'Unknown',
+        card.name,
         textAlign: TextAlign.center,
         softWrap: false,
         overflow: TextOverflow.ellipsis,

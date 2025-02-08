@@ -82,11 +82,11 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
               // Deck Column (your deck of cards)
               Expanded(
                 child: DragTarget<GameCard>(
-                  onWillAccept: (card) {
-                    return !card!.isInDeck;
+                  onWillAcceptWithDetails: (card) {
+                    return !card.data.isInDeck;
                   },
-                  onAccept: (card) {
-                    addCardToDeck(card);
+                  onAcceptWithDetails: (card) {
+                    addCardToDeck(card.data);
                   },
                   builder: (context, candidateData, rejectedData) {
                     return _buildCardList(deck, "Your Deck", true);
@@ -96,11 +96,11 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
               // Available Cards Column
               Expanded(
                 child: DragTarget<GameCard>(
-                  onWillAccept: (card) {
-                    return card!.isInDeck;
+                  onWillAcceptWithDetails: (card) {
+                    return card.data.isInDeck;
                   },
-                  onAccept: (card) {
-                    removeCardFromDeck(card);
+                  onAcceptWithDetails: (card) {
+                    removeCardFromDeck(card.data);
                   },
                   builder: (context, candidateData, rejectedData) {
                     return _buildCardList(
@@ -144,7 +144,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
           color: Colors.blueGrey, // Background color for the divider
         ),
         // Set a fixed height for each section (deck or available cards)
-        Container(
+        SizedBox(
           height: 300, // Fixed height for each section (change as needed)
           child: SingleChildScrollView(
             child: Wrap(
