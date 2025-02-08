@@ -5,15 +5,15 @@
         "name": "Penguin Mage",
         "imagePath": "assets/images/PenguinMage.png",
         "type": "monster",
-        "health": 8,
-        "attack": 7,
-        "cost": 4,
+        "health": 2,
+        "attack": 2,
+        "cost": 2,
         "shortDescription": null,
         "fullDescription": "A penguin mage",
         "mascotEffects": {
-          "startingHealth": 3,
+          "startingHealth": 2,
           "startingMana": 4,
-          "regainManaPerTurn": 1
+          "regainManaPerTurn": 2
         }
       },
       {
@@ -21,14 +21,50 @@
         "name": "Fire Dog",
         "imagePath": "assets/images/FlameDog.png",
         "type": "monster",
-        "health": 10,
-        "attack": 3,
-        "cost": 3,
+        "health": 3,
+        "attack": 1,
+        "cost": 2,
         "shortDescription": null,
         "fullDescription": "A fire dog",
         "mascotEffects": {
-          "startingHealth": 3,
-          "startingMana": 4,
+          "startingHealth": 4,
+          "startingMana": 3,
+          "regainManaPerTurn": 1
+        }
+      },
+      {
+        "id": "monster_mushroom_man",
+        "name": "Mushroom Man",
+        "imagePath": "assets/images/MushroomMan.png",
+        "type": "monster",
+        "health": 2,
+        "attack": 1,
+        "cost": 2,
+        "summonEffect": {
+          "type": "swarm",
+          "value": "monster_mushroom_boy"
+        },
+        "shortDescription": null,
+        "fullDescription": "Mushroom Man swarms the board with Fun Guys",
+        "mascotEffects": {
+          "startingHealth": 2,
+          "startingMana": 3,
+          "regainManaPerTurn": 1
+        }
+      },
+      {
+        "id": "monster_mushroom_boy",
+        "name": "Fun Guy",
+        "imagePath": "assets/images/MushroomBoy.png",
+        "type": "monster",
+        "health": 1,
+        "attack": 1,
+        "cost": 1,
+        "shortDescription": null,
+        "fullDescription": "a Fun Guy",
+        "mascotEffects": {
+          "startingHealth": 1,
+          "startingMana": 1,
           "regainManaPerTurn": 1
         }
       }
@@ -64,12 +100,22 @@
         "cost": 4,
         "upgradeCardType": "heal",
         "value": null,
-        "shortDescription": "Heal a monster's to it's original health.",
-        "fullDescription": "Heal a monster's to it's original health."
+        "shortDescription": "Heal a monster to it's original health.",
+        "fullDescription": "Heal a monster to it's original health."
       }
     ],
     "actions": [
-
+      {
+        "id": "action_draw",
+        "name": "Draw",
+        "imagePath": "assets/images/Draw.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "draw",
+        "value": 1,
+        "shortDescription": "Draw 1 card from your deck.",
+        "fullDescription": "Draw 1 card from your deck."
+      }
     ]
 }
   

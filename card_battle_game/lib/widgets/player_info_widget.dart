@@ -25,7 +25,7 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<MonsterCard>(
+    return DragTarget<MonsterCard>( 
       onWillAcceptWithDetails: (details) {
         bool canAttack = details.data.canAttack();
         setState(() {
@@ -99,10 +99,26 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
                     ),
                   ],
                 ),
-                _buildStatBar('Health', widget.player.health, Colors.red,
-                    FontAwesomeIcons.heart),
-                _buildStatBar('Mana', widget.player.mana, Colors.blue,
-                    FontAwesomeIcons.gem),
+                // Row to display Health and Mana next to each other
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatBar(null, widget.player.health, Colors.red,
+                        FontAwesomeIcons.heart),
+                    _buildStatBar(null, widget.player.deck.length, Colors.green,
+                        FontAwesomeIcons.database),
+                  ],
+                ),
+                // Row to display Deck and Hand next to each other
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatBar(null, widget.player.mana, Colors.blue,
+                        FontAwesomeIcons.gem),
+                    _buildStatBar(null, widget.player.hand.length, Colors.green,
+                        FontAwesomeIcons.hand),
+                  ],
+                ),
                 Expanded(
                   child: Container(),
                 ),
@@ -114,13 +130,15 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
     );
   }
 
-  Widget _buildStatBar(String statName, int value, Color color, IconData icon) {
+  Widget _buildStatBar(String? statName, int value, Color color, IconData icon) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if(statName != null)...[
             Text(statName, style: TextStyle(fontSize: 14)),
+            ],
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [

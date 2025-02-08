@@ -26,11 +26,15 @@ class CardDatabase {
   }
 
   static Future<List<GameCard>> generateDeck(int amount) async {
-    var allCards = await loadCardsFromJson(filePath);
+    await loadCardsFromJson(filePath);
     List<GameCard> deck = [];
     for (var i = 0; i < amount; i++) {
       var card = getRandomCard().clone();
       deck.add(card);
+    }
+    if (!deck.any((card) => card.isMonster())) {
+      deck.removeAt(0);
+      deck.add(getRandomCard(type: 'monster').clone());
     }
     return deck;
   }
@@ -45,14 +49,27 @@ class CardDatabase {
     return rewards;
   }
 
-  static GameCard getRandomCard() {
+  static GameCard getRandomCard({String? type = null}) {
     var rng = Random();
-    switch (rng.nextInt(2)) {
-      case 0:
+    if (type == null) {
+      switch (rng.nextInt(3)) {
+        case 0:
+          type = 'monster';
+          break;
+        case 1:
+          type = 'upgrade';
+          break;
+        case 2:
+          type = 'action';
+          break;
+      }
+    }
+    switch (type!) {
+      case 'monster':
         return monsterCards[rng.nextInt(monsterCards.length)];
-      case 1:
+      case 'upgrade':
         return upgradeCards[rng.nextInt(upgradeCards.length)];
-      case 2:
+      case 'action':
         return actionCards[rng.nextInt(actionCards.length)];
     }
     return monsterCards[rng.nextInt(monsterCards.length)];

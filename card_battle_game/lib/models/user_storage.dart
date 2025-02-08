@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/cpu.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -138,10 +140,8 @@ class Game {
   }
 
   void setMascot(MonsterCard card) {
+    player.setMascot(card);
     mascot = card.id;
-    player.startingHealth = card.mascotEffects.startingHealth;
-    player.startingMana = card.mascotEffects.startingMana;
-    player.regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
   }
 
   void stageUp() {
@@ -150,5 +150,20 @@ class Game {
 
   void setPlayer(Player player) {
     this.player = player;
+  }
+
+  Future<CpuPlayer> initCPU() async{
+    var cpu = CpuPlayer(name: 'Enemy');
+    print('Stage: ${stage}');
+    if(stage <= 1){
+      cpu.level = CpuLevels.easy;
+      cpu.strategy = CpuStrategy.random;
+    }else{
+      cpu.level = CpuLevels.easy;
+      cpu.strategy = CpuStrategy.values[Random().nextInt(CpuStrategy.values.length)];
+    }
+    print('CPU Strategy: ${cpu.strategy}');
+    await cpu.generateDeck();
+    return cpu;
   }
 }

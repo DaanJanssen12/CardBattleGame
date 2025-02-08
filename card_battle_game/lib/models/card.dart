@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/effect.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:uuid/uuid.dart';
 
@@ -11,6 +12,7 @@ class GameCard {
   String? fullDescription;
   late bool isInDeck;
   late String cloneId;
+  late bool oneTimeUse = false;
 
   GameCard(this.name, this.imagePath, this.cost, this.shortDescription,
       this.fullDescription) {
@@ -72,6 +74,7 @@ class MonsterCard extends GameCard {
   int health;
   int attack;
   late MascotEffects mascotEffects;
+  late SummonEffect? summonEffect;
 
   //Game info
   late bool hasAttacked;
@@ -89,6 +92,7 @@ class MonsterCard extends GameCard {
     currentHealth = health;
     currentAttack = attack;
     mascotEffects = MascotEffects.fromJson(null);
+    summonEffect = null;
     //id = Uuid().v4();
   }
   void apply(UpgradeCard card) {
@@ -159,6 +163,7 @@ class MonsterCard extends GameCard {
     );
     card.id = json['id'];
     card.mascotEffects = MascotEffects.fromJson(json['mascotEffects']);
+    card.summonEffect = json['summonEffect'] == null ? null : SummonEffect.fromJson(json['summonEffect']);
     return card;
   }
 
@@ -177,6 +182,8 @@ class MonsterCard extends GameCard {
         name, imagePath, cost, shortDescription, fullDescription,
         health: health, attack: attack);
     card.id = id;
+    card.mascotEffects = mascotEffects;
+    card.summonEffect = summonEffect;
     return card;
   }
 }
@@ -222,6 +229,16 @@ class ActionCard extends GameCard {
     );
     card.id = json['id'];
     return card;
+  }
+
+  void doAction(Player player){
+    switch(actionCardType){
+      case ActionCardType.draw:
+        for(var i = 0; i < value; i++){
+          player.drawCard();
+        }
+      break;
+    }
   }
 
   @override

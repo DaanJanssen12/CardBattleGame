@@ -10,6 +10,7 @@
     },
     "cards":[
         "monster_fire_dog",
-        "upgrade_strengthen"
+        "action_draw",
+        "monster_mushroom_man"
     ]
 }

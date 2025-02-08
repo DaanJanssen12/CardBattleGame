@@ -13,7 +13,7 @@ class Player {
   late int startingHealth;
   late int startingMana;
   late int regainManaPerTurn;
-  late String mascot; 
+  late String mascot;
 
   Player({required this.name})
       : health = 3,
@@ -21,12 +21,12 @@ class Player {
         deck = [],
         hand = [],
         discardPile = [],
-        monsters = List.filled(3, null){
-          startingHealth = 3;
-          startingMana = 0;
-          regainManaPerTurn = 1;
-          mascot = '';
-        }
+        monsters = List.filled(3, null) {
+    startingHealth = 3;
+    startingMana = 0;
+    regainManaPerTurn = 1;
+    mascot = '';
+  }
 
   factory Player.fromJson(Map<String, dynamic> json) {
     var data = Player(name: 'Player');
@@ -39,59 +39,76 @@ class Player {
     data.mana = json['mana'];
     data.hand = json['hand'] == null
         ? json['hand'].map((cardJson) {
-            return GameCard.fromJson(
-                cardJson);
+            return GameCard.fromJson(cardJson);
           }).toList()
         : [];
     data.deck = json['deck'] == null
         ? json['deck'].map((cardJson) {
-            return GameCard.fromJson(
-                cardJson);
+            return GameCard.fromJson(cardJson);
           }).toList()
         : [];
     return data;
   }
 
-  Future<void> initDeck() async {
+  Future<void> generateDeck() async {
     deck = await CardDatabase.generateDeck(5);
     deck.shuffle();
   }
 
-  void endGame(){
-    for(var monster in monsters){
-      if(monster != null){
-        faintMonster(monster);
+  void endGame() {
+    for (var monster in monsters) {
+      if (monster != null) {
+        faintMonster(monster.monsterZoneIndex!);
       }
     }
     shuffleDiscardPile();
     shuffleHandIntoDeck();
   }
 
-  void startGame(){
+  void setMascot(MonsterCard card) {
+    mascot = card.id;
+    startingHealth = card.mascotEffects.startingHealth;
+    startingMana = card.mascotEffects.startingMana;
+    regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
+  }
+
+  Future<void> startGame() async {
+    if (mascot.isEmpty) {
+      var newMascot = deck.firstWhere((w) => w.isMonster());
+      mascot = newMascot.id;
+      setMascot(newMascot.toMonster());
+    }
     health = startingHealth;
     mana = startingMana;
-    if(mascot.isEmpty){
-      mascot = deck.firstWhere((w) => w.isMonster()).id;
-    }
     var mascotCard = deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
-    summonMonster(mascotCard.toMonster(), 1);
+    await summonMonster(mascotCard.toMonster(), 1);
+    deck.shuffle();
   }
 
   void startTurn() {
-    drawCard(1);
     mana += regainManaPerTurn;
 
     for (var monster in monsters.where((w) => w != null)) {
       monster!.startnewTurn();
     }
+    if (deck.isEmpty || deck.length == 0) {
+      shuffleDiscardPile();
+    }
   }
 
-  void drawCard(int amount) {
-    for (int i = 0; i < amount; i++) {
-      if (deck.isEmpty) shuffleDiscardPile();
-      if (deck.isNotEmpty) hand.add(deck.removeAt(0));
+  GameCard drawCard() {
+    if (deck.isEmpty) {
+      shuffleDiscardPile();
     }
+    var drawnCard = deck.removeAt(0);
+    hand.add(drawnCard);
+
+    if (deck.isEmpty) {
+      shuffleDiscardPile();
+    }
+
+    return drawnCard;
   }
 
   void shuffleDiscardPile() {
@@ -100,7 +117,7 @@ class Player {
     deck.shuffle();
   }
 
-  void shuffleHandIntoDeck(){
+  void shuffleHandIntoDeck() {
     deck.addAll(hand);
     hand.clear();
     deck.shuffle();
@@ -131,54 +148,30 @@ class Player {
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
     }
+    if (card.isAction()) {
+      (card as ActionCard).doAction(this);
+    }
 
     if (!card.isMonster()) {
       discardPile.add(card);
     }
   }
 
-  void summonMonster(MonsterCard monster, int monsterZoneIndex) {
+  Future<void> summonMonster(MonsterCard monster, int monsterZoneIndex) async {
     monsters[monsterZoneIndex] = monster;
     monster.summon(monsterZoneIndex);
-  }
-
-  void faintMonster(MonsterCard monster) {
-    monster.faint();
-    var i = monsters.indexOf(monster);
-    monsters[i] = null;
-    discardPile.add(monster);
-  }
-}
-
-class CPU {
-  static Future<void> executeTurn(
-      Player player, Player opponent, Function updateGameState) async {
-    // If the enemy has cards to play, play them.
-    for (var card in List.from(player.hand)) {
-      for (var i = 0; i < 3; i++) {
-        if (player.canPlayCard(card, i).$1) {
-          player.playCard(card, i);
-          updateGameState();
-          await Future.delayed(Duration(seconds: 1));
-        }
-      }
+    if (monster.summonEffect != null) {
+      print('triggering summon effect');
+      await monster.summonEffect!.apply(monster, this);
     }
+  }
 
-    for (var monster in List.from(player.monsters)) {
-      if (monster == null) continue;
-
-      if (monster.canAttack()) {
-        if (opponent.monsters.isEmpty ||
-            !opponent.monsters.any((w) => w != null)) {
-          monster.attackPlayer(opponent);
-        } else {
-          var opponentMonster = opponent.monsters.where((w) => w != null).first;
-          if (opponentMonster == null) continue;
-          monster.doAttack(opponentMonster);
-        }
-        updateGameState();
-        await Future.delayed(Duration(seconds: 1));
-      }
+  void faintMonster(int monsterZoneIndex) {
+    var monster = monsters[monsterZoneIndex];
+    monster!.faint();
+    monsters[monsterZoneIndex] = null;
+    if (!monster.oneTimeUse) {
+      discardPile.add(monster);
     }
   }
 }
