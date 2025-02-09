@@ -13,7 +13,7 @@
         "fullDescription": "A penguin mage",
         "mascotEffects": {
           "startingHealth": 4,
-          "startingMana": 3,
+          "startingMana": 1,
           "regainManaPerTurn": 3
         }
       },
@@ -30,7 +30,7 @@
         "fullDescription": "A fire dog",
         "mascotEffects": {
           "startingHealth": 6,
-          "startingMana": 2,
+          "startingMana": 1,
           "regainManaPerTurn": 2
         }
       },
@@ -51,7 +51,7 @@
         "fullDescription": "Mushroom Man swarms the board with Fun Guys",
         "mascotEffects": {
           "startingHealth": 5,
-          "startingMana": 3,
+          "startingMana": 2,
           "regainManaPerTurn": 2
         }
       },
@@ -67,9 +67,9 @@
         "shortDescription": null,
         "fullDescription": "a Fun Guy",
         "mascotEffects": {
-          "startingHealth": 4,
-          "startingMana": 2,
-          "regainManaPerTurn": 2
+          "startingHealth": 6,
+          "startingMana": 4,
+          "regainManaPerTurn": 1
         }
       },
       {
@@ -85,8 +85,8 @@
         "fullDescription": "This cute little water droplet is just happy to be there.",
         "mascotEffects": {
           "startingHealth": 4,
-          "startingMana": 2,
-          "regainManaPerTurn": 3
+          "startingMana": 7,
+          "regainManaPerTurn": 1
         }
       }
     ],

@@ -128,7 +128,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
               gameOver
                   ? currentStage >= rewardFromStage
                       ? "Select a reward to add to your collection"
-                      : "Click the button below to end the game and return to the main menu"
+                      : "Click the button below to end the game"
                   : "Before you continue you can select a reward",
               style: TextStyle(
                 fontSize: 14,
@@ -139,51 +139,54 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
             ),
           ),
 
-          // Reward Card Selection Grid
-          Center(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: rewardCards.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == rewardCards.length) {
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          skipReward = true;
-                        });
-                      },
-                      child: Card(
-                        child: Text('Skip'),
-                      ),
-                    );
-                  } else {
-                    final card = rewardCards[index];
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedReward = card;
-                        });
-                      },
-                      child: CardWidget(
-                        card: card,
-                        isSelected:
-                            _selectedReward == card, // Highlight selected card
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-
           // Reward Description Box (Below Card Selection)
           if (!gameOver || currentStage >= rewardFromStage) ...[
+            // Reward Card Selection Grid
+            Center(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: rewardCards.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == rewardCards.length) {
+                      return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              skipReward = true;
+                              _selectedReward = null;
+                            });
+                          },
+                          child: Card(
+                            child: CardWidget(
+                                card: GameCard(
+                                    'Skip', '', 0, 'Do not take a reward', ''),
+                                isSelected: skipReward),
+                          ));
+                    } else {
+                      final card = rewardCards[index];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedReward = card;
+                            skipReward = false;
+                          });
+                        },
+                        child: CardWidget(
+                          card: card,
+                          isSelected: _selectedReward ==
+                              card, // Highlight selected card
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
             Positioned(
               bottom: 120, // Adjust the position
               left: 20,
@@ -234,10 +237,10 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
             right: 0,
             child: Center(
               child: ElevatedButton(
-                onPressed: canAdvance() ? null : advanceToNextStage,
+                onPressed: canNotAdvance() ? null : advanceToNextStage,
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: canAdvance() ? Colors.grey : Colors.blue,
+                  backgroundColor: canNotAdvance() ? Colors.grey : Colors.blue,
                   padding: EdgeInsets.symmetric(horizontal: 90, vertical: 20),
                   textStyle:
                       TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -253,8 +256,8 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
     );
   }
 
-  bool canAdvance() {
-    return (_selectedReward == null &&
+  bool canNotAdvance() {
+    return (_selectedReward == null && !skipReward &&
         (!gameOver || currentStage >= rewardFromStage));
   }
 }

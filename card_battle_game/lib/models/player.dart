@@ -101,6 +101,7 @@ class Player {
     if (deck.isEmpty) {
       shuffleDiscardPile();
     }
+    
     var drawnCard = deck.removeAt(0);
     hand.add(drawnCard);
 
