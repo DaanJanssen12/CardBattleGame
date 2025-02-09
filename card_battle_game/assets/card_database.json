@@ -11,9 +11,9 @@
         "shortDescription": null,
         "fullDescription": "A penguin mage",
         "mascotEffects": {
-          "startingHealth": 2,
-          "startingMana": 4,
-          "regainManaPerTurn": 2
+          "startingHealth": 4,
+          "startingMana": 3,
+          "regainManaPerTurn": 3
         }
       },
       {
@@ -27,9 +27,9 @@
         "shortDescription": null,
         "fullDescription": "A fire dog",
         "mascotEffects": {
-          "startingHealth": 4,
-          "startingMana": 3,
-          "regainManaPerTurn": 1
+          "startingHealth": 6,
+          "startingMana": 2,
+          "regainManaPerTurn": 2
         }
       },
       {
@@ -47,9 +47,9 @@
         "shortDescription": null,
         "fullDescription": "Mushroom Man swarms the board with Fun Guys",
         "mascotEffects": {
-          "startingHealth": 2,
+          "startingHealth": 5,
           "startingMana": 3,
-          "regainManaPerTurn": 1
+          "regainManaPerTurn": 2
         }
       },
       {
@@ -63,9 +63,9 @@
         "shortDescription": null,
         "fullDescription": "a Fun Guy",
         "mascotEffects": {
-          "startingHealth": 3,
-          "startingMana": 1,
-          "regainManaPerTurn": 1
+          "startingHealth": 4,
+          "startingMana": 2,
+          "regainManaPerTurn": 2
         }
       }
     ],
@@ -77,9 +77,9 @@
         "type": "upgrade",
         "cost": 1,
         "upgradeCardType": "heal",
-        "value": 2,
-        "shortDescription": "Heal a monster by 2.",
-        "fullDescription": "Heal a monster by 2."
+        "value": 1,
+        "shortDescription": "Heal a monster by 1.",
+        "fullDescription": "Heal a monster by 1."
       },
       {
         "id": "upgrade_strengthen",
@@ -97,7 +97,7 @@
         "name": "Health Potion",
         "imagePath": "assets/images/upgrades/HealthPotion.png",
         "type": "upgrade",
-        "cost": 4,
+        "cost": 3,
         "upgradeCardType": "heal",
         "value": null,
         "shortDescription": "Heal a monster to it's original health.",

@@ -139,9 +139,10 @@ class MonsterCard extends GameCard {
     battleLog.add('$name attacked ${target.name} ($currentAttack dmg)');
   }
 
-  void attackPlayer(Player player) {
+  void attackPlayer(Player player, List<String> battleLog) {
     player.health--;
     hasAttacked = true;
+    battleLog.add('$name attacked ${player.name} directly');
   }
 
   void startnewTurn() {

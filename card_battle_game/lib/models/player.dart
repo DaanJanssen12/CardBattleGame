@@ -133,6 +133,10 @@ class Player {
       return (false, 'There already is a monster in that zone');
     }
 
+    if(card.isMonster() && card.toMonster().isActive){
+      return (false, 'This monster has already been summoned');
+    }
+
     if (card.isUpgrade() && !monsterZoneOccupied) {
       return (false, 'There is no monster in that zone');
     }

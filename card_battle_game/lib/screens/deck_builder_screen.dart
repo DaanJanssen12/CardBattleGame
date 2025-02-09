@@ -153,7 +153,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
               children: cards.map((card) {
                 return LongPressDraggable<GameCard>(
                   data: card,
-                  delay: Duration(microseconds: 250),
+                  delay: Duration(microseconds: 750),
                   feedback: Material(
                     child: SizedBox(
                       width: 100, // Fixed width for the card

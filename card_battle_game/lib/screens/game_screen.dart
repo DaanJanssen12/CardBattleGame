@@ -26,6 +26,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _isLoading = true;
   int turn = 1;
   bool addTurn = false;
+  bool gameEnded = false;
   List<String> battleLog = [];
   Player player = Player(name: 'Player');
   CpuPlayer enemy = CpuPlayer(name: 'Enemy');
@@ -150,6 +151,9 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void nextTurn() async {
+    if (gameEnded) {
+      return;
+    }
     battleLog.add('-');
     if (addTurn) {
       turn++;
@@ -253,8 +257,11 @@ class _GameScreenState extends State<GameScreen> {
 
   void handleAttackPlayerDirectly(
       Player attackedPlayer, MonsterCard attackingMonster) {
+    if (!playerTurn) {
+      return;
+    }
     setState(() {
-      attackingMonster.attackPlayer(attackedPlayer);
+      attackingMonster.attackPlayer(attackedPlayer, battleLog);
     });
 
     Future.sync(() async {
@@ -266,25 +273,31 @@ class _GameScreenState extends State<GameScreen> {
 
   void checkGameEnd() {
     if (enemy.health <= 0) {
-      player.endGame();
-      enemy.endGame();
+      setState(() {
+        gameEnded = true;
+      });
       NotificationService.showDialogMessage(context, 'You won!',
           title: "Winner", callback: () async {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
+          player.endGame();
+          enemy.endGame();
           toStageSelection();
         });
       });
     }
     if (player.health <= 0) {
-      player.endGame();
-      enemy.endGame();
+      setState(() {
+        gameEnded = true;
+      });
       NotificationService.showDialogMessage(context, 'You lost!',
           title: "Loser", callback: () async {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
+          player.endGame();
+          enemy.endGame();
           toMainMenu();
         });
       });
