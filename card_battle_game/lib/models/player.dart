@@ -58,7 +58,7 @@ class Player {
   void endGame() {
     for (var monster in monsters) {
       if (monster != null) {
-        faintMonster(monster.monsterZoneIndex!, []);
+        faintMonster(monster.monsterZoneIndex!, [], null);
       }
     }
     shuffleDiscardPile();
@@ -107,7 +107,7 @@ class Player {
     if (deck.isEmpty) {
       shuffleDiscardPile();
     }
-    
+
     battleLog.add('$name drew a card');
     return drawnCard;
   }
@@ -133,7 +133,7 @@ class Player {
       return (false, 'There already is a monster in that zone');
     }
 
-    if(card.isMonster() && card.toMonster().isActive){
+    if (card.isMonster() && card.toMonster().isActive) {
       return (false, 'This monster has already been summoned');
     }
 
@@ -144,7 +144,8 @@ class Player {
     return (true, '');
   }
 
-  Future<void> playCard(GameCard card, int monsterZoneIndex, List<String> battleLog) async{
+  Future<void> playCard(GameCard card, int monsterZoneIndex,
+      List<String> battleLog, Player opponent) async {
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
@@ -152,20 +153,32 @@ class Player {
     }
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
-      battleLog.add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
+      battleLog
+          .add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
     }
     if (card.isAction()) {
       var actionCard = (card as ActionCard);
-      await actionCard.doAction(this);
+      await actionCard.doAction(this, opponent);
       battleLog.add('${card.name} played');
     }
-
-    if (!card.isMonster() && !card.oneTimeUse) {
-      discardPile.add(card);
+    if (card.isOpponentCard) {
+      opponent.discardPile.add(card);
     }
+
+    if (card.oneTimeUse) {
+      return;
+    }
+    if (card.isOpponentCard) {
+      return;
+    }
+    if (card.isMonster()) {
+      return;
+    }
+    discardPile.add(card);
   }
 
-  Future<void> summonMonster(MonsterCard monster, int monsterZoneIndex, List<String> battleLog) async {
+  Future<void> summonMonster(
+      MonsterCard monster, int monsterZoneIndex, List<String> battleLog) async {
     monsters[monsterZoneIndex] = monster;
     monster.summon(monsterZoneIndex);
     if (monster.summonEffect != null) {
@@ -174,12 +187,16 @@ class Player {
     battleLog.add('${monster.name} summoned');
   }
 
-  void faintMonster(int monsterZoneIndex, List<String> battleLog) {
+  void faintMonster(
+      int monsterZoneIndex, List<String> battleLog, Player? opponent) {
     var monster = monsters[monsterZoneIndex];
     monster!.faint();
     monsters[monsterZoneIndex] = null;
-    if (!monster.oneTimeUse) {
+    if (!monster.oneTimeUse && !monster.isOpponentCard) {
       discardPile.add(monster);
+    }
+    if (monster.isOpponentCard && opponent != null) {
+      opponent.discardPile.add(monster);
     }
   }
 }

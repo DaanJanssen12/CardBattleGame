@@ -23,7 +23,7 @@ class CpuDatabase {
       return null;
     }
     var possibleCpuPlayers =
-        cpuPlayers.where((w) => excludeCpuIds.contains(w.id ?? '')).toList();
+        cpuPlayers.where((w) => !excludeCpuIds.contains(w.id ?? '')).toList();
     if (stage == null) {
       return possibleCpuPlayers[Random().nextInt(possibleCpuPlayers.length)];
     } else {

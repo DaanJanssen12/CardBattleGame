@@ -2,6 +2,7 @@
     "monsters": [
       {
         "id": "monster_penguin_mage",
+        "rarity": "Common",
         "name": "Penguin Mage",
         "imagePath": "assets/images/monsters/PenguinMage.png",
         "type": "monster",
@@ -18,6 +19,7 @@
       },
       {
         "id": "monster_fire_dog",
+        "rarity": "Common",
         "name": "Fire Dog",
         "imagePath": "assets/images/monsters/FlameDog.png",
         "type": "monster",
@@ -34,6 +36,7 @@
       },
       {
         "id": "monster_mushroom_man",
+        "rarity": "Rare",
         "name": "Mushroom Man",
         "imagePath": "assets/images/monsters/MushroomMan.png",
         "type": "monster",
@@ -54,6 +57,7 @@
       },
       {
         "id": "monster_mushroom_boy",
+        "rarity": "Common",
         "name": "Fun Guy",
         "imagePath": "assets/images/monsters/MushroomBoy.png",
         "type": "monster",
@@ -70,6 +74,7 @@
       },
       {
         "id": "monster_water_droplet",
+        "rarity": "Common",
         "name": "Droplet",
         "imagePath": "assets/images/monsters/WaterDroplet.png",
         "type": "monster",
@@ -88,6 +93,7 @@
     "upgrades": [
       {
         "id": "upgrade_heal",
+        "rarity": "Common",
         "name": "Heal",
         "imagePath": "assets/images/upgrades/Heal.png",
         "type": "upgrade",
@@ -99,6 +105,7 @@
       },
       {
         "id": "upgrade_strengthen",
+        "rarity": "Common",
         "name": "Strengthen",
         "imagePath": "assets/images/upgrades/Strengthen.png",
         "type": "upgrade",
@@ -110,6 +117,7 @@
       },
       {
         "id": "upgrade_health_potion",
+        "rarity": "Rare",
         "name": "Health Potion",
         "imagePath": "assets/images/upgrades/HealthPotion.png",
         "type": "upgrade",
@@ -121,6 +129,7 @@
       },
       {
         "id": "upgrade_water_gun",
+        "rarity": "Uncommon",
         "name": "Water Gun",
         "imagePath": "assets/images/upgrades/WaterGun.png",
         "type": "upgrade",
@@ -132,6 +141,7 @@
       },
       {
         "id": "upgrade_raspberry",
+        "rarity": "Uncommon",
         "name": "Raspberry",
         "imagePath": "assets/images/upgrades/Raspberry.png",
         "type": "upgrade",
@@ -143,6 +153,7 @@
       },
       {
         "id": "upgrade_blueberry",
+        "rarity": "Uncommon",
         "name": "Blueberry",
         "imagePath": "assets/images/upgrades/Blueberry.png",
         "type": "upgrade",
@@ -151,11 +162,25 @@
         "value": 1,
         "shortDescription": "Heal a monster by 1.",
         "fullDescription": "Heal a monster by 1."
+      },
+      {
+        "id": "upgrade_shield",
+        "rarity": "Uncommon",
+        "name": "Shield",
+        "imagePath": "assets/images/upgrades/Shield.png",
+        "type": "upgrade",
+        "cost": 2,
+        "upgradeCardType": "effectShield",
+        "value": 3,
+        "shortDescription": "Reduces incoming damage for 3 turns.",
+        "fullDescription": "Grants the user a shield that reduces all incoming damage by 50% for the next 3 turns."
       }
+      
     ],
     "actions": [
       {
         "id": "action_draw",
+        "rarity": "Uncommon",
         "name": "Draw",
         "imagePath": "assets/images/actions/Draw.png",
         "type": "action",
@@ -167,6 +192,7 @@
       },
       {
         "id": "action_harvest",
+        "rarity": "Uncommon",
         "name": "Harvest",
         "imagePath": "assets/images/actions/Harvest.png",
         "type": "action",
@@ -179,6 +205,7 @@
       },
       {
         "id": "action_mushroom_garden",
+        "rarity": "Uncommon",
         "name": "Mushroom Garden",
         "imagePath": "assets/images/actions/MushroomGarden.png",
         "type": "action",
@@ -188,6 +215,19 @@
         "extraData": "monster_mushroom_boy",
         "shortDescription": "Add 2 Fun Guy to your hand.",
         "fullDescription": "Add 2 Fun Guy to your hand."
+      },
+      {
+        "id": "action_robber",
+        "rarity": "Rare",
+        "name": "Robber",
+        "imagePath": "assets/images/actions/Robber.png",
+        "type": "action",
+        "cost": 3,
+        "actionCardType": "stealRandomCardFromOpponentHand",
+        "value": 1,
+        "extraData": null,
+        "shortDescription": "Steal 1 random card from your opponents hand.",
+        "fullDescription": "Steal 1 random card from your opponents hand."
       }
     ]
 }

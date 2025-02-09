@@ -149,7 +149,7 @@ class CardWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          card.shortDescription!,
+          card.fullDescription ?? card.shortDescription ?? '',
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

@@ -3,17 +3,12 @@
     "deck": {
         "cards":[
             "monster_penguin_mage",
+            "monster_water_droplet",
             "upgrade_heal",
             "upgrade_heal",
             "upgrade_strengthen"
         ]
     },
-    "cards":[
-        "monster_fire_dog",
-        "action_draw",
-        "monster_mushroom_man",
-        "action_harvest",
-        "action_mushroom_garden"
-    ],
+    "cards":[],
     "background": "forrest.jpg"
 }

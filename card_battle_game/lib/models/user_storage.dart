@@ -58,6 +58,17 @@ class UserStorage {
     data.background = background;
     await saveUserData(data);
   }
+
+  static Future<void> endGame(int stage, GameCard? reward) async {
+    var data = await getUserData();
+    if (stage > data.highscore) {
+      data.highscore = stage;
+    }
+    if (reward != null) {
+      data.cards.add(reward.id);
+    }
+    await saveUserData(data);
+  }
 }
 
 class UserData {
@@ -66,6 +77,7 @@ class UserData {
   late List<String> cards;
   late Game? activeGame;
   late String background;
+  late int highscore;
 
   UserData();
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -78,6 +90,7 @@ class UserData {
         : [];
     data.activeGame =
         json['activeGame'] != null ? Game.fromJson(json['activeGame']) : null;
+    data.highscore = json['highscore'] ?? 0;
     return data;
   }
 
@@ -93,6 +106,7 @@ class UserData {
       'cards': cards,
       'background': background,
       'deck': deck.toJson(),
+      'highscore': highscore
     };
   }
 
@@ -136,7 +150,9 @@ class Game {
   late int stage;
   late String mascot;
   late Player player;
+  late bool playerHasLost = false;
   List<String> versedCPUs = [];
+  List<GameCard> selectedRewards = [];
   Game() {
     stage = 0;
     mascot = '';
@@ -162,6 +178,10 @@ class Game {
 
   void setPlayer(Player player) {
     this.player = player;
+  }
+
+  void endGame() {
+    playerHasLost = true;
   }
 
   Future<CpuPlayer> initCPU() async {

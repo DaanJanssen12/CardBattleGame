@@ -191,13 +191,20 @@ class _GameScreenState extends State<GameScreen> {
       enemy.drawCard(battleLog);
     });
     await Future.delayed(Duration(seconds: 1));
-    await CPU.executeTurn(enemy, player, () {
-      setState(() {
-        checkForFaintedMonsters(player);
-        checkForFaintedMonsters(enemy);
-        checkGameEnd();
-      });
-    }, battleLog);
+    await CPU.executeTurn(
+        enemy,
+        player,
+        () {
+          setState(() {
+            checkForFaintedMonsters(player);
+            checkForFaintedMonsters(enemy);
+            checkGameEnd();
+          });
+        },
+        battleLog,
+        () {
+          return gameEnded;
+        });
     setState(() {});
     await Future.delayed(Duration(seconds: 1));
     nextTurn(); // Continue to the next turn
@@ -206,7 +213,7 @@ class _GameScreenState extends State<GameScreen> {
   void playCard(GameCard card, int monsterZoneIndex) async {
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
-      await player.playCard(card, monsterZoneIndex, battleLog);
+      await player.playCard(card, monsterZoneIndex, battleLog, enemy);
       setState(() {});
       soundPlayerService.playDropSound();
     } else {
@@ -249,7 +256,7 @@ class _GameScreenState extends State<GameScreen> {
     for (var monster in player.monsters.where((w) => w != null)) {
       if (monster!.currentHealth <= 0) {
         setState(() {
-          player.faintMonster(monster.monsterZoneIndex!, battleLog);
+          player.faintMonster(monster.monsterZoneIndex!, battleLog, enemy);
         });
       }
     }
@@ -298,7 +305,8 @@ class _GameScreenState extends State<GameScreen> {
         }).then((_) {
           player.endGame();
           enemy.endGame();
-          toMainMenu();
+          widget.userData.activeGame!.playerHasLost = true;
+          toStageSelection();
         });
       });
     }

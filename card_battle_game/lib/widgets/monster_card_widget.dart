@@ -56,30 +56,73 @@ class MonsterCardWidget extends StatelessWidget {
         softWrap: false,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.white
-        ),
+            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }
 
   Widget _buildImage(BoxConstraints constraints) {
-    return SizedBox(
-      height: constraints.maxHeight * 0.4,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(
-          monster?.imagePath ?? 'assets/images/placeholder.png',
-          width: 200,
-          height: 100,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.image_not_supported,
-                size: 50, color: Colors.grey);
-          },
+    return Stack(
+      alignment:
+          Alignment.bottomLeft, // Positioning the badge to the bottom-left
+      children: [
+        SizedBox(
+          height: constraints.maxHeight * 0.4,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              monster?.imagePath ?? 'assets/images/placeholder.png',
+              width: 200,
+              height: 100,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.image_not_supported,
+                  size: 50,
+                  color: Colors.grey,
+                );
+              },
+            ),
+          ),
         ),
-      ),
+        if (monster!.effects.isNotEmpty) ...[
+          for (var effect in monster!.effects) ...[
+            _buildEffectBadge(effect.type, effect.value)
+          ]
+        ] // Cost badge now overlaying slightly on the image
+      ],
+    );
+  }
+
+  Widget _buildEffectBadge(GameEffectType effectType, int value) {
+    IconData? icon;
+    switch (effectType) {
+      case GameEffectType.shield:
+        icon = FontAwesomeIcons.shield;
+        break;
+    }
+    return Positioned(
+      left: 0, // Adjusted to be closer to the bottom-left corner
+      bottom: 0, // Added a slight left offset for more overlap
+      child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.lightBlue, size: 14),
+              const SizedBox(width: 4), // Space between icon and number
+              Text('$value',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  )),
+            ],
+          )),
     );
   }
 

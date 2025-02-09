@@ -16,11 +16,14 @@ class GameCard {
   late bool isInDeck;
   late String cloneId;
   late bool oneTimeUse = false;
+  late CardRarity rarity;
+  late bool isOpponentCard = false;
 
   GameCard(this.name, this.imagePath, this.cost, this.shortDescription,
       this.fullDescription) {
     //id = Uuid().v4();
     isInDeck = false;
+    rarity = CardRarity.Common;
   }
 
   bool isMonster() => type == 'Monster';
@@ -45,6 +48,7 @@ class GameCard {
         GameCard(name, imagePath, cost, shortDescription, fullDescription);
     clone.id = id;
     cloneId = Uuid().v4();
+    clone.rarity = rarity;
     return clone;
   }
 
@@ -72,6 +76,15 @@ class GameCard {
   }
 }
 
+class GameEffect{
+
+  int value;
+  GameEffectType type;
+
+  GameEffect(this.type, this.value);
+}
+enum GameEffectType {shield}
+
 class MonsterCard extends GameCard {
   //Stats
   int health;
@@ -85,6 +98,7 @@ class MonsterCard extends GameCard {
   late int currentHealth;
   late int currentAttack;
   late int? monsterZoneIndex;
+  List<GameEffect> effects = [];
 
   MonsterCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,
@@ -110,6 +124,9 @@ class MonsterCard extends GameCard {
           currentHealth += card.value!;
         }
         break;
+      case UpgradeCardType.effectShield:
+        effects.add(GameEffect(GameEffectType.shield, card.value!));
+        break;
     }
   }
 
@@ -122,6 +139,9 @@ class MonsterCard extends GameCard {
   }
 
   void takeDamage(int damage) {
+    if(effects.isNotEmpty && effects.any((a) => a.type == GameEffectType.shield)){
+      damage = (damage/2).ceil();
+    }
     currentHealth -= damage;
     if (currentHealth < 0) {
       currentHealth = 0;
@@ -147,6 +167,13 @@ class MonsterCard extends GameCard {
 
   void startnewTurn() {
     hasAttacked = false;
+    for (var effect in effects) {
+      effect.value--;
+    }
+
+    effects = effects.any((a) => a.value > 0)
+      ? effects.where((w) => w.value > 0).toList()
+      : [];
   }
 
   void faint() {
@@ -169,7 +196,11 @@ class MonsterCard extends GameCard {
     );
     card.id = json['id'];
     card.mascotEffects = MascotEffects.fromJson(json['mascotEffects']);
-    card.summonEffect = json['summonEffect'] == null ? null : SummonEffect.fromJson(json['summonEffect']);
+    card.summonEffect = json['summonEffect'] == null
+        ? null
+        : SummonEffect.fromJson(json['summonEffect']);
+    card.rarity = CardRarityExtension.fromString(json['rarity']);
+
     return card;
   }
 
@@ -190,6 +221,7 @@ class MonsterCard extends GameCard {
     card.id = id;
     card.mascotEffects = mascotEffects;
     card.summonEffect = summonEffect;
+    card.rarity = rarity;
     return card;
   }
 }
@@ -235,28 +267,36 @@ class ActionCard extends GameCard {
     );
     card.id = json['id'];
     card.extraData = json['extraData'];
+    card.rarity = CardRarityExtension.fromString(json['rarity']);
     return card;
   }
 
-  Future<void> doAction(Player player) async{
-    switch(actionCardType){
+  Future<void> doAction(Player player, Player opponent) async {
+    switch (actionCardType) {
       case ActionCardType.draw:
-        for(var i = 0; i < value; i++){
+        for (var i = 0; i < value; i++) {
           player.drawCard([]);
         }
-      break;
+        break;
       case ActionCardType.drawNotFromDeck:
-      print(extraData);
-      var cardIds = extraData!.split(";");
-      print(cardIds);
-      var cards = await CardDatabase.getCards(cardIds);
-      print(cards.length);
-      for(int i = 0; i < value; i++){
-        var cardToAdd = cards[Random().nextInt(cards.length)].clone();
-        cardToAdd.oneTimeUse = true;
-        player.hand.add(cardToAdd);
-      }
-      break;
+        var cardIds = extraData!.split(";");
+        var cards = await CardDatabase.getCards(cardIds);
+        for (int i = 0; i < value; i++) {
+          var cardToAdd = cards[Random().nextInt(cards.length)].clone();
+          cardToAdd.oneTimeUse = true;
+          player.hand.add(cardToAdd);
+        }
+        break;
+      case ActionCardType.stealRandomCardFromOpponentHand:
+        if (opponent.hand.isEmpty) {
+          return;
+        }
+        var opponentCard =
+            opponent.hand[Random().nextInt(opponent.hand.length)];
+        opponent.hand.remove(opponentCard);
+        opponentCard.isOpponentCard;
+        player.hand.add(opponentCard);
+        break;
     }
   }
 
@@ -276,6 +316,7 @@ class ActionCard extends GameCard {
         actionCardType: actionCardType, value: value);
     card.id = id;
     card.extraData = extraData;
+    card.rarity = rarity;
     return card;
   }
 }
@@ -303,6 +344,8 @@ class UpgradeCard extends GameCard {
       value: json['value'],
     );
     card.id = json['id'];
+    card.rarity = CardRarityExtension.fromString(json['rarity']);
+
     return card;
   }
 
@@ -321,11 +364,12 @@ class UpgradeCard extends GameCard {
         name, imagePath, cost, shortDescription, fullDescription,
         upgradeCardType: upgradeCardType, value: value);
     card.id = id;
+    card.rarity = rarity;
     return card;
   }
 }
 
-enum UpgradeCardType { boostAtk, heal }
+enum UpgradeCardType { boostAtk, heal, effectShield }
 
 extension UpgradeCardTypeExtension on UpgradeCardType {
   // Convert a string to an enum value
@@ -337,7 +381,7 @@ extension UpgradeCardTypeExtension on UpgradeCardType {
   }
 }
 
-enum ActionCardType { draw, drawNotFromDeck }
+enum ActionCardType { draw, drawNotFromDeck, stealRandomCardFromOpponentHand }
 
 extension ActionCardTypeExtension on ActionCardType {
   // Convert a string to an enum value
@@ -346,5 +390,30 @@ extension ActionCardTypeExtension on ActionCardType {
       (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
       orElse: () => ActionCardType.draw, // Default value
     );
+  }
+}
+
+enum CardRarity { Common, Uncommon, Rare, UltraRare, Legendary }
+
+extension CardRarityExtension on CardRarity {
+  // Convert a string to an enum value
+  static CardRarity fromString(String str) {
+    return CardRarity.values.firstWhere(
+      (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
+      orElse: () => CardRarity.Common, // Default value
+    );
+  }
+
+  CardRarity? getPrevious() {
+    // Get the index of the current value
+    int index = this.index;
+
+    // If it's the first value (common), return null (no previous)
+    if (index == 0) {
+      return null;
+    }
+
+    // Otherwise, return the previous value
+    return CardRarity.values[index - 1];
   }
 }

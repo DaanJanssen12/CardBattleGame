@@ -16,6 +16,38 @@
         "mascot": "monster_mushroom_boy"
     },
     {
+        "id": "cpu_lily",
+        "name": "Lily",
+        "possibleFromStage": 1,
+        "possibleUntillStage": 2,
+        "cpuLevel": "easy",
+        "cpuStrategy": "random",
+        "deck": [
+            "monster_mushroom_boy",
+            "monster_water_droplet",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_raspberry"
+        ],
+        "mascot": "monster_mushroom_boy"
+    },
+    {
+        "id": "cpu_rick",
+        "name": "Rick",
+        "possibleFromStage": 2,
+        "possibleUntillStage": 3,
+        "cpuLevel": "easy",
+        "cpuStrategy": "offensive",
+        "deck": [
+            "monster_mushroom_boy",
+            "monster_mushroom_boy",
+            "monster_mushroom_boy",
+            "upgrade_strawberry",
+            "upgrade_strawberry"
+        ],
+        "mascot": "monster_mushroom_boy"
+    },
+    {
         "id": "cpu_bubbles",
         "name": "Bubbles",
         "possibleFromStage": 1,
@@ -25,6 +57,7 @@
         "deck": [
             "monster_water_droplet",
             "monster_water_droplet",
+            "upgrade_heal",
             "upgrade_heal",
             "upgrade_heal",
             "upgrade_water_gun"
@@ -66,8 +99,8 @@
     {
         "id": "cpu_sunny",
         "name": "Sunny",
-        "possibleFromStage": 4,
-        "possibleUntillStage": 6,
+        "possibleFromStage": 5,
+        "possibleUntillStage": 9,
         "cpuLevel": "medium",
         "cpuStrategy": "defensive",
         "deck": [
@@ -75,7 +108,9 @@
             "monster_mushroom_boy",
             "upgrade_heal",
             "upgrade_health_potion",
-            "action_mushroom_garden"
+            "action_mushroom_garden",
+            "action_draw",
+            "upgrade_heal"
         ],
         "mascot": "monster_mushroom_man"
     },
@@ -83,7 +118,7 @@
         "id": "cpu_zippy",
         "name": "Zippy",
         "possibleFromStage": 5,
-        "possibleUntillStage": 7,
+        "possibleUntillStage": 9,
         "cpuLevel": "medium",
         "cpuStrategy": "random",
         "deck": [
@@ -91,7 +126,9 @@
             "monster_penguin_mage",
             "upgrade_raspberry",
             "upgrade_blueberry",
-            "action_harvest"
+            "action_harvest",
+            "upgrade_heal",
+            "action_draw"
         ],
         "mascot": "monster_fire_dog"
     }

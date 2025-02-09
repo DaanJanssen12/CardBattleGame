@@ -43,13 +43,51 @@ class CardDatabase {
     await loadCardsFromJson(filePath);
     List<GameCard> rewards = [];
     for (var i = 0; i < amount; i++) {
-      var card = getRandomCard().clone();
+      var card = getRandomCard(rarity: getRandomRarity(stage)).clone();
       rewards.add(card);
     }
     return rewards;
   }
 
-  static GameCard getRandomCard({String? type}) {
+  static CardRarity getRandomRarity(int? stage) {
+    stage ??= 1;
+    switch (stage) {
+      case < 5:
+        return generateRarity(95, 4, 1, 0, 0);
+      case < 10:
+        return generateRarity(65, 30, 8, 2, 1);
+      case < 15:
+        return generateRarity(40, 30, 10, 5, 2);
+      case < 20:
+        return generateRarity(30, 30, 15, 10, 3);
+      case >= 20:
+        return generateRarity(25, 25, 15, 10, 5);
+    }
+
+    return CardRarity.Common;
+  }
+
+  static CardRarity generateRarity(
+      int common, int uncommon, int rare, int ultraRare, int legendary) {
+    var totalPercentagePool = common + uncommon + rare + ultraRare + legendary;
+    var randomGeneratedNumber = Random().nextInt(totalPercentagePool) + 1;
+    if (randomGeneratedNumber <= legendary) {
+      return CardRarity.Legendary;
+    }
+    if (randomGeneratedNumber <= (legendary + ultraRare)) {
+      return CardRarity.UltraRare;
+    }
+    if (randomGeneratedNumber <= (legendary + ultraRare + rare)) {
+      return CardRarity.Rare;
+    }
+    if (randomGeneratedNumber <= (legendary + ultraRare + rare + uncommon)) {
+      return CardRarity.Uncommon;
+    }
+
+    return CardRarity.Common;
+  }
+
+  static GameCard getRandomCard({String? type, CardRarity? rarity}) {
     var rng = Random();
     if (type == null) {
       switch (rng.nextInt(3)) {
@@ -64,15 +102,60 @@ class CardDatabase {
           break;
       }
     }
+    var monsterCardPool = monsterCards;
+    var upgradeCardPool = upgradeCards;
+    var actionCardPool = actionCards;
+    if (rarity != null) {
+      var pool = getCardsWithRarity(monsterCardPool, rarity);
+      if (pool != null && pool.isNotEmpty) {
+        monsterCardPool = pool.map((m) => m.toMonster()).toList();
+      } else {
+        monsterCardPool = monsterCards;
+      }
+
+      pool = getCardsWithRarity(upgradeCardPool, rarity);
+      if (pool != null && pool.isNotEmpty) {
+        upgradeCardPool = pool.map((m) => m as UpgradeCard).toList();
+      } else {
+        upgradeCardPool = upgradeCards;
+      }
+
+      pool = getCardsWithRarity(actionCardPool, rarity);
+      if (pool != null && pool.isNotEmpty) {
+        actionCardPool = pool.map((m) => m as ActionCard).toList();
+      } else {
+        actionCardPool = actionCards;
+      }
+    }
     switch (type!) {
       case 'monster':
-        return monsterCards[rng.nextInt(monsterCards.length)];
+        return monsterCardPool[rng.nextInt(monsterCardPool.length)];
       case 'upgrade':
-        return upgradeCards[rng.nextInt(upgradeCards.length)];
+        return upgradeCardPool[rng.nextInt(upgradeCardPool.length)];
       case 'action':
-        return actionCards[rng.nextInt(actionCards.length)];
+        return actionCardPool[rng.nextInt(actionCardPool.length)];
     }
-    return monsterCards[rng.nextInt(monsterCards.length)];
+    return monsterCardPool[rng.nextInt(monsterCardPool.length)];
+  }
+
+  static List<GameCard>? getCardsWithRarity(
+      List<GameCard> list, CardRarity rarity) {
+    var iterable = list.where((w) => w.rarity == rarity);
+    if (iterable.isEmpty) {
+      return null;
+    }
+    var pool = iterable.toList();
+    var previousRarity = rarity.getPrevious();
+    var whileCounter = 0;
+    while (pool.isEmpty) {
+      if (previousRarity == null || whileCounter > 10) {
+        break;
+      }
+      pool = list.where((w) => w.rarity == previousRarity).toList();
+      previousRarity = previousRarity.getPrevious();
+      whileCounter++;
+    }
+    return pool;
   }
 
   static Future<void> loadCardsFromJson(String filePath) async {
