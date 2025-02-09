@@ -162,7 +162,7 @@ class Game {
 
   Future<CpuPlayer> initCPU() async{
     var cpu = CpuPlayer(name: 'Enemy');
-    print('Stage: ${stage}');
+    print('Stage: $stage');
     if(stage <= 1){
       cpu.level = CpuLevels.easy;
       cpu.strategy = CpuStrategy.random;

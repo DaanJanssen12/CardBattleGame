@@ -113,6 +113,28 @@
         "value": 3,
         "shortDescription": "Boost a monster's attack by 3.",
         "fullDescription": "Boost a monster's attack by 3."
+      },
+      {
+        "id": "upgrade_raspberry",
+        "name": "Raspberry",
+        "imagePath": "assets/images/upgrades/Raspberry.png",
+        "type": "upgrade",
+        "cost": 0,
+        "upgradeCardType": "boostAtk",
+        "value": 1,
+        "shortDescription": "Boost a monster's attack by 1.",
+        "fullDescription": "Boost a monster's attack by 1."
+      },
+      {
+        "id": "upgrade_blueberry",
+        "name": "Blueberry",
+        "imagePath": "assets/images/upgrades/Blueberry.png",
+        "type": "upgrade",
+        "cost": 0,
+        "upgradeCardType": "heal",
+        "value": 1,
+        "shortDescription": "Heal a monster by 1.",
+        "fullDescription": "Heal a monster by 1."
       }
     ],
     "actions": [
@@ -126,6 +148,18 @@
         "value": 1,
         "shortDescription": "Draw 1 card from your deck.",
         "fullDescription": "Draw 1 card from your deck."
+      },
+      {
+        "id": "action_harvest",
+        "name": "Harvest",
+        "imagePath": "assets/images/actions/Harvest.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "drawNotFromDeck",
+        "value": 1,
+        "extraData": "upgrade_raspberry;upgrade_blueberry",
+        "shortDescription": "Gain 1 random berry card.",
+        "fullDescription": "Gain 1 random berry card."
       }
     ]
 }

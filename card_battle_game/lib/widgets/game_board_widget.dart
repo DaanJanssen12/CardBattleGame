@@ -6,6 +6,7 @@ import '../models/card.dart';
 class GameBoardWidget extends StatefulWidget {
   final Player player;
   final Player enemy;
+  final bool isPlayersTurn;
   final Function(GameCard, int) onCardDrop;
   final Function(GameCard) onCardTap;
   final Function(MonsterCard, Player, int) onMonsterAttack;
@@ -14,6 +15,7 @@ class GameBoardWidget extends StatefulWidget {
     super.key,
     required this.player,
     required this.enemy,
+    required this.isPlayersTurn,
     required this.onCardDrop,
     required this.onCardTap,
     required this.onMonsterAttack,
@@ -61,7 +63,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
                           height: MediaQuery.of(context).size.height * 0.20,
                           child: DragTarget<MonsterCard>(
                             onWillAcceptWithDetails: (details) {
-                              return widget.enemy.monsters[index] != null &&
+                              return widget.isPlayersTurn && widget.enemy.monsters[index] != null &&
                                   draggingMonster != null &&
                                   draggingMonster!.canAttack();
                             },
@@ -93,7 +95,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
                       child: SizedBox(
                           height: MediaQuery.of(context).size.height * 0.20,
                           child: DragTarget<GameCard>(
-                            onWillAcceptWithDetails: (details) => details.data
+                            onWillAcceptWithDetails: (details) => widget.isPlayersTurn && details.data
                                 .canBePlayed(), // Accept any draggable card
                             onAcceptWithDetails: (details) {
                               // Place card in player's monster zone if it's a monster card

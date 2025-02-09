@@ -5,7 +5,7 @@ class NotificationService {
   static Future<void> showDialogMessage(BuildContext context, String message, {String title = 'Notification', Function? callback}) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: true, // Allow dismiss on tap outside
+      barrierDismissible: false, // Allow dismiss on tap outside
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),

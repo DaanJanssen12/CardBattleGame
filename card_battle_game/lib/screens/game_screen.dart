@@ -65,7 +65,7 @@ class _GameScreenState extends State<GameScreen> {
         return AlertDialog(
           title:
               Text("Battle Log", style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Container(
+          content: SizedBox(
             width: double.maxFinite,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -199,12 +199,11 @@ class _GameScreenState extends State<GameScreen> {
     nextTurn(); // Continue to the next turn
   }
 
-  void playCard(GameCard card, int monsterZoneIndex) {
+  void playCard(GameCard card, int monsterZoneIndex) async {
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
-      setState(() {
-        player.playCard(card, monsterZoneIndex, battleLog);
-      });
+      await player.playCard(card, monsterZoneIndex, battleLog);
+      setState(() {});
       soundPlayerService.playDropSound();
     } else {
       NotificationService.showDialogMessage(context, canPlayCard.$2,
@@ -395,6 +394,7 @@ class _GameScreenState extends State<GameScreen> {
                           GameBoardWidget(
                               player: player,
                               enemy: enemy,
+                              isPlayersTurn: playerTurn,
                               onCardDrop: playCard,
                               onCardTap: showCardDetails,
                               onMonsterAttack: attackMonster),

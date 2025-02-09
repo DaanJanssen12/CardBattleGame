@@ -1,7 +1,6 @@
 import 'package:card_battle_game/models/user_storage.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class UserProfileScreen extends StatefulWidget {

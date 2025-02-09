@@ -38,7 +38,7 @@ class CPU {
       for (var card in List.from(cpu.hand)) {
         for (var i = 0; i < 3; i++) {
           if (cpu.canPlayCard(card, i).$1) {
-            cpu.playCard(card, i, battleLog);
+            await cpu.playCard(card, i, battleLog);
             updateGameState();
             await Future.delayed(Duration(seconds: 1));
           }
@@ -68,7 +68,7 @@ class CPU {
         for (var i = 0; i < 3; i++) {
           //If monster can be played > play it
           if (cpu.canPlayCard(monsterCard, i).$1) {
-            cpu.playCard(monsterCard, i, battleLog);
+            await cpu.playCard(monsterCard, i, battleLog);
             updateGameState();
             await Future.delayed(Duration(seconds: 1));
           }
@@ -90,7 +90,7 @@ class CPU {
       for (var i = 0; i < 3; i++) {
         //If card can be played > play it
         if (cpu.canPlayCard(gameCard, i).$1) {
-          cpu.playCard(gameCard, i, battleLog);
+          await cpu.playCard(gameCard, i, battleLog);
           updateGameState();
           await Future.delayed(Duration(seconds: 1));
         }
@@ -112,6 +112,8 @@ class CPU {
         switch ((gameCard as ActionCard).actionCardType) {
           case ActionCardType.draw:
             return 10;
+          case ActionCardType.drawNotFromDeck:
+            return 20;
         }
       }
     }
@@ -128,6 +130,8 @@ class CPU {
         switch ((gameCard as ActionCard).actionCardType) {
           case ActionCardType.draw:
             return 10;
+          case ActionCardType.drawNotFromDeck:
+            return 20;
         }
       }
     }

@@ -27,8 +27,9 @@ class PlayerHandWidget extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: GestureDetector(
               onTap: () => onCardTap(card),
-              child: Draggable<GameCard>(
+              child: LongPressDraggable<GameCard>(
                 data: card,
+                delay: Duration(milliseconds: 100),
                 feedback: Material(
                   color: Colors.transparent,
                   child: Container(

@@ -49,7 +49,7 @@ class CardDatabase {
     return rewards;
   }
 
-  static GameCard getRandomCard({String? type = null}) {
+  static GameCard getRandomCard({String? type}) {
     var rng = Random();
     if (type == null) {
       switch (rng.nextInt(3)) {

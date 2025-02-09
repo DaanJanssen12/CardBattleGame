@@ -151,8 +151,9 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
               spacing: 10, // Horizontal space between cards
               runSpacing: 10, // Vertical space between rows
               children: cards.map((card) {
-                return Draggable<GameCard>(
+                return LongPressDraggable<GameCard>(
                   data: card,
+                  delay: Duration(microseconds: 250),
                   feedback: Material(
                     child: SizedBox(
                       width: 100, // Fixed width for the card

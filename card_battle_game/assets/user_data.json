@@ -11,7 +11,8 @@
     "cards":[
         "monster_fire_dog",
         "action_draw",
-        "monster_mushroom_man"
+        "monster_mushroom_man",
+        "action_harvest"
     ],
     "background": "background1.jpg"
 }

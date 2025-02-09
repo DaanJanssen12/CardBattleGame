@@ -92,7 +92,7 @@ class Player {
     for (var monster in monsters.where((w) => w != null)) {
       monster!.startnewTurn();
     }
-    if (deck.isEmpty || deck.length == 0) {
+    if (deck.isEmpty || deck.isEmpty) {
       shuffleDiscardPile();
     }
   }
@@ -140,7 +140,7 @@ class Player {
     return (true, '');
   }
 
-  void playCard(GameCard card, int monsterZoneIndex, List<String> battleLog) {
+  Future<void> playCard(GameCard card, int monsterZoneIndex, List<String> battleLog) async{
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
@@ -151,11 +151,12 @@ class Player {
       battleLog.add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
     }
     if (card.isAction()) {
-      (card as ActionCard).doAction(this);
+      var actionCard = (card as ActionCard);
+      await actionCard.doAction(this);
       battleLog.add('${card.name} played');
     }
 
-    if (!card.isMonster()) {
+    if (!card.isMonster() && !card.oneTimeUse) {
       discardPile.add(card);
     }
   }

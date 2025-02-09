@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:card_battle_game/models/card_database.dart';
 import 'package:card_battle_game/models/effect.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:uuid/uuid.dart';
@@ -210,12 +213,12 @@ class MascotEffects {
 class ActionCard extends GameCard {
   ActionCardType actionCardType;
   int value;
+  String? extraData;
 
   ActionCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,
       {this.actionCardType = ActionCardType.draw, this.value = 1}) {
     type = 'Action';
-    //id = Uuid().v4();
   }
 
   factory ActionCard.fromJson(Map<String, dynamic> json) {
@@ -230,15 +233,28 @@ class ActionCard extends GameCard {
       value: json['value'],
     );
     card.id = json['id'];
+    card.extraData = json['extraData'];
     return card;
   }
 
-  void doAction(Player player){
+  Future<void> doAction(Player player) async{
     switch(actionCardType){
       case ActionCardType.draw:
         for(var i = 0; i < value; i++){
           player.drawCard([]);
         }
+      break;
+      case ActionCardType.drawNotFromDeck:
+      print(extraData);
+      var cardIds = extraData!.split(";");
+      print(cardIds);
+      var cards = await CardDatabase.getCards(cardIds);
+      print(cards.length);
+      for(int i = 0; i < value; i++){
+        var cardToAdd = cards[Random().nextInt(cards.length)].clone();
+        cardToAdd.oneTimeUse = true;
+        player.hand.add(cardToAdd);
+      }
       break;
     }
   }
@@ -258,6 +274,7 @@ class ActionCard extends GameCard {
         name, imagePath, cost, shortDescription, fullDescription,
         actionCardType: actionCardType, value: value);
     card.id = id;
+    card.extraData = extraData;
     return card;
   }
 }
@@ -313,19 +330,19 @@ extension UpgradeCardTypeExtension on UpgradeCardType {
   // Convert a string to an enum value
   static UpgradeCardType fromString(String str) {
     return UpgradeCardType.values.firstWhere(
-      (e) => e.toString().split('.').last == str.toLowerCase(),
+      (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
       orElse: () => UpgradeCardType.boostAtk, // Default value
     );
   }
 }
 
-enum ActionCardType { draw }
+enum ActionCardType { draw, drawNotFromDeck }
 
 extension ActionCardTypeExtension on ActionCardType {
   // Convert a string to an enum value
   static ActionCardType fromString(String str) {
     return ActionCardType.values.firstWhere(
-      (e) => e.toString().split('.').last == str.toLowerCase(),
+      (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
       orElse: () => ActionCardType.draw, // Default value
     );
   }
