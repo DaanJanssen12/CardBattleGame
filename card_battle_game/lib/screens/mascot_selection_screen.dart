@@ -74,7 +74,7 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
           // Card Selection Grid
           Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.fromLTRB(20, 80, 20, 0),
               child: GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,

@@ -1,0 +1,98 @@
+[
+    {
+        "id": "cpu_bill",
+        "name": "Bill",
+        "possibleFromStage": 1,
+        "possibleUntillStage": 2,
+        "cpuLevel": "easy",
+        "cpuStrategy": "random",
+        "deck": [
+            "monster_mushroom_boy",
+            "monster_mushroom_boy",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_raspberry"
+        ],
+        "mascot": "monster_mushroom_boy"
+    },
+    {
+        "id": "cpu_bubbles",
+        "name": "Bubbles",
+        "possibleFromStage": 1,
+        "possibleUntillStage": 3,
+        "cpuLevel": "easy",
+        "cpuStrategy": "defensive",
+        "deck": [
+            "monster_water_droplet",
+            "monster_water_droplet",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_water_gun"
+        ],
+        "mascot": "monster_water_droplet"
+    },
+    {
+        "id": "cpu_poppy",
+        "name": "Poppy",
+        "possibleFromStage": 2,
+        "possibleUntillStage": 4,
+        "cpuLevel": "easy",
+        "cpuStrategy": "random",
+        "deck": [
+            "monster_mushroom_boy",
+            "monster_fire_dog",
+            "upgrade_raspberry",
+            "upgrade_blueberry",
+            "action_harvest"
+        ],
+        "mascot": "monster_mushroom_boy"
+    },
+    {
+        "id": "cpu_frostbite",
+        "name": "Frostbite",
+        "possibleFromStage": 3,
+        "possibleUntillStage": 5,
+        "cpuLevel": "medium",
+        "cpuStrategy": "offensive",
+        "deck": [
+            "monster_penguin_mage",
+            "monster_water_droplet",
+            "upgrade_raspberry",
+            "upgrade_water_gun",
+            "action_draw"
+        ],
+        "mascot": "monster_penguin_mage"
+    },
+    {
+        "id": "cpu_sunny",
+        "name": "Sunny",
+        "possibleFromStage": 4,
+        "possibleUntillStage": 6,
+        "cpuLevel": "medium",
+        "cpuStrategy": "defensive",
+        "deck": [
+            "monster_mushroom_man",
+            "monster_mushroom_boy",
+            "upgrade_heal",
+            "upgrade_health_potion",
+            "action_mushroom_garden"
+        ],
+        "mascot": "monster_mushroom_man"
+    },
+    {
+        "id": "cpu_zippy",
+        "name": "Zippy",
+        "possibleFromStage": 5,
+        "possibleUntillStage": 7,
+        "cpuLevel": "medium",
+        "cpuStrategy": "random",
+        "deck": [
+            "monster_fire_dog",
+            "monster_penguin_mage",
+            "upgrade_raspberry",
+            "upgrade_blueberry",
+            "action_harvest"
+        ],
+        "mascot": "monster_fire_dog"
+    }
+]

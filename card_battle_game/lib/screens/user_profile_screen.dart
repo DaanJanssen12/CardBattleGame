@@ -83,9 +83,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   value: _selectedBackground,
                   onChanged: selectBackground,
                   items: <String>[
-                    'background1.jpg',
-                    'background2.jpg',
-                    'background3.jpg'
+                    'forrest.jpg',
+                    'plains.jpg',
+                    'oasis.jpg'
                   ] // Predefined backgrounds
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(

@@ -63,7 +63,7 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
         children: [
           // Background image
           Image.asset(
-            'assets/images/${widget.userData == null ? "background1.jpg" : widget.userData!.background}',
+            'assets/images/${_userData == null ? "forrest.jpg" : _userData!.background}',
             fit: BoxFit.cover,
           ),
 

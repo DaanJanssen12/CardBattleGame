@@ -1,12 +1,16 @@
 import 'dart:math';
-
 import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/card_database.dart';
 import 'package:card_battle_game/models/player.dart';
 
 class CpuPlayer extends Player {
   late bool isCPU;
   late CpuLevels level;
   late CpuStrategy strategy;
+  late List<String> deckCardIds;
+  late int possibleFromStage;
+  late int possibleUntillStage;
+  late String? id;
 
   CpuPlayer({required super.name}) {
     isCPU = true;
@@ -18,11 +22,47 @@ class CpuPlayer extends Player {
       Player opponent, Function updateGameState, List<String> battleLog) async {
     await CPU.executeTurn(this, opponent, updateGameState, battleLog);
   }
+
+  Future<void> init() async{
+    deck = await CardDatabase.getCards(deckCardIds);
+    var mascotCard = deck.firstWhere((w) => w.id == mascot);
+    setMascot(mascotCard.toMonster());
+  }
+
+  factory CpuPlayer.fromJson(Map<String, dynamic> json){
+    var cpu = CpuPlayer(name: json['name']);
+    cpu.level = CpuLevelsExtension.fromString(json['cpuLevel']);
+    cpu.strategy = CpuStrategyExtension.fromString(json['cpuStrategy']);
+    cpu.mascot = json['mascot'];
+    cpu.deckCardIds = (json['deck'] as List<dynamic>).map((m) => m.toString()).toList();
+    cpu.possibleFromStage = json['possibleFromStage'];
+    cpu.possibleUntillStage = json['possibleUntillStage'];
+    cpu.id = json['id'];
+    return cpu;
+  }
 }
 
 enum CpuLevels { easy, medium, hard, expert }
+extension CpuLevelsExtension on CpuLevels {
+  // Convert a string to an enum value
+  static CpuLevels fromString(String str) {
+    return CpuLevels.values.firstWhere(
+      (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
+      orElse: () => CpuLevels.easy, // Default value
+    );
+  }
+}
 
 enum CpuStrategy { random, defensive, offensive }
+extension CpuStrategyExtension on CpuStrategy {
+  // Convert a string to an enum value
+  static CpuStrategy fromString(String str) {
+    return CpuStrategy.values.firstWhere(
+      (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
+      orElse: () => CpuStrategy.random, // Default value
+    );
+  }
+}
 
 class CPU {
   static Future<void> executeTurn(CpuPlayer cpu, Player opponent,

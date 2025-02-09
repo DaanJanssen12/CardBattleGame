@@ -67,6 +67,22 @@
           "startingMana": 2,
           "regainManaPerTurn": 2
         }
+      },
+      {
+        "id": "monster_water_droplet",
+        "name": "Droplet",
+        "imagePath": "assets/images/monsters/WaterDroplet.png",
+        "type": "monster",
+        "health": 1,
+        "attack": 1,
+        "cost": 1,
+        "shortDescription": null,
+        "fullDescription": "This cute little water droplet is just happy to be there.",
+        "mascotEffects": {
+          "startingHealth": 4,
+          "startingMana": 2,
+          "regainManaPerTurn": 3
+        }
       }
     ],
     "upgrades": [
@@ -86,9 +102,9 @@
         "name": "Strengthen",
         "imagePath": "assets/images/upgrades/Strengthen.png",
         "type": "upgrade",
-        "cost": 2,
+        "cost": 1,
         "upgradeCardType": "boostAtk",
-        "value": 2,
+        "value": 1,
         "shortDescription": "Boost a monster's attack by 1.",
         "fullDescription": "Boost a monster's attack by 1."
       },
@@ -160,6 +176,18 @@
         "extraData": "upgrade_raspberry;upgrade_blueberry",
         "shortDescription": "Gain 1 random berry card.",
         "fullDescription": "Gain 1 random berry card."
+      },
+      {
+        "id": "action_mushroom_garden",
+        "name": "Mushroom Garden",
+        "imagePath": "assets/images/actions/MushroomGarden.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "drawNotFromDeck",
+        "value": 2,
+        "extraData": "monster_mushroom_boy",
+        "shortDescription": "Add 2 Fun Guy to your hand.",
+        "fullDescription": "Add 2 Fun Guy to your hand."
       }
     ]
 }

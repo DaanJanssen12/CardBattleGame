@@ -5,9 +5,11 @@ import 'dart:math';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
 import 'package:card_battle_game/models/cpu.dart';
+import 'package:card_battle_game/models/cpu_database.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class UserStorage {
   static String fileName = 'user_data.json';
@@ -51,7 +53,7 @@ class UserStorage {
     await saveUserData(data);
   }
 
-  static Future<void> setBackground(String background) async{
+  static Future<void> setBackground(String background) async {
     var data = await getUserData();
     data.background = background;
     await saveUserData(data);
@@ -69,7 +71,7 @@ class UserData {
   factory UserData.fromJson(Map<String, dynamic> json) {
     var data = UserData();
     data.name = json['name'];
-    data.background = json['background'] ?? "background1.jpg";
+    data.background = json['background'] ?? "forrest.jpg";
     data.deck = Deck.fromJson(json['deck']);
     data.cards = json['cards'] != null
         ? (json['cards'] as List<dynamic>).map((m) => m.toString()).toList()
@@ -79,7 +81,7 @@ class UserData {
     return data;
   }
 
-  Future<void> newGame() async{
+  Future<void> newGame() async {
     activeGame = Game();
     var player = await asPlayer();
     activeGame!.setPlayer(player);
@@ -89,6 +91,7 @@ class UserData {
     return {
       'name': name,
       'cards': cards,
+      'background': background,
       'deck': deck.toJson(),
     };
   }
@@ -133,6 +136,7 @@ class Game {
   late int stage;
   late String mascot;
   late Player player;
+  List<String> versedCPUs = [];
   Game() {
     stage = 0;
     mascot = '';
@@ -160,17 +164,26 @@ class Game {
     this.player = player;
   }
 
-  Future<CpuPlayer> initCPU() async{
+  Future<CpuPlayer> initCPU() async {
+    var cpuPlayer = await CpuDatabase.getRandomCpuPlayer(stage, versedCPUs);
+    if (cpuPlayer == null) {
+      return await generateNewCPU();
+    }
+    await cpuPlayer.init();
+    versedCPUs.add(cpuPlayer.id ?? Uuid().v4());
+    return cpuPlayer;
+  }
+
+  Future<CpuPlayer> generateNewCPU() async {
     var cpu = CpuPlayer(name: 'Enemy');
-    print('Stage: $stage');
-    if(stage <= 1){
+    if (stage <= 1) {
       cpu.level = CpuLevels.easy;
       cpu.strategy = CpuStrategy.random;
-    }else{
+    } else {
       cpu.level = CpuLevels.easy;
-      cpu.strategy = CpuStrategy.values[Random().nextInt(CpuStrategy.values.length)];
+      cpu.strategy =
+          CpuStrategy.values[Random().nextInt(CpuStrategy.values.length)];
     }
-    print('CPU Strategy: ${cpu.strategy}');
     await cpu.generateDeck();
     return cpu;
   }

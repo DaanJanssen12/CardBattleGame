@@ -30,4 +30,5 @@ flutter:
     - assets/images/upgrades/
     - assets/images/actions/
     - assets/card_database.json
+    - assets/cpu_data.json
     - assets/user_data.json

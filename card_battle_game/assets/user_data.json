@@ -12,7 +12,8 @@
         "monster_fire_dog",
         "action_draw",
         "monster_mushroom_man",
-        "action_harvest"
+        "action_harvest",
+        "action_mushroom_garden"
     ],
-    "background": "background1.jpg"
+    "background": "forrest.jpg"
 }
