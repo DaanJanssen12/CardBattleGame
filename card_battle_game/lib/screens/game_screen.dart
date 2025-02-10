@@ -1,5 +1,6 @@
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/cpu.dart';
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:card_battle_game/models/user_storage.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
@@ -52,8 +53,8 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> initGame() async {
     battleLog.add('Game Started');
-    await player.startGame(battleLog);
-    await enemy.startGame(battleLog);
+    await player.startGame(battleLog, enemy);
+    await enemy.startGame(battleLog, player);
     setState(() {});
     showCoinFlipDialog();
   }
@@ -279,6 +280,10 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void checkGameEnd() {
+    //Prevent this function being called multiple times
+    if (gameEnded) {
+      return;
+    }
     if (enemy.health <= 0) {
       setState(() {
         gameEnded = true;

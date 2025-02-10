@@ -6,6 +6,7 @@ import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
 import 'package:card_battle_game/models/cpu.dart';
 import 'package:card_battle_game/models/cpu_database.dart';
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';

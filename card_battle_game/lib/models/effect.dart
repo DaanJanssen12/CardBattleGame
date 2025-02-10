@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/game_effect.dart';
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
 
 class SummonEffect{
@@ -18,7 +22,7 @@ class SummonEffect{
       return effect;
   }
 
-  Future<void> apply(MonsterCard triggeringMonster, Player player) async{
+  Future<void> apply(MonsterCard triggeringMonster, Player player, Player? opponent) async{
     switch(type){
       case SummonEffectType.swarm:
       var swarmCard = await CardDatabase.getCards([value!]);
@@ -26,15 +30,23 @@ class SummonEffect{
         if(player.monsters[i] == null){
           var swarmMonster = swarmCard[0].toMonster().clone().toMonster();
           swarmMonster.oneTimeUse = true;
-          player.summonMonster(swarmMonster, i, []);
+          player.summonMonster(swarmMonster, i, [], null);
         }
+      }
+      break;
+      case SummonEffectType.freeze:
+      if(opponent!.monsters.any((a) => a != null)){
+        var possibleTargets = opponent!.monsters.where((w) => w != null).toList();
+        var target = possibleTargets[Random().nextInt(possibleTargets.length)];
+        var amount = int.parse(value!);
+        target!.effects.add(GameEffect(GameEffectType.freeze, amount));
       }
       break;
     }
   }
 }
 
-enum SummonEffectType { swarm }
+enum SummonEffectType { swarm, freeze }
 
 extension SummonEffectTypeExtension on SummonEffectType {
   // Convert a string to an enum value

@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:flutter/material.dart';
 import '../models/card.dart';
 import 'monster_card_widget.dart';

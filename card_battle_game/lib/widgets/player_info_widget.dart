@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

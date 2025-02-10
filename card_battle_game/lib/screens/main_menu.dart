@@ -4,6 +4,7 @@ import 'package:card_battle_game/screens/deck_builder_screen.dart';
 import 'package:card_battle_game/screens/how_to_play_screen.dart';
 import 'package:card_battle_game/screens/mascot_selection_screen.dart';
 import 'package:card_battle_game/screens/user_profile_screen.dart';
+import 'package:card_battle_game/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -53,6 +54,22 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
         _userData = userData;
       });
     }
+  }
+
+  void startGame() async{
+    if(_userData!.deck.cards.length < 5){
+      await NotificationService.showDialogMessage(context, 'To start your deck has to have at least 5 cards.');
+      return;
+    }
+    if(_userData!.deck.cards.length > 10){
+      await NotificationService.showDialogMessage(context, "To start a game your deck can't have more then 10 cards.");
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => MascotSelectionScreen(userData: _userData!)),
+    );
   }
 
   @override
@@ -122,13 +139,7 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
                 // Start Game Button
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              MascotSelectionScreen(userData: _userData!)),
-                      //MaterialPageRoute(builder: (context) => GameScreen()),
-                    );
+                    startGame();
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,

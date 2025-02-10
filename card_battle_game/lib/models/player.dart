@@ -1,5 +1,8 @@
+import 'package:card_battle_game/models/action_card.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/monster_card.dart';
+import 'package:card_battle_game/models/upgrade_card.dart';
 
 class Player {
   String name;
@@ -72,7 +75,7 @@ class Player {
     regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
   }
 
-  Future<void> startGame(List<String> battleLog) async {
+  Future<void> startGame(List<String> battleLog, Player opponent) async {
     if (mascot.isEmpty) {
       var newMascot = deck.firstWhere((w) => w.isMonster());
       mascot = newMascot.id;
@@ -82,7 +85,7 @@ class Player {
     mana = startingMana;
     var mascotCard = deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
-    await summonMonster(mascotCard.toMonster(), 1, battleLog);
+    await summonMonster(mascotCard.toMonster(), 1, battleLog, opponent);
     deck.shuffle();
   }
 
@@ -101,7 +104,7 @@ class Player {
     if (deck.isEmpty) {
       shuffleDiscardPile();
     }
-    
+
     var drawnCard = deck.removeAt(0);
     hand.add(drawnCard);
 
@@ -120,7 +123,17 @@ class Player {
   }
 
   void shuffleHandIntoDeck() {
-    deck.addAll(hand);
+    if (hand.isEmpty) {
+      return;
+    }
+
+    var cardsToAddBackIntoDeck =
+        hand.where((w) => !w.oneTimeUse && !w.isOpponentCard).toList();
+    if (cardsToAddBackIntoDeck.isEmpty) {
+      return;
+    }
+
+    deck.addAll(cardsToAddBackIntoDeck);
     hand.clear();
     deck.shuffle();
   }
@@ -150,7 +163,7 @@ class Player {
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
-      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog);
+      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog, opponent);
     }
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
@@ -162,10 +175,12 @@ class Player {
       await actionCard.doAction(this, opponent);
       battleLog.add('${card.name} played');
     }
+    print('Is opponent card: ${card.isOpponentCard}');
     if (card.isOpponentCard) {
       opponent.discardPile.add(card);
     }
 
+    print('Is one time use: ${card.oneTimeUse}');
     if (card.oneTimeUse) {
       return;
     }
@@ -179,11 +194,11 @@ class Player {
   }
 
   Future<void> summonMonster(
-      MonsterCard monster, int monsterZoneIndex, List<String> battleLog) async {
+      MonsterCard monster, int monsterZoneIndex, List<String> battleLog, Player? opponent) async {
     monsters[monsterZoneIndex] = monster;
     monster.summon(monsterZoneIndex);
     if (monster.summonEffect != null) {
-      await monster.summonEffect!.apply(monster, this);
+      await monster.summonEffect!.apply(monster, this, opponent);
     }
     battleLog.add('${monster.name} summoned');
   }

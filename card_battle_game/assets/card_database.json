@@ -88,6 +88,27 @@
           "startingMana": 7,
           "regainManaPerTurn": 1
         }
+      },
+      {
+        "id": "monster_glacial_seal",
+        "rarity": "Uncommon",
+        "name": "Glacial Seal",
+        "imagePath": "assets/images/monsters/GlacialSeal.png",
+        "type": "monster",
+        "health": 4,
+        "attack": 1,
+        "cost": 3,
+        "shortDescription": null,
+        "fullDescription": "A slow but sturdy seal, radiating an icy chill. On summon: Freeze one random enemy for 1 turn.",
+        "summonEffect": {
+          "type": "freeze",
+          "value": "1"
+        },
+        "mascotEffects": {
+          "startingHealth": 7,
+          "startingMana": 1,
+          "regainManaPerTurn": 2
+        }
       }
     ],
     "upgrades": [
@@ -228,6 +249,19 @@
         "extraData": null,
         "shortDescription": "Steal 1 random card from your opponents hand.",
         "fullDescription": "Steal 1 random card from your opponents hand."
+      },
+      {
+        "id": "action_mana_surge",
+        "rarity": "Rare",
+        "name": "Mana Surge",
+        "imagePath": "assets/images/actions/ManaSurge.png",
+        "type": "action",
+        "cost": 2,
+        "actionCardType": "gainMana",
+        "value": 3,
+        "extraData": null,
+        "shortDescription": "Gain 3 mana.",
+        "fullDescription": "A sudden influx of energy courses through you. You gain 3 mana."
       }
     ]
 }

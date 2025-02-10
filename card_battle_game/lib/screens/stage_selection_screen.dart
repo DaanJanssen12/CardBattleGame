@@ -66,14 +66,18 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
     if (gameOver && currentStage < rewardFromStage) {
       endGame(null);
     }
-    if (_selectedReward != null) {
+    if (_selectedReward != null || skipReward) {
       if (gameOver) {
-        widget.userData.cards.add(_selectedReward!.id);
+        if (!skipReward) {
+          widget.userData.cards.add(_selectedReward!.id);
+        }
         endGame(_selectedReward);
       } else {
-        widget.userData.activeGame!.selectedRewards.add(_selectedReward!);
+        if (!skipReward) {
+          widget.userData.activeGame!.selectedRewards.add(_selectedReward!);
+          widget.userData.activeGame!.player.deck.add(_selectedReward!);
+        }
         widget.userData.activeGame!.stageUp();
-        widget.userData.activeGame!.player.deck.add(_selectedReward!);
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -210,7 +214,15 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
                     ),
                     SizedBox(height: 8),
                     _selectedReward == null
-                        ? Text(
+                        ? skipReward 
+                          ? Text(
+                            'Skip: you gain no reward',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          )
+                          : Text(
                             'Select a reward to see its description',
                             style: TextStyle(
                               color: Colors.white,
@@ -257,7 +269,8 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
   }
 
   bool canNotAdvance() {
-    return (_selectedReward == null && !skipReward &&
+    return (_selectedReward == null &&
+        !skipReward &&
         (!gameOver || currentStage >= rewardFromStage));
   }
 }

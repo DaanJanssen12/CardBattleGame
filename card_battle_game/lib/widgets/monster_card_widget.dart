@@ -1,3 +1,5 @@
+import 'package:card_battle_game/models/game_effect.dart';
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/card.dart';
@@ -99,6 +101,9 @@ class MonsterCardWidget extends StatelessWidget {
     switch (effectType) {
       case GameEffectType.shield:
         icon = FontAwesomeIcons.shield;
+        break;
+      case GameEffectType.freeze:
+        icon = FontAwesomeIcons.snowflake;
         break;
     }
     return Positioned(

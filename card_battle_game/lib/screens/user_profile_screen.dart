@@ -3,6 +3,8 @@ import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 class UserProfileScreen extends StatefulWidget {
   final UserData userData;
   const UserProfileScreen({super.key, required this.userData});
@@ -20,13 +22,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   void initState() {
     super.initState();
     _nameController.text = widget.userData.name;
-    _selectedBackground = widget.userData.background; // Set initial background
+    print(widget.userData.background);
+    print(widget.userData.background.split('.')[0]);
+    _selectedBackground = widget.userData.background.split('.')[0]; // Set initial background
   }
 
   void saveName(String name) async {
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text("Saved")),
-    // );
     await UserStorage.setName(name);
   }
 
@@ -34,13 +35,36 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     setState(() {
       _selectedBackground = newBackground;
     });
-    widget.userData.background = newBackground!;
-    await UserStorage.setBackground(newBackground);
+    var fileName = '${newBackground!}.jpg';
+    widget.userData.background = fileName;
+    await UserStorage.setBackground(fileName);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          title: Text(
+            "User Profile",
+            // style: TextStyle(
+            //   fontSize: 28,
+            //   fontWeight: FontWeight.bold,
+            //   color: Colors.white,
+            //   shadows: [
+            //     Shadow(
+            //       blurRadius: 4,
+            //       color: Colors.black54,
+            //       offset: Offset(2, 2),
+            //     ),
+            //   ],
+            // ),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context); // Go back to the previous screen
+            },
+          )),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -51,7 +75,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   fit: BoxFit.cover,
                 )
               : Image.asset(
-                  'assets/images/$_selectedBackground',
+                  'assets/images/$_selectedBackground.jpg',
                   fit: BoxFit.cover,
                 ),
 
@@ -60,43 +84,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
-                Text(
-                  "User Profile",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 4,
-                        color: Colors.black54,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                // Background Selection Dropdown
-                DropdownButton<String>(
-                  value: _selectedBackground,
-                  onChanged: selectBackground,
-                  items: <String>[
-                    'forrest.jpg',
-                    'plains.jpg',
-                    'oasis.jpg'
-                  ] // Predefined backgrounds
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  hint: Text("Select Background"),
-                ),
-                SizedBox(height: 20),
-
                 // Name Input Field
                 Container(
                   width: 300,
@@ -115,25 +102,66 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
+
+                // Background Selection Dropdown
+                Container(
+                    width: 300,
+                    //height: 500,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            'Background',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 200,
+                          child: DropdownButton<String>(
+                            value: _selectedBackground,
+                            onChanged: selectBackground,
+                            items: <String>[
+                              'forrest',
+                              'plains',
+                              'oasis'
+                            ]
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            hint: Text("Select Background"),
+                          ),
+                        )
+                      ],
+                    )),
+                SizedBox(height: 20),
                 SizedBox(
                   width: 300,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Go back to the main menu
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 15),
-                          textStyle: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        child: Text("Back"),
-                      ),
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     Navigator.pop(context); // Go back to the main menu
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     foregroundColor: Colors.white,
+                      //     backgroundColor: Colors.red,
+                      //     padding: EdgeInsets.symmetric(
+                      //         horizontal: 40, vertical: 15),
+                      //     textStyle: TextStyle(
+                      //         fontSize: 18, fontWeight: FontWeight.bold),
+                      //   ),
+                      //   child: Text("Back"),
+                      // ),
                       ElevatedButton(
                         onPressed: () {
                           // Handle saving name (you can extend this with local storage)

@@ -1,7 +1,11 @@
 import 'dart:math';
+import 'package:card_battle_game/models/action_card.dart';
+import 'package:card_battle_game/models/action_card_type.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
 import 'package:card_battle_game/models/player.dart';
+import 'package:card_battle_game/models/upgrade_card.dart';
+import 'package:card_battle_game/models/upgrade_card_type.dart';
 
 class CpuPlayer extends Player {
   late bool isCPU;
@@ -206,6 +210,8 @@ class CPU {
             return 20;
           case ActionCardType.stealRandomCardFromOpponentHand:
             return 40;
+          default:
+            return 0;
         }
       }
     }
@@ -218,6 +224,8 @@ class CPU {
             return 90;
           case UpgradeCardType.heal:
             return 100;
+          default:
+            return 0;
         }
       }
       if (gameCard.isAction()) {
@@ -228,6 +236,8 @@ class CPU {
             return 20;
           case ActionCardType.stealRandomCardFromOpponentHand:
             return 30;
+          default:
+            return 0;
         }
       }
     }
