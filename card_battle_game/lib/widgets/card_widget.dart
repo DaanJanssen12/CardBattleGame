@@ -10,7 +10,11 @@ class CardWidget extends StatelessWidget {
   final bool isSelected;
 
   const CardWidget(
-      {super.key, required this.card, this.onTap, this.isHovered = false, this.isSelected = false});
+      {super.key,
+      required this.card,
+      this.onTap,
+      this.isHovered = false,
+      this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +23,19 @@ class CardWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade200, Colors.blue.shade100],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+          image: DecorationImage(
+            image: AssetImage('assets/images/card_front.png'),
+            fit: BoxFit.fill,
           ),
+          // gradient: LinearGradient(
+          //   colors: [Colors.blue.shade200, Colors.blue.shade100],
+          //   begin: Alignment.topCenter,
+          //   end: Alignment.bottomCenter,
+          // ),
           borderRadius: BorderRadius.circular(16),
-          border: isSelected ? Border.all(
-            color: Colors.yellowAccent,
-            width: 3
-          ) : null,
+          border: isSelected
+              ? Border.all(color: Colors.yellowAccent, width: 3)
+              : null,
           boxShadow: const [
             BoxShadow(
               color: Colors.black45,
@@ -46,7 +53,6 @@ class CardWidget extends StatelessWidget {
                 _buildNameHeader(),
                 const SizedBox(height: 4), // Space between icon and number
                 _buildImage(constraints),
-                const SizedBox(height: 4), // Space between icon and number
                 if (card is MonsterCard) ...[
                   _buildStatsSection(card as MonsterCard),
                 ] else ...[
@@ -61,24 +67,48 @@ class CardWidget extends StatelessWidget {
   }
 
   Widget _buildNameHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        card.name,
-        textAlign: TextAlign.center,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+    return Stack(
+      clipBehavior: Clip.none, // Allows the crown to slightly overflow
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Text(
+            card.name,
+            textAlign: TextAlign.center,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
-      ),
+        if(card.isMonster() && card.toMonster().isMascot)...[
+          Positioned(
+          top: -6, // Moves the crown above
+          right: -6, // Moves it slightly outward for floating effect
+          child: Container(
+            width: 18, // Adjust size of circle
+            height: 18, // Adjust size of circle
+            decoration: BoxDecoration(
+              color: Colors.deepPurple, // Background color for crown
+              shape: BoxShape.circle,
+              border:
+                  Border.all(color: Colors.white, width: 1), // Optional border
+            ),
+            child: const Center(
+              child: Icon(
+                FontAwesomeIcons.crown, // Crown icon
+                size: 10, // Smaller for fitting inside
+                color: Colors.amber, // Gold color for effect
+              ),
+            ),
+          ),
+        ),
+        ]
+      ],
     );
   }
 
@@ -127,11 +157,11 @@ class CardWidget extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(FontAwesomeIcons.gem, color: Colors.lightBlue, size: 14),
-              const SizedBox(width: 4), // Space between icon and number
+              Icon(FontAwesomeIcons.droplet, color: Colors.blue, size: 10),
+              const SizedBox(width: 2), // Space between icon and number
               Text('${card.cost}',
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   )),
@@ -142,13 +172,13 @@ class CardWidget extends StatelessWidget {
 
   Widget _buildDescriptionSection() {
     return Container(
-      height: 48,
+        height: 48,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.deepPurple.shade700,
-          borderRadius: BorderRadius.circular(8),
-        ),
+        // decoration: BoxDecoration(
+        //   color: Colors.deepPurple.shade700,
+        //   borderRadius: BorderRadius.circular(8),
+        // ),
         child: Text(
           card.fullDescription ?? card.shortDescription ?? '',
           style: const TextStyle(
@@ -163,10 +193,10 @@ class CardWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple.shade700,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      // decoration: BoxDecoration(
+      //   color: Colors.deepPurple.shade700,
+      //   borderRadius: BorderRadius.circular(8),
+      // ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

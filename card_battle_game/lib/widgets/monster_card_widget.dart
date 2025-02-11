@@ -2,7 +2,6 @@ import 'package:card_battle_game/models/game_effect.dart';
 import 'package:card_battle_game/models/monster_card.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../models/card.dart';
 
 class MonsterCardWidget extends StatelessWidget {
   final MonsterCard? monster;
@@ -14,11 +13,15 @@ class MonsterCardWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue.shade200, Colors.blue.shade100],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        // gradient: LinearGradient(
+        //   colors: [Colors.blue.shade200, Colors.blue.shade100],
+        //   begin: Alignment.topCenter,
+        //   end: Alignment.bottomCenter,
+        // ),
+        image: DecorationImage(
+            image: AssetImage('assets/images/card_front.png'),
+            fit: BoxFit.fill,
+          ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           const BoxShadow(
@@ -44,22 +47,67 @@ class MonsterCardWidget extends StatelessWidget {
     );
   }
 
+  // Widget _buildNameHeader() {
+  //   return Container(
+  //     width: double.infinity,
+  //     padding: const EdgeInsets.symmetric(vertical: 6),
+  //     decoration: BoxDecoration(
+  //       color: Colors.deepPurple,
+  //       borderRadius: BorderRadius.circular(8),
+  //     ),
+  //     child: Text(
+  //       monster?.name ?? 'Unknown',
+  //       textAlign: TextAlign.center,
+  //       softWrap: false,
+  //       overflow: TextOverflow.ellipsis,
+  //       style: const TextStyle(
+  //           fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+  //     ),
+  //   );
+  // }
   Widget _buildNameHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        monster?.name ?? 'Unknown',
-        textAlign: TextAlign.center,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-      ),
+    return Stack(
+      clipBehavior: Clip.none, // Allows the crown to slightly overflow
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Text(
+            monster!.name,
+            textAlign: TextAlign.center,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        if(monster!.isMascot)...[
+          Positioned(
+          top: -6, // Moves the crown above
+          right: -6, // Moves it slightly outward for floating effect
+          child: Container(
+            width: 18, // Adjust size of circle
+            height: 18, // Adjust size of circle
+            decoration: BoxDecoration(
+              color: Colors.deepPurple, // Background color for crown
+              shape: BoxShape.circle,
+              border:
+                  Border.all(color: Colors.white, width: 1), // Optional border
+            ),
+            child: const Center(
+              child: Icon(
+                FontAwesomeIcons.crown, // Crown icon
+                size: 10, // Smaller for fitting inside
+                color: Colors.amber, // Gold color for effect
+              ),
+            ),
+          ),
+        ),
+        ]
+      ],
     );
   }
 

@@ -22,6 +22,7 @@ class GameCard {
     //id = Uuid().v4();
     isInDeck = false;
     rarity = CardRarity.Common;
+    type = "";
   }
 
   bool isMonster() => type == 'Monster';

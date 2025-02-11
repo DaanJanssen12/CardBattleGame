@@ -11,6 +11,7 @@ class MonsterCard extends GameCard {
   int health;
   int attack;
   late MascotEffects mascotEffects;
+  late bool isMascot = false;
   late SummonEffect? summonEffect;
 
   //Game info
@@ -60,8 +61,9 @@ class MonsterCard extends GameCard {
   }
 
   void takeDamage(int damage) {
-    if(effects.isNotEmpty && effects.any((a) => a.type == GameEffectType.shield)){
-      damage = (damage/2).ceil();
+    if (effects.isNotEmpty &&
+        effects.any((a) => a.type == GameEffectType.shield)) {
+      damage = (damage / 2).ceil();
     }
     currentHealth -= damage;
     if (currentHealth < 0) {
@@ -86,18 +88,30 @@ class MonsterCard extends GameCard {
     battleLog.add('$name attacked ${player.name} directly');
   }
 
-  void startnewTurn() {
-    hasAttacked = false;
+  Future<void> startnewTurn(
+      Player player, Player opponent, List<String> battleLog) async {
     for (var effect in effects) {
-      if(effect.type == GameEffectType.freeze){
+      if (effect.type == GameEffectType.freeze) {
         hasAttacked = true;
       }
       effect.value--;
     }
 
     effects = effects.any((a) => a.value > 0)
-      ? effects.where((w) => w.value > 0).toList()
-      : [];
+        ? effects.where((w) => w.value > 0).toList()
+        : [];
+
+    if (isMascot && mascotEffects.additionalEffect != null) {
+      await mascotEffects.additionalEffect!.trigger(
+          MascotEffectTriggers.startOfTurn,
+          this,
+          player,
+          null,
+          opponent,
+          battleLog);
+    }
+    //This must be done after the mascot effect
+    hasAttacked = false;
   }
 
   void faint() {

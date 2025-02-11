@@ -178,17 +178,16 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void startPlayerTurn(Player player) {
-    setState(() {
-      player.startTurn();
-    });
+    player.startTurn(enemy, battleLog);
+    setState(() {});
 
     showDeckOverlay();
   }
 
   Future<void> enemyTurn(CpuPlayer enemy) async {
     await Future.delayed(Duration(seconds: 1));
+    enemy.startTurn(player, battleLog);
     setState(() {
-      enemy.startTurn();
       enemy.drawCard(battleLog);
     });
     await Future.delayed(Duration(seconds: 1));

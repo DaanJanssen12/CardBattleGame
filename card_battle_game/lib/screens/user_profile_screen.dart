@@ -3,7 +3,6 @@ import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final UserData userData;

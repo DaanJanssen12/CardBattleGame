@@ -150,12 +150,39 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
                               ),
                             ),
                             Text(
-                              'Regain Mana Per Turn: ${deck.firstWhere((card) => card == _selectedMascot).toMonster().mascotEffects.regainManaPerTurn}',
+                              'Regain Mana Per Turn: ${_selectedMascot!.toMonster().mascotEffects.regainManaPerTurn}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                               ),
                             ),
+                            if (_selectedMascot!
+                                    .toMonster()
+                                    .mascotEffects
+                                    .additionalEffect !=
+                                null) ...[
+                              SizedBox(height: 8),
+                              Text(
+                                _selectedMascot!
+                                    .toMonster()
+                                    .mascotEffects
+                                    .additionalEffect!
+                                    .name,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                _selectedMascot!
+                                    .toMonster()
+                                    .mascotEffects
+                                    .additionalEffect!
+                                    .description,
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ]
                           ],
                         ),
                 ],

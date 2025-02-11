@@ -1,5 +1,4 @@
 import 'package:card_battle_game/models/card_database.dart';
-import 'package:card_battle_game/models/cpu.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/models/card.dart';

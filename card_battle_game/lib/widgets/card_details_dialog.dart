@@ -41,7 +41,7 @@ class CardDetailsDialog extends StatelessWidget {
             ],
               Row(
                 children: [
-                  Icon(FontAwesomeIcons.gem, color: Colors.lightBlue, size: 14),
+                  Icon(FontAwesomeIcons.droplet, color: Colors.blue, size: 14),
                   SizedBox(width: 4),
                   Text('Cost: ${card.cost}'),
                 ],

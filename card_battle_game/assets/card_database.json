@@ -6,7 +6,7 @@
         "name": "Penguin Mage",
         "imagePath": "assets/images/monsters/PenguinMage.png",
         "type": "monster",
-        "health": 2,
+        "health": 1,
         "attack": 2,
         "cost": 2,
         "shortDescription": null,
@@ -14,7 +14,13 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 1,
-          "regainManaPerTurn": 3
+          "regainManaPerTurn": 2,
+          "additionalEffect": {
+            "name": "Arcane Infusion",
+            "description": "Gain 1 mana whenever an upgrade is applied to Penguin Mage",
+            "type": "gainManaWhenUpgradeAppliedToSelf",
+            "value": "1"
+          }
         }
       },
       {
@@ -29,9 +35,15 @@
         "shortDescription": null,
         "fullDescription": "A fire dog",
         "mascotEffects": {
-          "startingHealth": 6,
-          "startingMana": 1,
-          "regainManaPerTurn": 2
+          "startingHealth": 5,
+          "startingMana": 2,
+          "regainManaPerTurn": 1,
+          "additionalEffect": {
+            "name": "Blazing Spirit",
+            "description": "Gains +1 attack at the start of each turn if it attacked last turn",
+            "type": "gainAtkStartOfTurnIfAttacked",
+            "value": "1"
+          }
         }
       },
       {
@@ -40,7 +52,7 @@
         "name": "Mushroom Man",
         "imagePath": "assets/images/monsters/MushroomMan.png",
         "type": "monster",
-        "health": 2,
+        "health": 3,
         "attack": 1,
         "cost": 2,
         "summonEffect": {
@@ -51,8 +63,14 @@
         "fullDescription": "Mushroom Man swarms the board with Fun Guys",
         "mascotEffects": {
           "startingHealth": 5,
-          "startingMana": 2,
-          "regainManaPerTurn": 2
+          "startingMana": 1,
+          "regainManaPerTurn": 2,
+          "additionalEffect": {
+            "name": "Spore Burst",
+            "description": "Summon 1 Fun Guy at the start of each turn",
+            "type": "summonAtStartOfTurn",
+            "value": "1;monster_mushroom_boy"
+          }
         }
       },
       {
@@ -63,13 +81,19 @@
         "type": "monster",
         "health": 1,
         "attack": 1,
-        "cost": 1,
+        "cost": 2,
         "shortDescription": null,
         "fullDescription": "a Fun Guy",
         "mascotEffects": {
           "startingHealth": 6,
-          "startingMana": 4,
-          "regainManaPerTurn": 1
+          "startingMana": 2,
+          "regainManaPerTurn": 1,
+          "additionalEffect": {
+            "name": "Mycelium Network",
+            "description": "When an upgrade is applied to this Fun Guy, copy it onto another random Fun Guy you control",
+            "type": "copyUpgrade",
+            "value": "1;monster_mushroom_boy"
+          }
         }
       },
       {
@@ -84,9 +108,15 @@
         "shortDescription": null,
         "fullDescription": "This cute little water droplet is just happy to be there.",
         "mascotEffects": {
-          "startingHealth": 4,
-          "startingMana": 7,
-          "regainManaPerTurn": 1
+          "startingHealth": 3,
+          "startingMana": 4,
+          "regainManaPerTurn": 1,
+          "additionalEffect": {
+            "name": "Refreshing Presence",
+            "description": "Whenever Droplet is healed, draw a card",
+            "type": "drawWhenHealed",
+            "value": "1"
+          }
         }
       },
       {
@@ -105,7 +135,7 @@
           "value": "1"
         },
         "mascotEffects": {
-          "startingHealth": 7,
+          "startingHealth": 5,
           "startingMana": 1,
           "regainManaPerTurn": 2
         }
@@ -154,7 +184,7 @@
         "name": "Water Gun",
         "imagePath": "assets/images/upgrades/WaterGun.png",
         "type": "upgrade",
-        "cost": 3,
+        "cost": 4,
         "upgradeCardType": "boostAtk",
         "value": 3,
         "shortDescription": "Boost a monster's attack by 3.",
@@ -166,7 +196,7 @@
         "name": "Raspberry",
         "imagePath": "assets/images/upgrades/Raspberry.png",
         "type": "upgrade",
-        "cost": 0,
+        "cost": 1,
         "upgradeCardType": "boostAtk",
         "value": 1,
         "shortDescription": "Boost a monster's attack by 1.",
@@ -178,7 +208,7 @@
         "name": "Blueberry",
         "imagePath": "assets/images/upgrades/Blueberry.png",
         "type": "upgrade",
-        "cost": 0,
+        "cost": 1,
         "upgradeCardType": "heal",
         "value": 1,
         "shortDescription": "Heal a monster by 1.",
@@ -190,7 +220,7 @@
         "name": "Shield",
         "imagePath": "assets/images/upgrades/Shield.png",
         "type": "upgrade",
-        "cost": 2,
+        "cost": 3,
         "upgradeCardType": "effectShield",
         "value": 3,
         "shortDescription": "Reduces incoming damage for 3 turns.",

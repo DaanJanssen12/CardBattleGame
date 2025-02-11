@@ -1,6 +1,7 @@
 import 'package:card_battle_game/models/action_card.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/mascot_effects.dart';
 import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/upgrade_card.dart';
 
@@ -17,6 +18,7 @@ class Player {
   late int startingMana;
   late int regainManaPerTurn;
   late String mascot;
+  late MonsterCard mascotCard;
 
   Player({required this.name})
       : health = 3,
@@ -69,7 +71,9 @@ class Player {
   }
 
   void setMascot(MonsterCard card) {
+    card.isMascot = true;
     mascot = card.id;
+    mascotCard = card;
     startingHealth = card.mascotEffects.startingHealth;
     startingMana = card.mascotEffects.startingMana;
     regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
@@ -85,15 +89,15 @@ class Player {
     mana = startingMana;
     var mascotCard = deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
-    await summonMonster(mascotCard.toMonster(), 1, battleLog, opponent);
+    await summonMonster(mascotCard.toMonster(), 1, battleLog, opponent, true);
     deck.shuffle();
   }
 
-  void startTurn() {
+  Future<void> startTurn(Player opponent, List<String> battleLog) async {
     mana += regainManaPerTurn;
 
     for (var monster in monsters.where((w) => w != null)) {
-      monster!.startnewTurn();
+      await monster!.startnewTurn(this, opponent, battleLog);
     }
     if (deck.isEmpty || deck.isEmpty) {
       shuffleDiscardPile();
@@ -163,10 +167,20 @@ class Player {
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
-      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog, opponent);
+      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog, opponent, false);
     }
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
+      if (monsters[monsterZoneIndex]!.isMascot &&
+          monsters[monsterZoneIndex]!.mascotEffects.additionalEffect != null) {
+        await monsters[monsterZoneIndex]!.mascotEffects.additionalEffect!.trigger(
+            MascotEffectTriggers.upgradeApplied,
+            monsters[monsterZoneIndex]!,
+            this,
+            card as UpgradeCard,
+            opponent,
+            battleLog);
+      }
       battleLog
           .add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
     }
@@ -193,11 +207,11 @@ class Player {
     discardPile.add(card);
   }
 
-  Future<void> summonMonster(
-      MonsterCard monster, int monsterZoneIndex, List<String> battleLog, Player? opponent) async {
+  Future<void> summonMonster(MonsterCard monster, int monsterZoneIndex,
+      List<String> battleLog, Player? opponent, bool isInitialMascotSummon) async {
     monsters[monsterZoneIndex] = monster;
     monster.summon(monsterZoneIndex);
-    if (monster.summonEffect != null) {
+    if (monster.summonEffect != null && !isInitialMascotSummon) {
       await monster.summonEffect!.apply(monster, this, opponent);
     }
     battleLog.add('${monster.name} summoned');
