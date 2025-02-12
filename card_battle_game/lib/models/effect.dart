@@ -21,10 +21,7 @@ class SummonEffect {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'type': type.toString().split(".").last,
-      'value': value
-    };
+    return {'type': type.toString().split(".").last, 'value': value};
   }
 
   Future<void> apply(
@@ -50,11 +47,29 @@ class SummonEffect {
           target!.effects.add(GameEffect(GameEffectType.freeze, amount));
         }
         break;
+      case SummonEffectType.backToHand:
+        var amount = int.parse(value!);
+
+        for (int i = 0; i < amount; i++) {
+          if (opponent!.monsters.any((a) => a != null)) {
+            var possibleTargets =
+                opponent.monsters.where((w) => w != null).toList();
+            var target =
+                possibleTargets[Random().nextInt(possibleTargets.length)];
+            if (target == null) {
+              continue;
+            }
+            opponent.monsters[target.monsterZoneIndex!] = null;
+            target.faint();
+            opponent.hand.add(target);
+          }
+        }
+        break;
     }
   }
 }
 
-enum SummonEffectType { swarm, freeze }
+enum SummonEffectType { swarm, freeze, backToHand }
 
 extension SummonEffectTypeExtension on SummonEffectType {
   // Convert a string to an enum value

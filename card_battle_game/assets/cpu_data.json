@@ -115,6 +115,23 @@
         "mascot": "monster_water_droplet"
     },
     {
+        "id": "cpu_brian",
+        "name": "Brian",
+        "possibleFromStage": 3,
+        "possibleUntillStage": 8,
+        "cpuLevel": "easy",
+        "cpuStrategy": "offensive",
+        "deck": [
+            "monster_zombie",
+            "monster_zombie",
+            "monster_zombie",
+            "monster_zombie",
+            "monster_zombie",
+            "monster_zombie"
+        ],
+        "mascot": "monster_zombie"
+    },
+    {
         "id": "cpu_max",
         "name": "Max",
         "possibleFromStage": 2,
@@ -135,7 +152,7 @@
         "id": "cpu_spike",
         "name": "Spike",
         "possibleFromStage": 3,
-        "possibleUntillStage": 5,
+        "possibleUntillStage": 12,
         "cpuLevel": "medium",
         "cpuStrategy": "offensive",
         "deck": [
@@ -151,8 +168,8 @@
     {
         "id": "cpu_willow",
         "name": "Willow",
-        "possibleFromStage": 4,
-        "possibleUntillStage": 5,
+        "possibleFromStage": 5,
+        "possibleUntillStage": 10,
         "cpuLevel": "medium",
         "cpuStrategy": "defensive",
         "deck": [
@@ -169,8 +186,8 @@
         "id": "cpu_frostbite",
         "name": "Frostbite",
         "possibleFromStage": 3,
-        "possibleUntillStage": 5,
-        "cpuLevel": "medium",
+        "possibleUntillStage": 6,
+        "cpuLevel": "easy",
         "cpuStrategy": "offensive",
         "deck": [
             "monster_penguin_mage",
@@ -214,6 +231,23 @@
             "action_harvest",
             "upgrade_heal",
             "action_draw"
+        ],
+        "mascot": "monster_fire_dog"
+    },
+    {
+        "id": "cpu_george",
+        "name": "George",
+        "possibleFromStage": 5,
+        "possibleUntillStage": 12,
+        "cpuLevel": "medium",
+        "cpuStrategy": "offensive",
+        "deck": [
+            "monster_fire_dog",
+            "monster_brawling_tornado",
+            "monster_fire_dog",
+            "upgrade_strengthen",
+            "upgrade_strengthen",
+            "action_robber"
         ],
         "mascot": "monster_fire_dog"
     }

@@ -81,26 +81,29 @@ class MascotAdditionalEffect {
       UpgradeCard? upgrade,
       Player opponent,
       List<String> battleLog) async {
-        print('trigger: $trigger');
-        print('type: $type');
+    print('trigger: $trigger');
+    print('type: $type');
     switch (trigger) {
       case MascotEffectTriggers.upgradeApplied:
         print('upgradecard type: ${upgrade!.upgradeCardType}');
-        if (type == MascotAdditionalEffectType.gainManaWhenUpgradeAppliedToSelf) {
+        if (type ==
+            MascotAdditionalEffectType.gainManaWhenUpgradeAppliedToSelf) {
           await apply(mascotMonster, player, upgrade, opponent, battleLog);
-        } else if (type == MascotAdditionalEffectType.drawWhenHealed && upgrade!.upgradeCardType == UpgradeCardType.heal) {
+        } else if (type == MascotAdditionalEffectType.drawWhenHealed &&
+            upgrade!.upgradeCardType == UpgradeCardType.heal) {
           await apply(mascotMonster, player, upgrade, opponent, battleLog);
         } else if (type == MascotAdditionalEffectType.copyUpgrade) {
           await apply(mascotMonster, player, upgrade, opponent, battleLog);
         }
         break;
       case MascotEffectTriggers.startOfTurn:
-      if (type == MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked && mascotMonster.hasAttacked) {
+        if (type == MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked &&
+            mascotMonster.hasAttacked) {
           await apply(mascotMonster, player, upgrade, opponent, battleLog);
         } else if (type == MascotAdditionalEffectType.summonAtStartOfTurn) {
           await apply(mascotMonster, player, upgrade, opponent, battleLog);
         }
-      break;
+        break;
       default:
         break;
     }
@@ -156,18 +159,37 @@ class MascotAdditionalEffect {
           player.drawCard([]);
         }
         break;
+      case MascotAdditionalEffectType.summonWhenFaintOpponentMonster:
+        if (player.monsters.any((a) => a == null)) {
+          var parts = value.split(";");
+          var howManyTimes = int.parse(parts[0]);
+          var monsterToSummonId = parts[1];
+          var monsterToSummon =
+              (await CardDatabase.getCards([monsterToSummonId]))[0];
+          for (var i = 0; i < howManyTimes; i++) {
+            if (!player.monsters.any((a) => a == null)) {
+              break;
+            }
+            var monsterZoneIndex = player.monsters.indexOf(null);
+            monsterToSummon.oneTimeUse = true;
+            await player.summonMonster(monsterToSummon.toMonster(),
+                monsterZoneIndex, battleLog, opponent, false);
+          }
+        }
+        break;
     }
   }
 }
 
-enum MascotEffectTriggers { upgradeApplied, startOfTurn }
+enum MascotEffectTriggers { upgradeApplied, startOfTurn, faintOpponentMonster }
 
 enum MascotAdditionalEffectType {
   gainManaWhenUpgradeAppliedToSelf,
   gainAtkStartOfTurnIfAttacked,
   summonAtStartOfTurn,
   copyUpgrade,
-  drawWhenHealed
+  drawWhenHealed,
+  summonWhenFaintOpponentMonster
 }
 
 extension MascotAdditionalEffectTypeExtension on MascotAdditionalEffectType {

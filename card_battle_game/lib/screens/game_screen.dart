@@ -196,8 +196,6 @@ class _GameScreenState extends State<GameScreen> {
         player,
         () {
           setState(() {
-            checkForFaintedMonsters(player);
-            checkForFaintedMonsters(enemy);
             checkGameEnd();
           });
         },
@@ -239,27 +237,10 @@ class _GameScreenState extends State<GameScreen> {
 
   // Handle the attack by dragging a monster card to an enemy monster zone
   void attackMonster(
-      MonsterCard attackingMonster, Player enemy, int targetIndex) {
-    setState(() {
-      attackingMonster.doAttack(enemy.monsters[targetIndex]!, battleLog);
-      //soundPlayerService.playAttackSound();
-    });
-    Future.sync(() async {
-      await Future.delayed(Duration(seconds: 1));
-    }).then((_) {
-      checkForFaintedMonsters(player);
-      checkForFaintedMonsters(enemy);
-    });
-  }
-
-  void checkForFaintedMonsters(Player player) {
-    for (var monster in player.monsters.where((w) => w != null)) {
-      if (monster!.currentHealth <= 0) {
-        setState(() {
-          player.faintMonster(monster.monsterZoneIndex!, battleLog, enemy);
-        });
-      }
-    }
+      MonsterCard attackingMonster, Player enemy, int targetIndex) async {
+    //soundPlayerService.playAttackSound();
+    await player.attackOpponentMonster(attackingMonster, enemy,
+        enemy.monsters[targetIndex]!, battleLog, () => {setState(() {})});
   }
 
   void handleAttackPlayerDirectly(
@@ -272,7 +253,7 @@ class _GameScreenState extends State<GameScreen> {
     });
 
     Future.sync(() async {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(milliseconds: 500));
     }).then((_) {
       checkGameEnd();
     });
@@ -538,32 +519,31 @@ class _GameScreenState extends State<GameScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if(drawnCard != null)...[
-              Text(
-                "You Drew:",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              if (drawnCard != null) ...[
+                Text(
+                  "You Drew:",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 12),
-              SizedBox(
-                width: 120,
-                height: 200,
-                child: CardWidget(card: drawnCard),
-              )
+                SizedBox(height: 12),
+                SizedBox(
+                  width: 120,
+                  height: 200,
+                  child: CardWidget(card: drawnCard),
+                )
+              ] else ...[
+                Text(
+                  "No cards to draw",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ]
-            else...[
-              Text(
-                "No cards to draw",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ]
             ],
           ),
         );

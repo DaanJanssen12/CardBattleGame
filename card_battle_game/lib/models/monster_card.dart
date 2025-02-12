@@ -60,26 +60,29 @@ class MonsterCard extends GameCard {
     monsterZoneIndex = spot;
   }
 
-  void takeDamage(int damage) {
+  bool takeDamage(int damage) {
     if (effects.isNotEmpty &&
         effects.any((a) => a.type == GameEffectType.shield)) {
       damage = (damage / 2).ceil();
     }
     currentHealth -= damage;
-    if (currentHealth < 0) {
+    if (currentHealth <= 0) {
       currentHealth = 0;
+      return true;
     }
+
+    return false;
   }
 
   bool canAttack() {
     return !hasAttacked && isActive;
   }
 
-  void doAttack(MonsterCard target, List<String> battleLog) {
-    target.takeDamage(currentAttack);
+  bool doAttack(MonsterCard target, List<String> battleLog) {
+    var targetFainted = target.takeDamage(currentAttack);
     hasAttacked = true;
-
     battleLog.add('$name attacked ${target.name} ($currentAttack dmg)');
+    return targetFainted;
   }
 
   void attackPlayer(Player player, List<String> battleLog) {

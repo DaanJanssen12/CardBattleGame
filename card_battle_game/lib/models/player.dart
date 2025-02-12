@@ -119,8 +119,8 @@ class Player {
     print('MASCOT CARD: ${this.mascotCard.id}');
     print('DECK: ${this.deck.length}');
     var mascotCard = deck.any((a) => a.isMonster() && a.toMonster().isMascot)
-      ? deck.firstWhere((w) => w.isMonster() && w.toMonster().isMascot)
-      : deck.firstWhere((w) => w.id == mascot);
+        ? deck.firstWhere((w) => w.isMonster() && w.toMonster().isMascot)
+        : deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
     await summonMonster(mascotCard.toMonster(), 1, battleLog, opponent, true);
     deck.shuffle();
@@ -272,6 +272,33 @@ class Player {
     }
     if (monster.isOpponentCard && opponent != null) {
       opponent.discardPile.add(monster);
+    }
+  }
+
+  Future<void> attackOpponentMonster(
+      MonsterCard attackingMonster,
+      Player opponent,
+      MonsterCard opponentMonster,
+      List<String> battleLog,
+      Function updateScreen) async {
+    var opponentMonsterFainted =
+        attackingMonster.doAttack(opponentMonster, battleLog);
+    
+      print('FAINTED? ${opponentMonsterFainted}');
+    updateScreen();
+    if (opponentMonsterFainted) {
+      print('FAINT ${opponentMonster.id}');
+      await Future.delayed(Duration(milliseconds: 500));
+      opponent.faintMonster(opponentMonster.monsterZoneIndex!, battleLog, this);
+      updateScreen();
+    }
+
+    if (attackingMonster.isMascot &&
+        attackingMonster.mascotEffects.additionalEffect != null) {
+      await attackingMonster.mascotEffects.additionalEffect!
+          .apply(attackingMonster, this, null, opponent, battleLog);
+      await Future.delayed(Duration(milliseconds: 500));
+      updateScreen();
     }
   }
 }

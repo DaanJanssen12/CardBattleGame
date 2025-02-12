@@ -139,6 +139,50 @@
           "startingMana": 1,
           "regainManaPerTurn": 2
         }
+      },
+      {
+        "id": "monster_brawling_tornado",
+        "rarity": "Rare",
+        "name": "Brawling Tornado",
+        "imagePath": "assets/images/monsters/BrawlingTornado.png",
+        "type": "monster",
+        "health": 1,
+        "attack": 4,
+        "cost": 3,
+        "shortDescription": null,
+        "fullDescription": "This tornado is ready for a fight. On summon: one random enemy is blown from the field back into the hand.",
+        "summonEffect": {
+          "type": "backToHand",
+          "value": "1"
+        },
+        "mascotEffects": {
+          "startingHealth": 3,
+          "startingMana": 3,
+          "regainManaPerTurn": 2
+        }
+      },
+      {
+        "id": "monster_zombie",
+        "rarity": "Rare",
+        "name": "Zombie",
+        "imagePath": "assets/images/monsters/Zombie.png",
+        "type": "monster",
+        "health": 1,
+        "attack": 1,
+        "cost": 1,
+        "shortDescription": null,
+        "fullDescription": "BRAAAAAAAAAAAAAIIIIINSSSSS",
+        "mascotEffects": {
+          "startingHealth": 4,
+          "startingMana": 3,
+          "regainManaPerTurn": 1,
+          "additionalEffect": {
+            "name": "Zombie Apocalypse",
+            "description": "Whenever this Zombie faints an opponent monster, summon a Zombie on your side of the field.",
+            "type": "summonWhenFaintOpponentMonster",
+            "value": "1;monster_zombie"
+          }
+        }
       }
     ],
     "upgrades": [
