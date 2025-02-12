@@ -22,7 +22,7 @@ class _CoinFlipWidgetState extends State<CoinFlipWidget>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 3), // Duration is still 5 seconds
+      duration: const Duration(seconds: 2), // Duration is still 5 seconds
       vsync: this,
     );
 
@@ -135,10 +135,6 @@ class _CoinFlipWidgetState extends State<CoinFlipWidget>
               coinResult! ? "Heads!" : "Tails!",
               style: const TextStyle(color: Colors.white, fontSize: 22),
             ),
-            Text(
-              coinResult == playerChoice ? "You go first" : "Enemy goes first",
-              style: const TextStyle(color: Colors.white, fontSize: 20),
-            ),
             const SizedBox(height: 16),
             Image.asset(
               coinResult == true
@@ -148,6 +144,11 @@ class _CoinFlipWidgetState extends State<CoinFlipWidget>
               height: 100,
             ),
             const SizedBox(height: 16),
+            Text(
+              coinResult == playerChoice ? "You go first" : "Enemy goes first",
+              style: const TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();

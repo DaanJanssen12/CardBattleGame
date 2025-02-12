@@ -61,7 +61,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
     return await CardDatabase.generateRewards(stage, 3);
   }
 
-  void advanceToNextStage() {
+  void advanceToNextStage() async {
     if (gameOver && currentStage < rewardFromStage) {
       endGame(null);
     }
@@ -77,6 +77,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
           widget.userData.activeGame!.player.deck.add(_selectedReward!);
         }
         widget.userData.activeGame!.stageUp();
+        await saveActiveGame();
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -86,9 +87,12 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
     }
   }
 
+  Future<void> saveActiveGame() async{
+    await UserStorage.updateActiveGame(widget.userData.activeGame!);
+  }
+
   void endGame(GameCard? reward) async {
-    UserStorage.endGame(currentStage, reward);
-    widget.userData.activeGame!.endGame();
+    widget.userData.endGame(currentStage, reward);
     Navigator.push(
       context,
       MaterialPageRoute(

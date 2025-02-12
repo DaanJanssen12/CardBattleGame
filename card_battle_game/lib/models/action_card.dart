@@ -68,7 +68,7 @@ class ActionCard extends GameCard {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'actionCardType': actionCardType,
+      'actionCardType': actionCardType.toString().split(".")[1],
       'value': value,
     };
   }

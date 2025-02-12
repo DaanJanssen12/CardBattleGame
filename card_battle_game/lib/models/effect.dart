@@ -20,6 +20,13 @@ class SummonEffect {
     return effect;
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString().split(".").last,
+      'value': value
+    };
+  }
+
   Future<void> apply(
       MonsterCard triggeringMonster, Player player, Player? opponent) async {
     switch (type) {

@@ -53,6 +53,7 @@ class GameCard {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'cost': cost,
       'imagePath': imagePath,
@@ -78,7 +79,10 @@ enum CardRarity { Common, Uncommon, Rare, UltraRare, Legendary }
 
 extension CardRarityExtension on CardRarity {
   // Convert a string to an enum value
-  static CardRarity fromString(String str) {
+  static CardRarity fromString(String? str) {
+    if(str == null){
+      return CardRarity.Common;
+    }
     return CardRarity.values.firstWhere(
       (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
       orElse: () => CardRarity.Common, // Default value

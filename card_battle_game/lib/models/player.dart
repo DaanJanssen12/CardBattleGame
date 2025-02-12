@@ -42,17 +42,45 @@ class Player {
     data.name = json['name'];
     data.health = json['health'];
     data.mana = json['mana'];
-    data.hand = json['hand'] == null
-        ? json['hand'].map((cardJson) {
+    data.startingHealth = json['startingHealth'];
+    data.startingMana = json['startingMana'];
+    data.regainManaPerTurn = json['regainManaPerTurn'];
+    data.mascot = json['mascot'];
+    data.hand = json['hand'] != null
+        ? (json['hand'] as List<dynamic>).map((cardJson) {
             return GameCard.fromJson(cardJson);
           }).toList()
         : [];
-    data.deck = json['deck'] == null
-        ? json['deck'].map((cardJson) {
+    data.deck = json['deck'] != null
+        ? (json['deck'] as List<dynamic>).map((cardJson) {
             return GameCard.fromJson(cardJson);
           }).toList()
         : [];
+    data.discardPile = json['discardPile'] != null
+        ? (json['discardPile'] as List<dynamic>).map((cardJson) {
+            return GameCard.fromJson(cardJson);
+          }).toList()
+        : [];
+    data.monsters = List.filled(3, null);
+    data.mascotCard = MonsterCard.fromJson(json['mascotCard']);
     return data;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'health': health,
+      'mana': mana,
+      'startingHealth': startingHealth,
+      'startingMana': startingMana,
+      'regainManaPerTurn': regainManaPerTurn,
+      'mascot': mascot,
+      'mascotCard': mascotCard.toJson(),
+      'hand': hand.map((m) => m.toJson()).toList(),
+      'monsters': monsters.map((m) => m?.toJson()).toList(),
+      'deck': deck.map((m) => m.toJson()).toList(),
+      'discardPile': discardPile.map((m) => m.toJson()).toList()
+    };
   }
 
   Future<void> generateDeck() async {
@@ -87,7 +115,12 @@ class Player {
     }
     health = startingHealth;
     mana = startingMana;
-    var mascotCard = deck.firstWhere((w) => w.id == mascot);
+    print('MASCOT: $mascot');
+    print('MASCOT CARD: ${this.mascotCard.id}');
+    print('DECK: ${this.deck.length}');
+    var mascotCard = deck.any((a) => a.isMonster() && a.toMonster().isMascot)
+      ? deck.firstWhere((w) => w.isMonster() && w.toMonster().isMascot)
+      : deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
     await summonMonster(mascotCard.toMonster(), 1, battleLog, opponent, true);
     deck.shuffle();
@@ -104,8 +137,12 @@ class Player {
     }
   }
 
-  GameCard drawCard(List<String> battleLog) {
+  GameCard? drawCard(List<String> battleLog) {
     if (deck.isEmpty) {
+      if (discardPile.isEmpty) {
+        return null;
+      }
+
       shuffleDiscardPile();
     }
 
@@ -167,19 +204,23 @@ class Player {
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
-      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog, opponent, false);
+      summonMonster(
+          card as MonsterCard, monsterZoneIndex, battleLog, opponent, false);
     }
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
       if (monsters[monsterZoneIndex]!.isMascot &&
           monsters[monsterZoneIndex]!.mascotEffects.additionalEffect != null) {
-        await monsters[monsterZoneIndex]!.mascotEffects.additionalEffect!.trigger(
-            MascotEffectTriggers.upgradeApplied,
-            monsters[monsterZoneIndex]!,
-            this,
-            card as UpgradeCard,
-            opponent,
-            battleLog);
+        await monsters[monsterZoneIndex]!
+            .mascotEffects
+            .additionalEffect!
+            .trigger(
+                MascotEffectTriggers.upgradeApplied,
+                monsters[monsterZoneIndex]!,
+                this,
+                card as UpgradeCard,
+                opponent,
+                battleLog);
       }
       battleLog
           .add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
@@ -207,8 +248,12 @@ class Player {
     discardPile.add(card);
   }
 
-  Future<void> summonMonster(MonsterCard monster, int monsterZoneIndex,
-      List<String> battleLog, Player? opponent, bool isInitialMascotSummon) async {
+  Future<void> summonMonster(
+      MonsterCard monster,
+      int monsterZoneIndex,
+      List<String> battleLog,
+      Player? opponent,
+      bool isInitialMascotSummon) async {
     monsters[monsterZoneIndex] = monster;
     monster.summon(monsterZoneIndex);
     if (monster.summonEffect != null && !isInitialMascotSummon) {

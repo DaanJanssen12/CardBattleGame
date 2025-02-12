@@ -33,7 +33,7 @@ class UpgradeCard extends GameCard {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'upgradeCardType': upgradeCardType,
+      'upgradeCardType': upgradeCardType.toString().split(".")[1],
       'value': value,
     };
   }

@@ -27,7 +27,9 @@ class UserStorage {
     if (await file.exists()) {
       // Read existing file
       final String jsonString = await file.readAsString();
+      print(jsonString);
       final dynamic jsonResponse = json.decode(jsonString);
+      print(jsonResponse);
       return UserData.fromJson(jsonResponse);
     } else {
       // First time: Load from assets & create file
@@ -68,6 +70,13 @@ class UserStorage {
     if (reward != null) {
       data.cards.add(reward.id);
     }
+    data.activeGame = null;
+    await saveUserData(data);
+  }
+
+  static Future<void> updateActiveGame(Game game) async {
+    var data = await getUserData();
+    data.activeGame = game;
     await saveUserData(data);
   }
 }
@@ -101,13 +110,19 @@ class UserData {
     activeGame!.setPlayer(player);
   }
 
+  Future<void> endGame(int currentStage, GameCard? reward) async {
+    await UserStorage.endGame(currentStage, reward);
+    activeGame = null;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'cards': cards,
       'background': background,
       'deck': deck.toJson(),
-      'highscore': highscore
+      'highscore': highscore,
+      'activeGame': activeGame?.toJson()
     };
   }
 
@@ -160,14 +175,6 @@ class Game {
     player = Player(name: '');
   }
 
-  factory Game.fromJson(Map<String, dynamic> json) {
-    var data = Game();
-    data.stage = json['name'];
-    data.mascot = json['mascot'];
-    data.player = Player.fromJson(json['player']);
-    return data;
-  }
-
   void setMascot(MonsterCard card) {
     player.setMascot(card);
     mascot = card.id;
@@ -207,5 +214,27 @@ class Game {
     }
     await cpu.generateDeck();
     return cpu;
+  }
+
+  factory Game.fromJson(Map<String, dynamic> json) {
+    var data = Game();
+    data.stage = json['stage'];
+    data.mascot = json['mascot'];
+    data.player = Player.fromJson(json['player']);
+    data.versedCPUs =
+        (json['versedCPUs'] as List<dynamic>).map((m) => m.toString()).toList();
+    data.selectedRewards = (json['selectedRewards'] as List<dynamic>)
+        .map((m) => GameCard.fromJson(m))
+        .toList();
+    return data;
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'stage': stage,
+      'mascot': mascot,
+      'player': player.toJson(),
+      'versedCPUs': versedCPUs,
+      'selectedRewards': selectedRewards.map((m) => m.toJson()).toList()
+    };
   }
 }

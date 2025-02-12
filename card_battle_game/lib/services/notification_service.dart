@@ -26,6 +26,20 @@ class NotificationService {
     );
   }
 
+  static Future<void> showDialogMessageWithActions(BuildContext context, String message, List<TextButton> actionButtons, {String title = 'Notification'}) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Allow dismiss on tap outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: actionButtons,
+        );
+      },
+    );
+  }
+
   // Show a snackbar with a message
   static void showSnackbar(BuildContext context, String message, {Duration duration = const Duration(seconds: 2)}) {
     ScaffoldMessenger.of(context).showSnackBar(

@@ -90,17 +90,6 @@ class MonsterCard extends GameCard {
 
   Future<void> startnewTurn(
       Player player, Player opponent, List<String> battleLog) async {
-    for (var effect in effects) {
-      if (effect.type == GameEffectType.freeze) {
-        hasAttacked = true;
-      }
-      effect.value--;
-    }
-
-    effects = effects.any((a) => a.value > 0)
-        ? effects.where((w) => w.value > 0).toList()
-        : [];
-
     if (isMascot && mascotEffects.additionalEffect != null) {
       await mascotEffects.additionalEffect!.trigger(
           MascotEffectTriggers.startOfTurn,
@@ -112,6 +101,17 @@ class MonsterCard extends GameCard {
     }
     //This must be done after the mascot effect
     hasAttacked = false;
+
+    for (var effect in effects) {
+      if (effect.type == GameEffectType.freeze) {
+        hasAttacked = true;
+      }
+      effect.value--;
+    }
+
+    effects = effects.any((a) => a.value > 0)
+        ? effects.where((w) => w.value > 0).toList()
+        : [];
   }
 
   void faint() {
@@ -134,6 +134,7 @@ class MonsterCard extends GameCard {
       attack: json['attack'],
     );
     card.id = json['id'];
+    card.isMascot = json['isMascot'] ?? false;
     card.mascotEffects = MascotEffects.fromJson(json['mascotEffects']);
     card.summonEffect = json['summonEffect'] == null
         ? null
@@ -149,6 +150,9 @@ class MonsterCard extends GameCard {
       ...super.toJson(),
       'health': health,
       'attack': attack,
+      'isMascot': isMascot,
+      'mascotEffects': mascotEffects.toJson(),
+      'summonEffect': summonEffect?.toJson()
     };
   }
 

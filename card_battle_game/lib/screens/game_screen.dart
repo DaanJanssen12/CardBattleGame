@@ -493,7 +493,7 @@ class _GameScreenState extends State<GameScreen> {
                             gameCard = player.drawCard(battleLog);
                           });
                           Navigator.of(context).pop(); // Close overlay
-                          showDrawnCardAnimation(gameCard!);
+                          showDrawnCardAnimation(gameCard);
                         },
                         child: SizedBox(
                           width: 120, // Ensures finite size
@@ -527,7 +527,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  void showDrawnCardAnimation(GameCard drawnCard) {
+  void showDrawnCardAnimation(GameCard? drawnCard) {
     showDialog(
       context: context,
       barrierDismissible: false, // Don't allow closing mid-animation
@@ -538,6 +538,7 @@ class _GameScreenState extends State<GameScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if(drawnCard != null)...[
               Text(
                 "You Drew:",
                 style: TextStyle(
@@ -552,13 +553,24 @@ class _GameScreenState extends State<GameScreen> {
                 height: 200,
                 child: CardWidget(card: drawnCard),
               )
+              ]
+            else...[
+              Text(
+                "No cards to draw",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ]
             ],
           ),
         );
       },
     );
 
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(milliseconds: 750), () {
       Navigator.of(context).pop();
       setState(() {});
     });

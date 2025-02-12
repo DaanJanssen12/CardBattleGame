@@ -1,6 +1,7 @@
 import 'package:card_battle_game/main.dart';
 import 'package:card_battle_game/models/user_storage.dart';
 import 'package:card_battle_game/screens/deck_builder_screen.dart';
+import 'package:card_battle_game/screens/game_screen.dart';
 import 'package:card_battle_game/screens/how_to_play_screen.dart';
 import 'package:card_battle_game/screens/mascot_selection_screen.dart';
 import 'package:card_battle_game/screens/user_profile_screen.dart';
@@ -56,14 +57,51 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
     }
   }
 
-  void startGame() async{
-    if(_userData!.deck.cards.length < 5){
-      await NotificationService.showDialogMessage(context, 'To start your deck has to have at least 5 cards.');
+  void startGame(bool newGame) async {
+    if (!newGame) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => GameScreen(userData: _userData!)),
+      );
       return;
     }
-    if(_userData!.deck.cards.length > 10){
-      await NotificationService.showDialogMessage(context, "To start a game your deck can't have more then 10 cards.");
+    if (_userData!.deck.cards.length < 5) {
+      await NotificationService.showDialogMessage(
+          context, 'To start your deck has to have at least 5 cards.');
       return;
+    }
+    if (_userData!.deck.cards.length > 10) {
+      await NotificationService.showDialogMessage(
+          context, "To start a game your deck can't have more then 10 cards.");
+      return;
+    }
+
+    if (_userData!.activeGame != null) {
+      var deleteOldGame = false;
+      await NotificationService.showDialogMessageWithActions(
+          context,
+          "Are you sure you want to start a new game? Your existing game will be deleted.",
+          [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteOldGame = false;
+              },
+              child: Text("I'm not sure"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteOldGame = true;
+              },
+              child: Text("I'm sure"),
+            ),
+          ]);
+
+      if (!deleteOldGame) {
+        return;
+      }
     }
     Navigator.push(
       context,
@@ -136,20 +174,58 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Start Game Button
-                ElevatedButton(
-                  onPressed: () {
-                    startGame();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                    textStyle:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                if (_userData!.activeGame != null) ...[
+                  ElevatedButton(
+                      onPressed: () {
+                        startGame(false);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                        textStyle: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('Continue Game'),
+                          Text('(stage ${_userData!.activeGame!.stage})',
+                              style: TextStyle(fontSize: 12)),
+                        ],
+                      )),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      startGame(true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                      textStyle:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    child: Text('Start Game!'),
                   ),
-                  child: Text('Start Game!'),
-                ),
+                ] else ...[
+                  // Start Game Button
+                  ElevatedButton(
+                    onPressed: () {
+                      startGame(true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                      textStyle:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    child: Text('Start Game!'),
+                  ),
+                ],
                 SizedBox(height: 20),
 
                 // How to Play Button

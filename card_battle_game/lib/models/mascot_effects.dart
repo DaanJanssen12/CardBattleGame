@@ -26,6 +26,15 @@ class MascotEffects {
     return data;
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'startingHealth': startingHealth,
+      'startingMana': startingMana,
+      'regainManaPerTurn': regainManaPerTurn,
+      'additionalEffect': additionalEffect?.toJson()
+    };
+  }
+
   @override
   String toString() {
     return """
@@ -54,6 +63,15 @@ class MascotAdditionalEffect {
     data.type = MascotAdditionalEffectTypeExtension.fromString(json['type']);
     data.value = json['value'];
     return data;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'description': description,
+      'type': type.toString().split(".").last,
+      'value': value
+    };
   }
 
   Future<void> trigger(
