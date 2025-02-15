@@ -136,17 +136,17 @@ class MonsterCardWidget extends StatelessWidget {
           ),
         ),
         if (monster!.effects.isNotEmpty) ...[
-          for (var effect in monster!.effects) ...[
-            _buildEffectBadge(effect.type, effect.value)
+          for (var i = 0; i < monster!.effects.length; i++) ...[
+            _buildEffectBadge(monster!.effects[i], i)
           ]
         ] // Cost badge now overlaying slightly on the image
       ],
     );
   }
 
-  Widget _buildEffectBadge(GameEffectType effectType, int value) {
+  Widget _buildEffectBadge(GameEffect effect, int index) {
     IconData? icon;
-    switch (effectType) {
+    switch (effect.type) {
       case GameEffectType.shield:
         icon = FontAwesomeIcons.shield;
         break;
@@ -156,7 +156,7 @@ class MonsterCardWidget extends StatelessWidget {
     }
     return Positioned(
       left: 0, // Adjusted to be closer to the bottom-left corner
-      bottom: 0, // Added a slight left offset for more overlap
+      bottom: index * 20, // Added a slight left offset for more overlap
       child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
           decoration: BoxDecoration(
@@ -166,11 +166,11 @@ class MonsterCardWidget extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: Colors.lightBlue, size: 14),
+              Icon(icon, color: Colors.lightBlue, size: 8),
               const SizedBox(width: 4), // Space between icon and number
-              Text('$value',
+              Text('${effect.value}',
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 8,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   )),

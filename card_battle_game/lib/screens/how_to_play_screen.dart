@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/material.dart';
 
@@ -54,12 +55,20 @@ class HowToPlayScreen extends StatelessWidget {
               '2. Then stage 1 starts and you start your first match'),
           _buildSectionTitle('Matches'),
           _buildSectionContent(
-            '1. Every game starts with both deck mascots being summoned in the middle monster zone.\n'
-            '2. To decide who goes first we toss a coin.\n'
-            '3. Use your abilities, move pieces, or play cards strategically.\n'
-            '4. The match ends when one player reaches 0 health.\n\n'
-            'You have a mana limit of ${Player.maxMana} and a hand limit of ${Player.maxHandSize}'
-          ),
+              '1. Every game starts with both deck mascots being summoned in the middle monster zone.\n'
+              '2. To decide who goes first we toss a coin.\n'
+              '3. Use your abilities, move pieces, or play cards strategically.\n'
+              '4. The match ends when one player reaches 0 health.\n\n'),
+          _buildSectionTitle('Resources'),
+          _buildSubSectionTitle('Mana'),
+          _buildSectionContent(
+              'Based on your mascot you start with an x amount of mana. Every turn you gain mana, this scales with the turns. You have a mana limit of ${Constants.playerMaxMana}.\n'),
+          _buildSubSectionTitle('Cards'),
+          _buildSectionContent(
+              'During your turn you play cards, these cards have a mana cost to play. Played cards are put in your discard pile, when your deck is empty your discard pile is recycled back into your deck.\n'),
+          _buildSubSectionTitle('Hand'),
+          _buildSectionContent(
+              'You can play cards that are in your hand. Every turn you draw (if possible) 2 cards from your deck into your hand. The amount of cards in your hand is limited to ${Constants.playerMaxHandSize}.\n'),
         ],
       ),
     );
@@ -91,17 +100,14 @@ class HowToPlayScreen extends StatelessWidget {
           _buildSectionTitle('Different Types of Cards'),
           _buildSectionContent(
               'There are different types of cards, and every card has a mana cost.'),
-
           _buildSubSectionTitle('Monster Card'),
           _buildSectionContent(
               'Monster cards all have health and attack, some monsters have additional effects.\n\n'
               'Every monster can attack once per turn. You attack by dragging the monster onto an opponent monster.\n\n'
               'If the opponent has no monsters on the board you can attack them directly by dragging your attacking monster onto the opponent’s info card. A direct attack does 1 point of damage.'),
-
           _buildSubSectionTitle('Upgrade Card'),
           _buildSectionContent(
               'Upgrade cards are cards that upgrade monsters. You play an upgrade card by dragging it onto a summoned monster.'),
-
           _buildSubSectionTitle('Action Card'),
           _buildSectionContent(
               'Action cards are cards that have various effects, for example: Draw 1 card.\n\n'

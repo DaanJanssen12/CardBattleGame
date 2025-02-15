@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/cpu.dart';
 import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
@@ -69,6 +70,7 @@ class StageMatch {
     updateGameState();
     if (player.canDraw()) {
       playerDrawFunction();
+      updateGameState();
     } else {
       await NotificationService.showDialogMessage(
           context, "Your hand is full, you can't draw a card",
@@ -86,8 +88,14 @@ class StageMatch {
   Future<void> startOpponentTurn() async {
     await Future.delayed(Duration(seconds: 1));
     opponent.startTurn(currentTurn, player, battleLog);
-    opponent.drawCard(battleLog);
-    updateGameState();
+    for (int i = 0; i < Constants.drawCardsPerTurn; i++) {
+      if (opponent.canDraw()) {
+        opponent.drawCard(battleLog);
+        updateGameState();
+      } else {
+        break;
+      }
+    }
     await Future.delayed(Duration(seconds: 1));
     await CPU.executeTurn(opponent, player, updateGameState, battleLog, () {
       return !gameIsActive;
@@ -179,8 +187,7 @@ class StageMatch {
           endMatch(true);
         });
       });
-    }
-    else if (player.health <= 0) {
+    } else if (player.health <= 0) {
       gameIsActive = false;
       updateGameState();
       NotificationService.showDialogMessage(context, 'You lost!',

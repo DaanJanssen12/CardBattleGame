@@ -1,14 +1,12 @@
 import 'package:card_battle_game/models/action_card.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/mascot_effects.dart';
 import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/upgrade_card.dart';
 
 class Player {
-  static int maxMana = 10;
-  static int maxHandSize = 6;
-
   String name;
   int health;
   int mana;
@@ -135,8 +133,8 @@ class Player {
         break;
     }
     mana += regainManaPerTurn;
-    if (mana > maxMana) {
-      mana = maxMana;
+    if (mana > Constants.playerMaxMana) {
+      mana = Constants.playerMaxMana;
     }
 
     for (var monster in monsters.where((w) => w != null)) {
@@ -154,7 +152,21 @@ class Player {
   }
 
   bool canDraw() {
-    return hand.length < maxHandSize;
+    return hand.length < Constants.playerMaxHandSize;
+  }
+
+  List<GameCard> drawCards(int amount, List<String> battleLog) {
+    List<GameCard> cardsDrawn = [];
+    for (int i = 0; i < amount; i++) {
+      if (canDraw()) {
+        var card = drawCard(battleLog);
+        if (card != null) {
+          cardsDrawn.add(card);
+        }
+      }
+    }
+    battleLog.add('$name drew ${cardsDrawn.length} card(s)');
+    return cardsDrawn;
   }
 
   GameCard? drawCard(List<String> battleLog) {
@@ -173,7 +185,6 @@ class Player {
       shuffleDiscardPile();
     }
 
-    battleLog.add('$name drew a card');
     return drawnCard;
   }
 
@@ -243,7 +254,8 @@ class Player {
                 this,
                 card as UpgradeCard,
                 opponent,
-                battleLog);
+                battleLog,
+                null);
       }
       battleLog
           .add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
@@ -297,6 +309,17 @@ class Player {
       Function updateScreen) async {
     var opponentMonsterFainted =
         attackingMonster.doAttack(opponentMonster, battleLog);
+    if (opponentMonster.isMascot &&
+        opponentMonster.mascotEffects.additionalEffect != null) {
+      await opponentMonster.mascotEffects.additionalEffect!.trigger(
+          MascotEffectTriggers.isAttacked,
+          opponentMonster,
+          opponent,
+          null,
+          this,
+          battleLog,
+          attackingMonster);
+    }
 
     updateScreen();
     if (opponentMonsterFainted) {
@@ -314,7 +337,8 @@ class Player {
           this,
           null,
           opponent,
-          battleLog);
+          battleLog,
+          null);
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
     }

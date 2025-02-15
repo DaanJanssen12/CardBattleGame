@@ -103,7 +103,8 @@ class MonsterCard extends GameCard {
           player,
           null,
           opponent,
-          battleLog);
+          battleLog,
+          null);
     }
     //This must be done after the mascot effect
     hasAttacked = false;

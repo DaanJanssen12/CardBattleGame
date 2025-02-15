@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/cpu.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:card_battle_game/models/stage_match.dart';
@@ -41,17 +42,14 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> initGame(Player player, CpuPlayer opponent) async {
-    match = StageMatch(player, opponent, [], () => {
-      setState(() {
-        
-      })
-    }, showDeckOverlay, endGame, context);
+    match = StageMatch(player, opponent, [], () => {setState(() {})},
+        showDeckOverlay, endGame, context);
     await match.init();
     showCoinFlipDialog();
   }
 
-  void endGame(bool playerWon){
-    if(!playerWon){
+  void endGame(bool playerWon) {
+    if (!playerWon) {
       widget.userData.activeGame!.playerHasLost = true;
     }
     toStageSelection();
@@ -141,7 +139,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  void playCard(GameCard card, int monsterZoneIndex) async{
+  void playCard(GameCard card, int monsterZoneIndex) async {
     await match.playCard(card, monsterZoneIndex, context);
   }
 
@@ -309,7 +307,7 @@ class _GameScreenState extends State<GameScreen> {
                         style: TextStyle(color: Colors.white, fontSize: 24),
                       ),
                       Text(
-                        "Tap to Draw a Card",
+                        "Tap to Draw your Cards",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       const SizedBox(height: 16),
@@ -317,12 +315,12 @@ class _GameScreenState extends State<GameScreen> {
                       // Deck Image (Tappable)
                       GestureDetector(
                         onTap: () {
-                          GameCard? gameCard;
+                          List<GameCard> gameCards = [];
                           setState(() {
-                            gameCard = match.player.drawCard(match.battleLog);
+                            gameCards = match.player.drawCards(Constants.drawCardsPerTurn, match.battleLog);
                           });
                           Navigator.of(context).pop(); // Close overlay
-                          showDrawnCardAnimation(gameCard);
+                          showDrawnCardAnimation(gameCards);
                         },
                         child: SizedBox(
                           width: 120, // Ensures finite size
@@ -356,7 +354,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  void showDrawnCardAnimation(GameCard? drawnCard) {
+  void showDrawnCardAnimation(List<GameCard> drawnCards) {
     showDialog(
       context: context,
       barrierDismissible: false, // Don't allow closing mid-animation
@@ -367,7 +365,7 @@ class _GameScreenState extends State<GameScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (drawnCard != null) ...[
+              if (drawnCards.isNotEmpty) ...[
                 Text(
                   "You Drew:",
                   style: TextStyle(
@@ -377,10 +375,17 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
                 SizedBox(height: 12),
-                SizedBox(
-                  width: 120,
-                  height: 200,
-                  child: CardWidget(card: drawnCard),
+                Row(
+                  children: [
+                    for (var card in drawnCards) ...[
+                      SizedBox(
+                        width: 120,
+                        height: 200,
+                        child: CardWidget(card: card),
+                      ),
+                      SizedBox(width: 10),
+                    ]
+                  ],
                 )
               ] else ...[
                 Text(

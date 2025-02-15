@@ -3,6 +3,7 @@ import 'package:card_battle_game/models/action_card.dart';
 import 'package:card_battle_game/models/action_card_type.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
 import 'package:card_battle_game/models/upgrade_card.dart';
 import 'package:card_battle_game/models/upgrade_card_type.dart';
@@ -47,7 +48,6 @@ class CpuPlayer extends Player {
     return cpu;
   }
 
-  
   Future<void> generateDeck(int deckSize) async {
     deck = await CardDatabase.generateDeck(deckSize, strategy, level);
     deck.shuffle();
@@ -66,7 +66,7 @@ extension CpuLevelsExtension on CpuLevels {
   }
 }
 
-enum CpuStrategy { random, defensive, offensive }
+enum CpuStrategy { random, defensive, offensive, balanced }
 
 extension CpuStrategyExtension on CpuStrategy {
   // Convert a string to an enum value
@@ -92,6 +92,31 @@ class CPU {
   }
 
   static Future<void> playCardsFromHand(
+      CpuPlayer cpu,
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver) async {
+    if (isGameOver()) {
+      return;
+    }
+    switch (cpu.level) {
+      case CpuLevels.easy:
+        await cpuEasyPlayCardsFromHand(
+            cpu, opponent, updateGameState, battleLog, isGameOver);
+        break;
+      case CpuLevels.medium:
+        await cpuMediumPlayCardsFromHand(
+            cpu, opponent, updateGameState, battleLog, isGameOver);
+        break;
+      default:
+        await cpuEasyPlayCardsFromHand(
+            cpu, opponent, updateGameState, battleLog, isGameOver);
+        break;
+    }
+  }
+
+  static Future<void> cpuEasyPlayCardsFromHand(
       CpuPlayer cpu,
       Player opponent,
       Function updateGameState,
@@ -131,6 +156,39 @@ class CPU {
             cpu, opponent, updateGameState, battleLog, isGameOver);
         await playMonsterCards(
             cpu, opponent, updateGameState, battleLog, isGameOver);
+      }
+    }
+  }
+
+  static Future<void> cpuMediumPlayCardsFromHand(
+      CpuPlayer cpu,
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver) async {
+    if (isGameOver()) {
+      return;
+    }
+
+    // **Step 1: Sort Hand by Priority**
+    cpu.hand.sort((a, b) {
+      int aPriority = getCardPriority(a, cpu);
+      int bPriority = getCardPriority(b, cpu);
+      return bPriority.compareTo(aPriority); // Higher priority first
+    });
+
+    // **Step 2: Play Cards in Order of Priority**
+    for (var card in List.from(cpu.hand)) {
+      for (var i = 0; i < 3; i++) {
+        if (cpu.canPlayCard(card, i).$1) {
+          await cpu.playCard(card, i, battleLog, opponent);
+          updateGameState();
+          await Future.delayed(Duration(milliseconds: 500));
+          if (isGameOver()) {
+            return;
+          }
+          break;
+        }
       }
     }
   }
@@ -260,6 +318,32 @@ class CPU {
     if (isGameOver() || opponent.health == 0) {
       return;
     }
+
+    switch (cpu.level) {
+      case CpuLevels.easy:
+        await cpuEasyAttackWithAllActiveMonsters(
+            cpu, opponent, updateGameState, battleLog, isGameOver);
+        break;
+      case CpuLevels.medium:
+        await cpuMediumAttackWithAllActiveMonsters(
+            cpu, opponent, updateGameState, battleLog, isGameOver);
+        break;
+      default:
+        await cpuEasyAttackWithAllActiveMonsters(
+            cpu, opponent, updateGameState, battleLog, isGameOver);
+        break;
+    }
+  }
+
+  static Future<void> cpuEasyAttackWithAllActiveMonsters(
+      CpuPlayer cpu,
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver) async {
+    if (isGameOver() || opponent.health == 0) {
+      return;
+    }
     for (var monster in cpu.monsters) {
       //No monster in spot so no attack
       if (monster == null) {
@@ -272,7 +356,7 @@ class CPU {
         if (opponent.monsters.isEmpty ||
             !opponent.monsters.any((w) => w != null)) {
           monster.attackPlayer(opponent, battleLog);
-          if(opponent.health == 0){
+          if (opponent.health == 0) {
             return;
           }
         } else {
@@ -301,5 +385,126 @@ class CPU {
         }
       }
     }
+  }
+
+  static Future<void> cpuMediumAttackWithAllActiveMonsters(
+      CpuPlayer cpu,
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver) async {
+    if (isGameOver() || opponent.health == 0) {
+      return;
+    }
+
+    List<MonsterCard> activeMonsters =
+        cpu.monsters.where((m) => m != null).map((m) => m!).toList();
+    List<MonsterCard> opponentMonsters =
+        opponent.monsters.where((m) => m != null).map((m) => m!).toList();
+
+    bool isAggressive = cpu.strategy == CpuStrategy.offensive;
+    bool isDefensive = cpu.strategy == CpuStrategy.defensive;
+
+    for (var monster in activeMonsters) {
+      if (!monster.canAttack()) continue;
+
+      opponentMonsters =
+          opponent.monsters.where((m) => m != null).map((m) => m!).toList();
+      // Opponent has no monsters? Attack player directly!
+      if (opponentMonsters.isEmpty) {
+        monster.attackPlayer(opponent, battleLog);
+        updateGameState();
+        await Future.delayed(Duration(milliseconds: 500));
+        if (isGameOver()) return;
+        continue;
+      }
+
+      // Opponent has monsters, so attack one of them based on strategy
+      MonsterCard target;
+
+      if (isAggressive) {
+        // Try to finish off a low-HP enemy first
+        MonsterCard? killableTarget;
+        if (opponentMonsters
+            .any((enemy) => enemy.currentHealth <= monster.attack)) {
+          opponentMonsters
+              .firstWhere((enemy) => enemy.currentHealth <= monster.attack);
+        }
+
+        target = killableTarget ??
+            opponentMonsters.reduce((a, b) => a.attack > b.attack
+                ? a
+                : b); // Otherwise, hit the strongest enemy
+      } else if (isDefensive) {
+        // Focus on the strongest enemy first
+        target = opponentMonsters
+            .reduce((a, b) => a.currentHealth > b.currentHealth ? a : b);
+      } else {
+        // Balanced: Attack the weakest enemy
+        target = opponentMonsters
+            .reduce((a, b) => a.currentHealth < b.currentHealth ? a : b);
+      }
+
+      await cpu.attackOpponentMonster(
+          monster, opponent, target, battleLog, updateGameState);
+
+      updateGameState();
+      await Future.delayed(Duration(milliseconds: 500));
+      if (isGameOver()) return;
+    }
+  }
+
+  static int getCardPriority(GameCard card, CpuPlayer cpu) {
+    if (cpu.strategy == CpuStrategy.random) {
+      return Random().nextInt(100);
+    }
+
+    bool isAggressive = cpu.strategy == CpuStrategy.offensive;
+    bool isDefensive = cpu.strategy == CpuStrategy.defensive;
+    bool isBalanced = cpu.strategy == CpuStrategy.balanced;
+
+    if (card.isAction()) {
+      switch ((card as ActionCard).actionCardType) {
+        case ActionCardType.draw:
+          return 100; // Always play draw cards first
+        case ActionCardType.stealRandomCardFromOpponentHand:
+          return isAggressive
+              ? 95
+              : (isBalanced ? 85 : 80); // Balanced in the middle
+        default:
+          return 50; // Other actions are mid-priority
+      }
+    }
+
+    if (card.isUpgrade()) {
+      switch ((card as UpgradeCard).upgradeCardType) {
+        case UpgradeCardType.boostAtk:
+          return isAggressive
+              ? 75
+              : (isBalanced ? 65 : 55); // Balanced in between
+        case UpgradeCardType.effectShield:
+          return isDefensive ? 80 : (isBalanced ? 70 : 60);
+        case UpgradeCardType.heal:
+          return isDefensive ? 85 : (isBalanced ? 65 : 50);
+      }
+    }
+
+    if (card.isMonster()) {
+      int attackValue = card.toMonster().attack;
+      int basePrio = 50 + (attackValue * 5); // Adjust base priority
+
+      // Reduce priority for very weak monsters (attack 1-2)
+      if (attackValue <= 2) basePrio -= 10;
+
+      // Aggressive CPUs push monster priority higher
+      if (isAggressive) return basePrio + 10;
+
+      // Defensive CPUs hesitate to play monsters unless they have defenses
+      if (isDefensive) return basePrio - 10;
+
+      return basePrio; // Balanced CPU gets normal priority
+    }
+
+    return 0; // Unknown cards get lowest priority
   }
 }

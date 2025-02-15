@@ -8,7 +8,7 @@
         "type": "monster",
         "health": 2,
         "attack": 2,
-        "cost": 2,
+        "cost": 3,
         "shortDescription": null,
         "fullDescription": "A penguin mage",
         "mascotEffects": {
@@ -31,7 +31,7 @@
         "type": "monster",
         "health": 3,
         "attack": 1,
-        "cost": 2,
+        "cost": 3,
         "shortDescription": null,
         "fullDescription": "A fire dog",
         "mascotEffects": {
@@ -54,7 +54,7 @@
         "type": "monster",
         "health": 3,
         "attack": 1,
-        "cost": 2,
+        "cost": 3,
         "summonEffect": {
           "type": "swarm",
           "value": "monster_mushroom_boy"
@@ -104,7 +104,7 @@
         "type": "monster",
         "health": 1,
         "attack": 1,
-        "cost": 1,
+        "cost": 2,
         "shortDescription": null,
         "fullDescription": "This cute little water droplet is just happy to be there.",
         "mascotEffects": {
@@ -127,7 +127,7 @@
         "type": "monster",
         "health": 4,
         "attack": 1,
-        "cost": 3,
+        "cost": 4,
         "shortDescription": null,
         "fullDescription": "A slow but sturdy seal, radiating an icy chill. On summon: Freeze one random enemy for 1 turn.",
         "summonEffect": {
@@ -148,7 +148,7 @@
         "type": "monster",
         "health": 1,
         "attack": 4,
-        "cost": 3,
+        "cost": 4,
         "shortDescription": null,
         "fullDescription": "This tornado is ready for a fight. On summon: one random enemy is blown from the field back into the hand.",
         "summonEffect": {
@@ -169,7 +169,7 @@
         "type": "monster",
         "health": 1,
         "attack": 1,
-        "cost": 1,
+        "cost": 2,
         "shortDescription": null,
         "fullDescription": "BRAAAAAAAAAAAAAIIIIINSSSSS",
         "mascotEffects": {
@@ -183,7 +183,29 @@
             "value": "1;monster_zombie"
           }
         }
-      }
+      },
+      {
+        "id": "monster_magma_golem",
+        "rarity": "Uncommon",
+        "name": "Magma Golem",
+        "imagePath": "assets/images/monsters/MagmaGolem.png",
+        "type": "monster",
+        "health": 5,
+        "attack": 2,
+        "cost": 5,
+        "fullDescription": "A powerful golem forged from molten magma.",
+        "mascotEffects": {
+          "startingHealth": 6,
+          "startingMana": 2,
+          "regainManaPerTurn": 1,
+          "additionalEffect": {
+            "name": "Molten Fury",
+            "description": "When this monster is attacked, it deals 1 damage to the attacking monster.",
+            "type": "dealDamageWhenAttacked",
+            "value": "1"
+          }
+        }
+      }      
     ],
     "upgrades": [
       {

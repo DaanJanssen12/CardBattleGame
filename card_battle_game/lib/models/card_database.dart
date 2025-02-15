@@ -43,14 +43,14 @@ class CardDatabase {
       }
     } else {
       switch (playStyle!) {
-        case CpuStrategy.random:
-          deck = await generateDeckByPercentages(level!, amount, 33, 33, 33);
-          break;
         case CpuStrategy.defensive:
           deck = await generateDeckByPercentages(level!, amount, 40, 40, 20);
           break;
         case CpuStrategy.offensive:
           deck = await generateDeckByPercentages(level!, amount, 50, 25, 25);
+          break;
+        default:
+          deck = await generateDeckByPercentages(level!, amount, 33, 33, 33);
           break;
       }
     }
