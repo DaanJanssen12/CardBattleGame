@@ -62,7 +62,7 @@ class UserStorage {
     await saveUserData(data);
   }
 
-  static Future<void> endGame(int stage, GameCard? reward) async {
+  static Future<int> endGame(int stage, GameCard? reward) async {
     var data = await getUserData();
     if (stage > data.highscore) {
       data.highscore = stage;
@@ -72,6 +72,8 @@ class UserStorage {
     }
     data.activeGame = null;
     await saveUserData(data);
+
+    return data.highscore;
   }
 
   static Future<void> updateActiveGame(Game game) async {
@@ -111,8 +113,8 @@ class UserData {
   }
 
   Future<void> endGame(int currentStage, GameCard? reward) async {
-    await UserStorage.endGame(currentStage, reward);
     activeGame = null;
+    highscore = await UserStorage.endGame(currentStage, reward);
   }
 
   Map<String, dynamic> toJson() {
@@ -195,25 +197,11 @@ class Game {
   Future<CpuPlayer> initCPU() async {
     var cpuPlayer = await CpuDatabase.getRandomCpuPlayer(stage, versedCPUs);
     if (cpuPlayer == null) {
-      return await generateNewCPU();
+      return await CpuDatabase.generateCPU(stage);
     }
     await cpuPlayer.init();
     versedCPUs.add(cpuPlayer.id ?? Uuid().v4());
     return cpuPlayer;
-  }
-
-  Future<CpuPlayer> generateNewCPU() async {
-    var cpu = CpuPlayer(name: 'Enemy');
-    if (stage <= 1) {
-      cpu.level = CpuLevels.easy;
-      cpu.strategy = CpuStrategy.random;
-    } else {
-      cpu.level = CpuLevels.easy;
-      cpu.strategy =
-          CpuStrategy.values[Random().nextInt(CpuStrategy.values.length)];
-    }
-    await cpu.generateDeck();
-    return cpu;
   }
 
   factory Game.fromJson(Map<String, dynamic> json) {

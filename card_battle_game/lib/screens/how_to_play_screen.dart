@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/material.dart';
 
 class HowToPlayScreen extends StatelessWidget {
@@ -56,7 +57,8 @@ class HowToPlayScreen extends StatelessWidget {
             '1. Every game starts with both deck mascots being summoned in the middle monster zone.\n'
             '2. To decide who goes first we toss a coin.\n'
             '3. Use your abilities, move pieces, or play cards strategically.\n'
-            '4. The match ends when one player reaches 0 health.',
+            '4. The match ends when one player reaches 0 health.\n\n'
+            'You have a mana limit of ${Player.maxMana} and a hand limit of ${Player.maxHandSize}'
           ),
         ],
       ),

@@ -10,7 +10,7 @@ class GameBoardWidget extends StatefulWidget {
   final bool isPlayersTurn;
   final Function(GameCard, int) onCardDrop;
   final Function(GameCard) onCardTap;
-  final Function(MonsterCard, Player, int) onMonsterAttack;
+  final Function(MonsterCard, int) onMonsterAttack;
 
   const GameBoardWidget({
     super.key,
@@ -39,7 +39,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
   // Handle drag end for attacking an enemy monster
   void endDrag(int index) {
     if (draggingMonster != null) {
-      widget.onMonsterAttack(draggingMonster!, widget.enemy, index);
+      widget.onMonsterAttack(draggingMonster!, index);
     }
     setState(() {
       draggingMonster = null; // Reset dragging monster after attack

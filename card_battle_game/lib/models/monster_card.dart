@@ -87,6 +87,9 @@ class MonsterCard extends GameCard {
 
   void attackPlayer(Player player, List<String> battleLog) {
     player.health--;
+    if(player.health < 0){
+      player.health = 0;
+    }
     hasAttacked = true;
     battleLog.add('$name attacked ${player.name} directly');
   }
@@ -109,9 +112,13 @@ class MonsterCard extends GameCard {
       if (effect.type == GameEffectType.freeze) {
         hasAttacked = true;
       }
+    }
+  }
+
+  Future<void> endTurn() async{
+    for (var effect in effects) {
       effect.value--;
     }
-
     effects = effects.any((a) => a.value > 0)
         ? effects.where((w) => w.value > 0).toList()
         : [];

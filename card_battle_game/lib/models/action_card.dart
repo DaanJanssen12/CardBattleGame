@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:card_battle_game/models/action_card_type.dart';
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/game_effect.dart';
 import 'package:card_battle_game/models/player.dart';
 
 class ActionCard extends GameCard {
@@ -40,6 +41,10 @@ class ActionCard extends GameCard {
         }
         break;
       case ActionCardType.drawNotFromDeck:
+        if (extraData == null) {
+          print('EXTRA DATA NULL WITH drawNotFromDeck actioncard');
+          return;
+        }
         var cardIds = extraData!.split(";");
         var cards = await CardDatabase.getCards(cardIds);
         for (int i = 0; i < value; i++) {
@@ -60,6 +65,15 @@ class ActionCard extends GameCard {
         break;
       case ActionCardType.gainMana:
         player.mana += value;
+        break;
+      case ActionCardType.showOpponentHand:
+        break;
+      case ActionCardType.freezeOpponent:
+        for (var monster in opponent.monsters) {
+          if (monster != null) {
+            monster.effects.add(GameEffect(GameEffectType.freeze, value));
+          }
+        }
         break;
     }
   }

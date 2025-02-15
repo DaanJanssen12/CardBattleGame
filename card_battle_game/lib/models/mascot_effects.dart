@@ -104,6 +104,11 @@ class MascotAdditionalEffect {
           await apply(mascotMonster, player, upgrade, opponent, battleLog);
         }
         break;
+      case MascotEffectTriggers.faintOpponentMonster:
+        if(type == MascotAdditionalEffectType.summonWhenFaintOpponentMonster){
+          await apply(mascotMonster, player, upgrade, opponent, battleLog);
+        }
+        break;
       default:
         break;
     }
@@ -118,7 +123,7 @@ class MascotAdditionalEffect {
         break;
       case MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked:
         var intVal = int.parse(value);
-        mascotMonster.attack += intVal;
+        mascotMonster.currentAttack += intVal;
         break;
       case MascotAdditionalEffectType.summonAtStartOfTurn:
         if (player.monsters.any((a) => a == null)) {

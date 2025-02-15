@@ -75,7 +75,7 @@ extension SummonEffectTypeExtension on SummonEffectType {
   // Convert a string to an enum value
   static SummonEffectType fromString(String str) {
     return SummonEffectType.values.firstWhere(
-      (e) => e.toString().split('.').last == str.toLowerCase(),
+      (e) => e.toString().split('.').last.toLowerCase() == str.toLowerCase(),
       orElse: () => SummonEffectType.swarm, // Default value
     );
   }

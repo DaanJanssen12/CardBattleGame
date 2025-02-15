@@ -2,7 +2,9 @@ enum ActionCardType {
   draw,
   drawNotFromDeck,
   stealRandomCardFromOpponentHand,
-  gainMana
+  gainMana,
+  showOpponentHand,
+  freezeOpponent
 }
 
 extension ActionCardTypeExtension on ActionCardType {

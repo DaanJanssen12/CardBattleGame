@@ -1,12 +1,10 @@
 import 'package:card_battle_game/models/card.dart';
 import 'package:card_battle_game/models/cpu.dart';
-import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/player.dart';
+import 'package:card_battle_game/models/stage_match.dart';
 import 'package:card_battle_game/models/user_storage.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:card_battle_game/screens/stage_selection_screen.dart';
-import 'package:card_battle_game/services/notification_service.dart';
-import 'package:card_battle_game/services/sound_player_service.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:card_battle_game/widgets/coin_flip_widget.dart';
@@ -25,16 +23,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   bool _isLoading = true;
-  int turn = 1;
-  bool addTurn = false;
-  bool gameEnded = false;
-  List<String> battleLog = [];
-  Player player = Player(name: 'Player');
-  CpuPlayer enemy = CpuPlayer(name: 'Enemy');
-  bool playerTurn = true;
-  String message = "";
-  GameCard? selectedCard;
-  SoundPlayerService soundPlayerService = SoundPlayerService();
+  late StageMatch match;
 
   @override
   void initState() {
@@ -43,20 +32,29 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _loadData() async {
-    player = widget.userData.activeGame!.player;
-    enemy = await widget.userData.activeGame!.initCPU();
+    var player = widget.userData.activeGame!.player;
+    var opponent = await widget.userData.activeGame!.initCPU();
     setState(() {
       _isLoading = false;
     });
-    await initGame();
+    await initGame(player, opponent);
   }
 
-  Future<void> initGame() async {
-    battleLog.add('Game Started');
-    await player.startGame(battleLog, enemy);
-    await enemy.startGame(battleLog, player);
-    setState(() {});
+  Future<void> initGame(Player player, CpuPlayer opponent) async {
+    match = StageMatch(player, opponent, [], () => {
+      setState(() {
+        
+      })
+    }, showDeckOverlay, endGame, context);
+    await match.init();
     showCoinFlipDialog();
+  }
+
+  void endGame(bool playerWon){
+    if(!playerWon){
+      widget.userData.activeGame!.playerHasLost = true;
+    }
+    toStageSelection();
   }
 
   void showBattleLog() async {
@@ -75,9 +73,9 @@ class _GameScreenState extends State<GameScreen> {
                 Expanded(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: battleLog.length,
+                    itemCount: match.battleLog.length,
                     itemBuilder: (context, index) {
-                      return battleLog[index] == '-'
+                      return match.battleLog[index] == '-'
                           ? Padding(
                               padding: EdgeInsets.symmetric(vertical: 4),
                               child: Divider(
@@ -91,7 +89,7 @@ class _GameScreenState extends State<GameScreen> {
                               child: Padding(
                                   padding: EdgeInsets.all(8),
                                   child: Text(
-                                    battleLog[index],
+                                    match.battleLog[index],
                                     style: TextStyle(fontSize: 16),
                                   )),
                             );
@@ -120,181 +118,31 @@ class _GameScreenState extends State<GameScreen> {
       builder: (BuildContext context) {
         return CoinFlipWidget(onFlipComplete: (bool isPlayerFirst) async {
           setState(() {
-            playerTurn = isPlayerFirst;
-            if (playerTurn) {
-              battleLog.add('${player.name} won the coin toss');
+            if (isPlayerFirst) {
+              match.log('${match.player.name} won the coin toss');
             } else {
-              battleLog.add('${enemy.name} won the coin toss');
+              match.log('${match.opponent.name} won the coin toss');
             }
           });
-
-          // Proceed with normal game initialization
-          setState(() {
-            player.drawCard([]);
-            player.drawCard([]);
-            enemy.drawCard([]);
-            enemy.drawCard([]);
-          });
-
-          battleLog.add('-');
-          battleLog.add('TURN $turn');
-          battleLog.add(
-              playerTurn ? "${player.name}'s Turn" : "${enemy.name}'s Turn");
-
-          if (playerTurn) {
-            startPlayerTurn(player);
-          } else {
-            await enemyTurn(enemy);
-          }
+          match.setTurnPlayer(isPlayerFirst);
+          match.start();
         });
       },
     );
   }
 
-  void nextTurn() async {
-    if (gameEnded) {
-      return;
-    }
-    battleLog.add('-');
-    if (addTurn) {
-      turn++;
-      addTurn = false;
-      battleLog.add('TURN $turn');
-      battleLog.add('-');
-    } else {
-      addTurn = true;
-    }
-    setState(() {
-      playerTurn = !playerTurn;
-      battleLog
-          .add(playerTurn ? "${player.name}'s Turn" : "${enemy.name}'s Turn");
-    });
-
-    if (playerTurn) {
-      startPlayerTurn(player);
-    } else {
-      await enemyTurn(enemy);
-    }
-  }
-
-  void startPlayerTurn(Player player) {
-    player.startTurn(enemy, battleLog);
-    setState(() {});
-
-    showDeckOverlay();
-  }
-
-  Future<void> enemyTurn(CpuPlayer enemy) async {
-    await Future.delayed(Duration(seconds: 1));
-    enemy.startTurn(player, battleLog);
-    setState(() {
-      enemy.drawCard(battleLog);
-    });
-    await Future.delayed(Duration(seconds: 1));
-    await CPU.executeTurn(
-        enemy,
-        player,
-        () {
-          setState(() {
-            checkGameEnd();
-          });
-        },
-        battleLog,
-        () {
-          return gameEnded;
-        });
-    setState(() {});
-    await Future.delayed(Duration(seconds: 1));
-    nextTurn(); // Continue to the next turn
-  }
-
-  void playCard(GameCard card, int monsterZoneIndex) async {
-    var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
-    if (canPlayCard.$1) {
-      await player.playCard(card, monsterZoneIndex, battleLog, enemy);
-      setState(() {});
-      soundPlayerService.playDropSound();
-    } else {
-      NotificationService.showDialogMessage(context, canPlayCard.$2,
-          title: "Can't play card!");
-    }
-  }
-
   void showCardDetails(GameCard card) {
-    setState(() {
-      selectedCard = card; // Update the selected card
-    });
-
-    // Open the dialog
     showDialog(
       context: context,
-      barrierDismissible: true, // Allows dismiss by tapping outside
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return CardDetailsDialog(card: card);
       },
     );
   }
 
-  // Handle the attack by dragging a monster card to an enemy monster zone
-  void attackMonster(
-      MonsterCard attackingMonster, Player enemy, int targetIndex) async {
-    //soundPlayerService.playAttackSound();
-    await player.attackOpponentMonster(attackingMonster, enemy,
-        enemy.monsters[targetIndex]!, battleLog, () => {setState(() {})});
-  }
-
-  void handleAttackPlayerDirectly(
-      Player attackedPlayer, MonsterCard attackingMonster) {
-    if (!playerTurn) {
-      return;
-    }
-    setState(() {
-      attackingMonster.attackPlayer(attackedPlayer, battleLog);
-    });
-
-    Future.sync(() async {
-      await Future.delayed(Duration(milliseconds: 500));
-    }).then((_) {
-      checkGameEnd();
-    });
-  }
-
-  void checkGameEnd() {
-    //Prevent this function being called multiple times
-    if (gameEnded) {
-      return;
-    }
-    if (enemy.health <= 0) {
-      setState(() {
-        gameEnded = true;
-      });
-      NotificationService.showDialogMessage(context, 'You won!',
-          title: "Winner", callback: () async {
-        Future.sync(() async {
-          await Future.delayed(Duration(seconds: 1));
-        }).then((_) {
-          player.endGame();
-          enemy.endGame();
-          toStageSelection();
-        });
-      });
-    }
-    if (player.health <= 0) {
-      setState(() {
-        gameEnded = true;
-      });
-      NotificationService.showDialogMessage(context, 'You lost!',
-          title: "Loser", callback: () async {
-        Future.sync(() async {
-          await Future.delayed(Duration(seconds: 1));
-        }).then((_) {
-          player.endGame();
-          enemy.endGame();
-          widget.userData.activeGame!.playerHasLost = true;
-          toStageSelection();
-        });
-      });
-    }
+  void playCard(GameCard card, int monsterZoneIndex) async{
+    await match.playCard(card, monsterZoneIndex, context);
   }
 
   void toStageSelection() {
@@ -337,9 +185,9 @@ class _GameScreenState extends State<GameScreen> {
               ),
               // End Turn Button: Positioned at the top-right of the app bar
               TextButton(
-                onPressed: playerTurn ? nextTurn : null,
+                onPressed: match.isPlayersTurn ? match.endPlayerTurn : null,
                 style: TextButton.styleFrom(
-                  backgroundColor: playerTurn
+                  backgroundColor: match.isPlayersTurn
                       ? Colors.green
                       : Colors.grey, // Green when active, grey when inactive
                   shape: RoundedRectangleBorder(
@@ -382,28 +230,28 @@ class _GameScreenState extends State<GameScreen> {
                               children: [
                                 Expanded(
                                     child: PlayerInfoWidget(
-                                        player: player,
-                                        isActive: playerTurn,
+                                        player: match.player,
+                                        isActive: match.isPlayersTurn,
                                         handleAttackPlayerDirectly: null)),
                                 SizedBox(width: 16),
                                 Expanded(
                                     child: PlayerInfoWidget(
-                                        player: enemy,
-                                        isActive: !playerTurn,
+                                        player: match.opponent,
+                                        isActive: !match.isPlayersTurn,
                                         handleAttackPlayerDirectly:
-                                            handleAttackPlayerDirectly)),
+                                            match.handleAttackPlayerDirectly)),
                               ],
                             ),
                           ),
                           SizedBox(height: 12),
                           // Game Board
                           GameBoardWidget(
-                              player: player,
-                              enemy: enemy,
-                              isPlayersTurn: playerTurn,
+                              player: match.player,
+                              enemy: match.opponent,
+                              isPlayersTurn: match.isPlayersTurn,
                               onCardDrop: playCard,
                               onCardTap: showCardDetails,
-                              onMonsterAttack: attackMonster),
+                              onMonsterAttack: match.attackMonster),
                         ],
                       ),
                       // Player's Hand at the bottom of the screen
@@ -415,7 +263,7 @@ class _GameScreenState extends State<GameScreen> {
                           color: Colors.grey[
                               200], // Adding visual separation for the player hand
                           child: PlayerHandWidget(
-                              player: player, onCardTap: showCardDetails),
+                              player: match.player, onCardTap: showCardDetails),
                         ),
                       ),
                     ],
@@ -471,7 +319,7 @@ class _GameScreenState extends State<GameScreen> {
                         onTap: () {
                           GameCard? gameCard;
                           setState(() {
-                            gameCard = player.drawCard(battleLog);
+                            gameCard = match.player.drawCard(match.battleLog);
                           });
                           Navigator.of(context).pop(); // Close overlay
                           showDrawnCardAnimation(gameCard);

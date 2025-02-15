@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:card_battle_game/models/action_card.dart';
 import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/cpu.dart';
 import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/upgrade_card.dart';
 import 'package:flutter/services.dart';
@@ -30,18 +31,81 @@ class CardDatabase {
     return returnCards;
   }
 
-  static Future<List<GameCard>> generateDeck(int amount) async {
+  static Future<List<GameCard>> generateDeck(
+      int amount, CpuStrategy? playStyle, CpuLevels? level) async {
     await loadCardsFromJson(filePath);
     List<GameCard> deck = [];
-    for (var i = 0; i < amount; i++) {
-      var card = getRandomCard().clone();
-      deck.add(card);
+    if (level == null && playStyle == null) {
+      //Completely random
+      for (var i = 0; i < amount; i++) {
+        var card = getRandomCard().clone();
+        deck.add(card);
+      }
+    } else {
+      switch (playStyle!) {
+        case CpuStrategy.random:
+          deck = await generateDeckByPercentages(level!, amount, 33, 33, 33);
+          break;
+        case CpuStrategy.defensive:
+          deck = await generateDeckByPercentages(level!, amount, 40, 40, 20);
+          break;
+        case CpuStrategy.offensive:
+          deck = await generateDeckByPercentages(level!, amount, 50, 25, 25);
+          break;
+      }
     }
     if (!deck.any((card) => card.isMonster())) {
       deck.removeAt(0);
       deck.add(getRandomCard(type: 'monster').clone());
     }
     return deck;
+  }
+
+  static Future<List<GameCard>> generateDeckByPercentages(
+      CpuLevels level,
+      int amountOfCards,
+      int monsterCardsPercentage,
+      int upgradeCardsPercentage,
+      int actionCardsPercentage) async {
+    List<GameCard> list = [];
+    addCards(list, getAmount(amountOfCards, monsterCardsPercentage), 'monster',
+        level);
+    addCards(list, getAmount(amountOfCards, upgradeCardsPercentage), 'upgrade',
+        level);
+    addCards(
+        list, getAmount(amountOfCards, actionCardsPercentage), 'action', level);
+    if (list.length < amountOfCards) {
+      addCards(list, 1, 'monster', level);
+      addCards(list, 1, 'upgrade', level);
+      addCards(list, 1, 'action', level);
+    }
+    return list;
+  }
+
+  static Future<List<GameCard>> addCards(List<GameCard> listToAddTo, int amount,
+      String type, CpuLevels level) async {
+    for (var i = 0; i < amount; i++) {
+      listToAddTo
+          .add(getRandomCard(type: type, rarity: getRarity(level)).clone());
+    }
+    return listToAddTo;
+  }
+
+  static CardRarity getRarity(CpuLevels level) {
+    switch (level) {
+      case CpuLevels.easy:
+        return generateRarity(80, 20, 0, 0, 0);
+      case CpuLevels.medium:
+        return generateRarity(40, 35, 15, 5, 0);
+      case CpuLevels.hard:
+        return generateRarity(35, 30, 20, 15, 0);
+      case CpuLevels.expert:
+        return generateRarity(20, 20, 20, 20, 20);
+    }
+  }
+
+  static int getAmount(int amount, int percentage) {
+    return ((amount / 100) * percentage).floor();
   }
 
   static Future<List<GameCard>> generateRewards(int stage, int amount) async {

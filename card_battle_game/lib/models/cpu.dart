@@ -46,6 +46,12 @@ class CpuPlayer extends Player {
     cpu.id = json['id'];
     return cpu;
   }
+
+  
+  Future<void> generateDeck(int deckSize) async {
+    deck = await CardDatabase.generateDeck(deckSize, strategy, level);
+    deck.shuffle();
+  }
 }
 
 enum CpuLevels { easy, medium, hard, expert }
@@ -148,7 +154,7 @@ class CPU {
           if (cpu.canPlayCard(monsterCard, i).$1) {
             await cpu.playCard(monsterCard, i, battleLog, opponent);
             updateGameState();
-            await Future.delayed(Duration(seconds: 1));
+            await Future.delayed(Duration(milliseconds: 500));
             //Played card, do not check the other spots
             break;
           }
@@ -179,7 +185,7 @@ class CPU {
         if (cpu.canPlayCard(gameCard, i).$1) {
           await cpu.playCard(gameCard, i, battleLog, opponent);
           updateGameState();
-          await Future.delayed(Duration(seconds: 1));
+          await Future.delayed(Duration(milliseconds: 500));
           if (isGameOver()) {
             return;
           }
@@ -251,7 +257,7 @@ class CPU {
       Function updateGameState,
       List<String> battleLog,
       bool Function() isGameOver) async {
-    if (isGameOver()) {
+    if (isGameOver() || opponent.health == 0) {
       return;
     }
     for (var monster in cpu.monsters) {
@@ -266,23 +272,30 @@ class CPU {
         if (opponent.monsters.isEmpty ||
             !opponent.monsters.any((w) => w != null)) {
           monster.attackPlayer(opponent, battleLog);
+          if(opponent.health == 0){
+            return;
+          }
         } else {
           var opponentMonsters =
               opponent.monsters.where((w) => w != null).toList();
           if (cpu.strategy == CpuStrategy.random) {
             //Attack a random opponent monster
-            monster.doAttack(
+            await cpu.attackOpponentMonster(
+                monster,
+                opponent,
                 opponentMonsters[Random().nextInt(opponentMonsters.length)]!,
-                battleLog);
+                battleLog,
+                updateGameState);
           } else {
             //Attack the opponent monster with the least health
             var weakestMonster = opponentMonsters
                 .reduce((a, b) => a!.currentHealth < b!.currentHealth ? a : b);
-            monster.doAttack(weakestMonster!, battleLog);
+            await cpu.attackOpponentMonster(
+                monster, opponent, weakestMonster!, battleLog, updateGameState);
           }
         }
         updateGameState();
-        await Future.delayed(Duration(seconds: 1));
+        await Future.delayed(Duration(milliseconds: 500));
         if (isGameOver()) {
           return;
         }

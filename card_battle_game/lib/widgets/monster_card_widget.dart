@@ -84,7 +84,7 @@ class MonsterCardWidget extends StatelessWidget {
             ),
           ),
         ),
-        if(monster!.isMascot)...[
+        if(monster!.isMascot && !monster!.isOpponentCard)...[
           Positioned(
           top: -6, // Moves the crown above
           right: -6, // Moves it slightly outward for floating effect

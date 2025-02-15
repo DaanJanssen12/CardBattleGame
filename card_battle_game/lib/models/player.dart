@@ -6,6 +6,9 @@ import 'package:card_battle_game/models/monster_card.dart';
 import 'package:card_battle_game/models/upgrade_card.dart';
 
 class Player {
+  static int maxMana = 10;
+  static int maxHandSize = 6;
+
   String name;
   int health;
   int mana;
@@ -83,19 +86,14 @@ class Player {
     };
   }
 
-  Future<void> generateDeck() async {
-    deck = await CardDatabase.generateDeck(5);
-    deck.shuffle();
-  }
-
-  void endGame() {
+  void endGame(Player opponent) {
     for (var monster in monsters) {
       if (monster != null) {
-        faintMonster(monster.monsterZoneIndex!, [], null);
+        faintMonster(monster.monsterZoneIndex!, [], opponent);
       }
     }
-    shuffleDiscardPile();
     shuffleHandIntoDeck();
+    shuffleDiscardPile();
   }
 
   void setMascot(MonsterCard card) {
@@ -115,9 +113,6 @@ class Player {
     }
     health = startingHealth;
     mana = startingMana;
-    print('MASCOT: $mascot');
-    print('MASCOT CARD: ${this.mascotCard.id}');
-    print('DECK: ${this.deck.length}');
     var mascotCard = deck.any((a) => a.isMonster() && a.toMonster().isMascot)
         ? deck.firstWhere((w) => w.isMonster() && w.toMonster().isMascot)
         : deck.firstWhere((w) => w.id == mascot);
@@ -126,8 +121,23 @@ class Player {
     deck.shuffle();
   }
 
-  Future<void> startTurn(Player opponent, List<String> battleLog) async {
+  Future<void> startTurn(
+      int currentTurn, Player opponent, List<String> battleLog) async {
+    switch (currentTurn) {
+      case >= 1 && < 3:
+        mana += 1;
+        break;
+      case >= 3 && < 5:
+        mana += 2;
+        break;
+      case >= 5:
+        mana += 3;
+        break;
+    }
     mana += regainManaPerTurn;
+    if (mana > maxMana) {
+      mana = maxMana;
+    }
 
     for (var monster in monsters.where((w) => w != null)) {
       await monster!.startnewTurn(this, opponent, battleLog);
@@ -135,6 +145,16 @@ class Player {
     if (deck.isEmpty || deck.isEmpty) {
       shuffleDiscardPile();
     }
+  }
+
+  Future<void> endTurn() async {
+    for (var monster in monsters.where((w) => w != null)) {
+      await monster!.endTurn();
+    }
+  }
+
+  bool canDraw() {
+    return hand.length < maxHandSize;
   }
 
   GameCard? drawCard(List<String> battleLog) {
@@ -158,6 +178,9 @@ class Player {
   }
 
   void shuffleDiscardPile() {
+    if (discardPile.isEmpty) {
+      return;
+    }
     deck.addAll(discardPile);
     discardPile.clear();
     deck.shuffle();
@@ -230,22 +253,13 @@ class Player {
       await actionCard.doAction(this, opponent);
       battleLog.add('${card.name} played');
     }
-    print('Is opponent card: ${card.isOpponentCard}');
-    if (card.isOpponentCard) {
+    if (card.isOpponentCard && !card.isMonster()) {
       opponent.discardPile.add(card);
     }
 
-    print('Is one time use: ${card.oneTimeUse}');
-    if (card.oneTimeUse) {
-      return;
+    if (!card.oneTimeUse && !card.isOpponentCard && !card.isMonster()) {
+      discardPile.add(card);
     }
-    if (card.isOpponentCard) {
-      return;
-    }
-    if (card.isMonster()) {
-      return;
-    }
-    discardPile.add(card);
   }
 
   Future<void> summonMonster(
@@ -283,20 +297,24 @@ class Player {
       Function updateScreen) async {
     var opponentMonsterFainted =
         attackingMonster.doAttack(opponentMonster, battleLog);
-    
-      print('FAINTED? ${opponentMonsterFainted}');
+
     updateScreen();
     if (opponentMonsterFainted) {
-      print('FAINT ${opponentMonster.id}');
       await Future.delayed(Duration(milliseconds: 500));
       opponent.faintMonster(opponentMonster.monsterZoneIndex!, battleLog, this);
       updateScreen();
     }
 
     if (attackingMonster.isMascot &&
-        attackingMonster.mascotEffects.additionalEffect != null) {
-      await attackingMonster.mascotEffects.additionalEffect!
-          .apply(attackingMonster, this, null, opponent, battleLog);
+        attackingMonster.mascotEffects.additionalEffect != null &&
+        opponentMonsterFainted) {
+      await attackingMonster.mascotEffects.additionalEffect!.trigger(
+          MascotEffectTriggers.faintOpponentMonster,
+          attackingMonster,
+          this,
+          null,
+          opponent,
+          battleLog);
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
     }

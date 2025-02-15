@@ -6,15 +6,15 @@
         "name": "Penguin Mage",
         "imagePath": "assets/images/monsters/PenguinMage.png",
         "type": "monster",
-        "health": 1,
+        "health": 2,
         "attack": 2,
         "cost": 2,
         "shortDescription": null,
         "fullDescription": "A penguin mage",
         "mascotEffects": {
           "startingHealth": 4,
-          "startingMana": 1,
-          "regainManaPerTurn": 2,
+          "startingMana": 3,
+          "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Arcane Infusion",
             "description": "Gain 1 mana whenever an upgrade is applied to Penguin Mage",
@@ -37,7 +37,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 2,
-          "regainManaPerTurn": 1,
+          "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Blazing Spirit",
             "description": "Gains +1 attack at the start of each turn if it attacked last turn",
@@ -64,7 +64,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 1,
-          "regainManaPerTurn": 2,
+          "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Spore Burst",
             "description": "Summon 1 Fun Guy at the start of each turn",
@@ -87,7 +87,7 @@
         "mascotEffects": {
           "startingHealth": 6,
           "startingMana": 2,
-          "regainManaPerTurn": 1,
+          "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Mycelium Network",
             "description": "When an upgrade is applied to this Fun Guy, copy it onto another random Fun Guy you control",
@@ -108,9 +108,9 @@
         "shortDescription": null,
         "fullDescription": "This cute little water droplet is just happy to be there.",
         "mascotEffects": {
-          "startingHealth": 3,
-          "startingMana": 4,
-          "regainManaPerTurn": 1,
+          "startingHealth": 4,
+          "startingMana": 2,
+          "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Refreshing Presence",
             "description": "Whenever Droplet is healed, draw a card",
@@ -137,7 +137,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 1,
-          "regainManaPerTurn": 2
+          "regainManaPerTurn": 0
         }
       },
       {
@@ -158,7 +158,7 @@
         "mascotEffects": {
           "startingHealth": 3,
           "startingMana": 3,
-          "regainManaPerTurn": 2
+          "regainManaPerTurn": 0
         }
       },
       {
@@ -175,7 +175,7 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 3,
-          "regainManaPerTurn": 1,
+          "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Zombie Apocalypse",
             "description": "Whenever this Zombie faints an opponent monster, summon a Zombie on your side of the field.",
@@ -212,7 +212,7 @@
       },
       {
         "id": "upgrade_health_potion",
-        "rarity": "Rare",
+        "rarity": "Uncommon",
         "name": "Health Potion",
         "imagePath": "assets/images/upgrades/HealthPotion.png",
         "type": "upgrade",
@@ -236,11 +236,11 @@
       },
       {
         "id": "upgrade_raspberry",
-        "rarity": "Uncommon",
+        "rarity": "Rare",
         "name": "Raspberry",
         "imagePath": "assets/images/upgrades/Raspberry.png",
         "type": "upgrade",
-        "cost": 1,
+        "cost": 0,
         "upgradeCardType": "boostAtk",
         "value": 1,
         "shortDescription": "Boost a monster's attack by 1.",
@@ -248,11 +248,11 @@
       },
       {
         "id": "upgrade_blueberry",
-        "rarity": "Uncommon",
+        "rarity": "Rare",
         "name": "Blueberry",
         "imagePath": "assets/images/upgrades/Blueberry.png",
         "type": "upgrade",
-        "cost": 1,
+        "cost": 0,
         "upgradeCardType": "heal",
         "value": 1,
         "shortDescription": "Heal a monster by 1.",
@@ -275,8 +275,8 @@
     "actions": [
       {
         "id": "action_draw",
-        "rarity": "Uncommon",
-        "name": "Draw",
+        "rarity": "Common",
+        "name": "Quick Draw",
         "imagePath": "assets/images/actions/Draw.png",
         "type": "action",
         "cost": 1,
@@ -284,6 +284,18 @@
         "value": 1,
         "shortDescription": "Draw 1 card from your deck.",
         "fullDescription": "Draw 1 card from your deck."
+      },
+      {
+        "id": "action_draw_twice",
+        "rarity": "Uncommon",
+        "name": "Fate Draw",
+        "imagePath": "assets/images/actions/DrawTwice.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "draw",
+        "value": 2,
+        "shortDescription": "Draw 2 cards from your deck.",
+        "fullDescription": "Draw 2 cards from your deck."
       },
       {
         "id": "action_harvest",
@@ -336,6 +348,32 @@
         "extraData": null,
         "shortDescription": "Gain 3 mana.",
         "fullDescription": "A sudden influx of energy courses through you. You gain 3 mana."
+      },
+      {
+        "id": "action_spyglass",
+        "rarity": "Uncommon",
+        "name": "Spyglass",
+        "imagePath": "assets/images/actions/Spyglass.png",
+        "type": "action",
+        "cost": 2,
+        "actionCardType": "showOpponentHand",
+        "value": 0,
+        "extraData": null,
+        "shortDescription": "Look at your opponent's hand.",
+        "fullDescription": "With this spyglass you can look at the cards in your opponent's hand"
+      },
+      {
+        "id": "action_blizzard",
+        "rarity": "Uncommon",
+        "name": "Blizzard",
+        "imagePath": "assets/images/actions/Blizzard.png",
+        "type": "action",
+        "cost": 2,
+        "actionCardType": "freezeOpponent",
+        "value": 1,
+        "extraData": null,
+        "shortDescription": "Freeze all opponent monsters",
+        "fullDescription": "You summon a blizzard which freezes your opponent's monsters for 1 turn"
       }
     ]
 }

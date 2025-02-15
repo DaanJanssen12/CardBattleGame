@@ -32,9 +32,58 @@ class CpuDatabase {
               w.possibleFromStage <= stage && w.possibleUntillStage >= stage)
           .toList();
       if (possibleCpuPlayers.isEmpty) {
-        return await getRandomCpuPlayer(null, excludeCpuIds);
+        return await generateCPU(stage);
       }
       return possibleCpuPlayers[Random().nextInt(possibleCpuPlayers.length)];
     }
+  }
+
+  static Future<CpuPlayer> generateCPU(int? stage) async{
+    var level = CpuLevels.easy;
+    var strategy = CpuStrategy.random;
+    int deckSize = 5;
+    if (stage == null) {
+      level = CpuLevels.values[Random().nextInt(CpuLevels.values.length)];
+      strategy =
+          CpuStrategy.values[Random().nextInt(CpuStrategy.values.length)];
+      deckSize = Random().nextInt(15);
+    } else {
+      switch (stage) {
+        case > 0 && <= 5:
+          level = CpuLevels.easy;
+          strategy = CpuStrategy.random;
+          break;
+        case > 5 && <= 15:
+          level = CpuLevels.medium;
+          strategy = getRandomNonRandomStrategy();
+          deckSize = Random().nextInt(8) + 5;
+          break;
+        case > 15:
+          level = CpuLevels.hard;
+          strategy = getRandomNonRandomStrategy();
+          deckSize = Random().nextInt(15) + 5;
+          break;
+      }
+    }
+
+    var cpu = CpuPlayer(name: 'CPU');
+    cpu.strategy = strategy;
+    cpu.level = level;
+    await cpu.generateDeck(deckSize);
+    print('INIT CPU');
+    print('LEVEL: $level');
+    print('STRATEGY: $strategy');
+    print('DECKSIZE: ${cpu.deck.length}');
+    print('DECK:');
+    for(var card in cpu.deck){
+      print(card.name);
+    }
+    print('MASCOT: ${cpu.mascot}');
+    return cpu;
+  }
+
+  static CpuStrategy getRandomNonRandomStrategy() {
+    var options = [CpuStrategy.defensive, CpuStrategy.offensive];
+    return options[Random().nextInt(options.length)];
   }
 }

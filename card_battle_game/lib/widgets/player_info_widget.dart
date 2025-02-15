@@ -6,7 +6,7 @@ import 'package:card_battle_game/models/player.dart';
 class PlayerInfoWidget extends StatefulWidget {
   final Player player;
   final bool isActive;
-  final Function(Player, MonsterCard)? handleAttackPlayerDirectly;
+  final Function(MonsterCard)? handleAttackPlayerDirectly;
 
   const PlayerInfoWidget({
     super.key,
@@ -131,7 +131,7 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
           if (widget.handleAttackPlayerDirectly != null &&
               (widget.player.monsters.isEmpty ||
                   widget.player.monsters.every((e) => e == null))) {
-            widget.handleAttackPlayerDirectly!(widget.player, details.data);
+            widget.handleAttackPlayerDirectly!(details.data);
             setState(() {
               isHovered = false;
             });

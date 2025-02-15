@@ -91,8 +91,8 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
     await UserStorage.updateActiveGame(widget.userData.activeGame!);
   }
 
-  void endGame(GameCard? reward) async {
-    widget.userData.endGame(currentStage, reward);
+  Future<void> endGame(GameCard? reward) async {
+    await widget.userData.endGame(currentStage, reward);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -233,7 +233,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
                             ),
                           )
                         : Text(
-                            _selectedReward!.shortDescription ?? "",
+                            _selectedReward!.fullDescription ?? _selectedReward!.shortDescription ?? "",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
