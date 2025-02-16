@@ -120,6 +120,61 @@
         }
       },
       {
+        "id": "monster_sheep",
+        "rarity": "Common",
+        "name": "Sheep",
+        "imagePath": "assets/images/monsters/Sheep.png",
+        "type": "monster",
+        "health": 1,
+        "attack": 0,
+        "cost": 1,
+        "shortDescription": null,
+        "fullDescription": "Just a sheep.",
+        "mascotEffects": {
+          "startingHealth": 6,
+          "startingMana": 2,
+          "regainManaPerTurn": 0
+        }
+      },
+      {
+        "id": "monster_worker_bee",
+        "rarity": "Common",
+        "name": "Worker Bee",
+        "imagePath": "assets/images/monsters/WorkerBee.png",
+        "type": "monster",
+        "health": 1,
+        "attack": 2,
+        "cost": 2,
+        "shortDescription": null,
+        "fullDescription": "This worker bee will do anything for his queen.",
+        "mascotEffects": {
+          "startingHealth": 4,
+          "startingMana": 3,
+          "regainManaPerTurn": 0
+        }
+      },
+      {
+        "id": "monster_queen_bee",
+        "rarity": "UltraRare",
+        "name": "Queen Bee",
+        "imagePath": "assets/images/monsters/QueenBee.png",
+        "type": "monster",
+        "health": 5,
+        "attack": 2,
+        "cost": 5,
+        "shortDescription": null,
+        "fullDescription": "This bee is the queen of their colony.",
+        "summonEffect": {
+          "type": "swarm",
+          "value": "monster_worker_bee"
+        },
+        "mascotEffects": {
+          "startingHealth": 5,
+          "startingMana": 2,
+          "regainManaPerTurn": 0
+        }
+      },
+      {
         "id": "monster_glacial_seal",
         "rarity": "Uncommon",
         "name": "Glacial Seal",
@@ -422,6 +477,19 @@
         "extraData": null,
         "shortDescription": "Freeze all opponent monsters",
         "fullDescription": "You summon a blizzard which freezes your opponent's monsters for 1 turn"
+      },
+      {
+        "id": "action_sheep_herder",
+        "rarity": "Uncommon",
+        "name": "Sheep Herder",
+        "imagePath": "assets/images/actions/SheepHerder.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "summon",
+        "value": 2,
+        "extraData": "monster_sheep",
+        "shortDescription": "Summon 2 sheep",
+        "fullDescription": "You summon 2 sheep to your side of the board."
       }
     ]
 }

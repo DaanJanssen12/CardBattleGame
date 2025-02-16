@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
@@ -151,9 +152,9 @@ Widget build(BuildContext context) {
                     SizedBox(
                       width: 200,
                       child: DropdownButton<String>(
-                        value: _selectedBackground,
+                        value: Constants.backgrounds.contains(_selectedBackground) ? _selectedBackground : Constants.backgrounds.first,
                         onChanged: selectBackground,
-                        items: <String>['forrest', 'plains', 'oasis']
+                        items: Constants.backgrounds
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,

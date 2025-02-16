@@ -92,7 +92,7 @@ class UserData {
   factory UserData.fromJson(Map<String, dynamic> json) {
     var data = UserData();
     data.name = json['name'];
-    data.background = json['background'] ?? "forrest.jpg";
+    data.background = json['background'] ?? "ClearSky.jpg";
     data.deck = Deck.fromJson(json['deck']);
     data.cards = json['cards'] != null
         ? (json['cards'] as List<dynamic>).map((m) => m.toString()).toList()

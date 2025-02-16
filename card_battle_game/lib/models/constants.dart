@@ -10,5 +10,6 @@ class Constants {
   static int gameAmountOfUpgradeCard = 3;
 
   //Other
-  static bool testMode = true;
+  static bool testMode = false;
+  static List<String> backgrounds = ['ClearSky', 'Liquid', 'Evening'];
 }

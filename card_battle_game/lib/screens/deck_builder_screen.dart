@@ -167,7 +167,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
                 var amount = grouped[card];
                 return LongPressDraggable<GameCard>(
                   data: card,
-                  delay: Duration(microseconds: 750),
+                  delay: Duration(microseconds: 1000),
                   feedback: Material(
                     child: SizedBox(
                       width: 100, // Fixed width for the card

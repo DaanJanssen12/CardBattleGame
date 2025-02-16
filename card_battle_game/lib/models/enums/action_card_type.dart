@@ -5,7 +5,8 @@ enum ActionCardType {
   gainMana,
   showOpponentHand,
   freezeOpponent,
-  combined
+  combined,
+  summon
 }
 
 extension ActionCardTypeExtension on ActionCardType {

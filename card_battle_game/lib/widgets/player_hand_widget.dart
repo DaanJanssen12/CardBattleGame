@@ -29,7 +29,7 @@ class PlayerHandWidget extends StatelessWidget {
               onTap: () => onCardTap(card),
               child: LongPressDraggable<GameCard>(
                 data: card,
-                delay: Duration(milliseconds: 100),
+                delay: Duration(milliseconds: 750),
                 feedback: Material(
                   color: Colors.transparent,
                   child: Container(

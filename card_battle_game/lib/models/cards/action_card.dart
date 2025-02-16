@@ -85,6 +85,21 @@ class ActionCard extends GameCard {
           }
         }
         break;
+      case ActionCardType.summon:
+        var cards = await CardDatabase.getCards([extraData!]);
+        for (int i = 0; i < value; i++) {
+          var cardToAdd = cards[0].clone();
+          cardToAdd.oneTimeUse = true;
+          for (int x = 0; x < 3; x++) {
+            var monsterZone = player.monsters[x];
+            if (monsterZone == null) {
+              await player.summonMonster(
+                  cardToAdd.toMonster(), x, [], opponent, false);
+              break;
+            }
+          }
+        }
+        break;
       case ActionCardType.combined:
         for (var effect in extraData!.split(";")) {
           if (effect.contains(":")) {
