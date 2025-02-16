@@ -1,6 +1,6 @@
-import 'package:card_battle_game/models/monster_card.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:flutter/material.dart';
-import '../models/card.dart';
+import '../models/cards/card.dart';
 import 'monster_card_widget.dart';
 
 class MonsterRowWidget extends StatelessWidget {

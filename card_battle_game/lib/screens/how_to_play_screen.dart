@@ -1,5 +1,4 @@
 import 'package:card_battle_game/models/constants.dart';
-import 'package:card_battle_game/models/player.dart';
 import 'package:flutter/material.dart';
 
 class HowToPlayScreen extends StatelessWidget {

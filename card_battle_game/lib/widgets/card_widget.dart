@@ -1,20 +1,22 @@
-import 'package:card_battle_game/models/monster_card.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../models/card.dart';
+import '../models/cards/card.dart';
 
 class CardWidget extends StatelessWidget {
   final GameCard card;
   final VoidCallback? onTap;
   final bool isHovered;
   final bool isSelected;
+  final int? amount;
 
   const CardWidget(
       {super.key,
       required this.card,
       this.onTap,
       this.isHovered = false,
-      this.isSelected = false});
+      this.isSelected = false,
+      this.amount});
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +106,30 @@ class CardWidget extends StatelessWidget {
                 size: 10, // Smaller for fitting inside
                 color: Colors.amber, // Gold color for effect
               ),
+            ),
+          ),
+        ),
+        ],
+        if(amount != null)...[
+          Positioned(
+          top: -6, // Moves the crown above
+          left: -6, // Moves it slightly outward for floating effect
+          child: Container(
+            width: 18, // Adjust size of circle
+            height: 18, // Adjust size of circle
+            decoration: BoxDecoration(
+              color: Colors.deepPurple, // Background color for crown
+              shape: BoxShape.circle,
+              border:
+                  Border.all(color: Colors.white, width: 1), // Optional border
+            ),
+            child: Center(
+              child: Text('${amount}x',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+              )),
             ),
           ),
         ),

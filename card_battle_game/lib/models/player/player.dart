@@ -1,10 +1,9 @@
-import 'package:card_battle_game/models/action_card.dart';
-import 'package:card_battle_game/models/card.dart';
-import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/cards/action_card.dart';
+import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
-import 'package:card_battle_game/models/mascot_effects.dart';
-import 'package:card_battle_game/models/monster_card.dart';
-import 'package:card_battle_game/models/upgrade_card.dart';
+import 'package:card_battle_game/models/cards/mascot_effects.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/models/cards/upgrade_card.dart';
 
 class Player {
   String name;

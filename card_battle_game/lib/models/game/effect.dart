@@ -1,8 +1,8 @@
 import 'dart:math';
-import 'package:card_battle_game/models/card_database.dart';
-import 'package:card_battle_game/models/game_effect.dart';
-import 'package:card_battle_game/models/monster_card.dart';
-import 'package:card_battle_game/models/player.dart';
+import 'package:card_battle_game/models/database/card_database.dart';
+import 'package:card_battle_game/models/game/game_effect.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/models/player/player.dart';
 
 class SummonEffect {
   late SummonEffectType type;

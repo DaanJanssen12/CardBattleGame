@@ -1,8 +1,8 @@
-import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/models/database/user_storage.dart';
 
 class MascotSelectionScreen extends StatefulWidget {
   final UserData userData;

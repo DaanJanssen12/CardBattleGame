@@ -1,9 +1,9 @@
-import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
-import 'package:card_battle_game/models/cpu.dart';
-import 'package:card_battle_game/models/player.dart';
-import 'package:card_battle_game/models/stage_match.dart';
-import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/models/player/cpu.dart';
+import 'package:card_battle_game/models/player/player.dart';
+import 'package:card_battle_game/models/game/stage_match.dart';
+import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:card_battle_game/screens/stage_selection_screen.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';

@@ -169,7 +169,7 @@
         "type": "monster",
         "health": 1,
         "attack": 1,
-        "cost": 2,
+        "cost": 1,
         "shortDescription": null,
         "fullDescription": "BRAAAAAAAAAAAAAIIIIINSSSSS",
         "mascotEffects": {
@@ -186,7 +186,7 @@
       },
       {
         "id": "monster_magma_golem",
-        "rarity": "Uncommon",
+        "rarity": "UltraRare",
         "name": "Magma Golem",
         "imagePath": "assets/images/monsters/MagmaGolem.png",
         "type": "monster",

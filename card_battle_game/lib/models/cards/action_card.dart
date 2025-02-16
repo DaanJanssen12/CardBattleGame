@@ -1,9 +1,9 @@
 import 'dart:math';
-import 'package:card_battle_game/models/action_card_type.dart';
-import 'package:card_battle_game/models/card.dart';
-import 'package:card_battle_game/models/card_database.dart';
-import 'package:card_battle_game/models/game_effect.dart';
-import 'package:card_battle_game/models/player.dart';
+import 'package:card_battle_game/models/enums/action_card_type.dart';
+import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/database/card_database.dart';
+import 'package:card_battle_game/models/game/game_effect.dart';
+import 'package:card_battle_game/models/player/player.dart';
 
 class ActionCard extends GameCard {
   ActionCardType actionCardType;

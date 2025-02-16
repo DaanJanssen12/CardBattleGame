@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:card_battle_game/models/cpu.dart';
+import 'package:card_battle_game/models/player/cpu.dart';
 import 'package:flutter/services.dart';
 
 class CpuDatabase {

@@ -1,6 +1,6 @@
-import 'package:card_battle_game/models/action_card.dart';
-import 'package:card_battle_game/models/monster_card.dart';
-import 'package:card_battle_game/models/upgrade_card.dart';
+import 'package:card_battle_game/models/cards/action_card.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/models/cards/upgrade_card.dart';
 import 'package:uuid/uuid.dart';
 
 class GameCard {
@@ -74,6 +74,14 @@ class GameCard {
     }
     return GameCard('', '', 0, null, null);
   }
+
+ @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GameCard && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
 enum CardRarity { Common, Uncommon, Rare, UltraRare, Legendary }
 

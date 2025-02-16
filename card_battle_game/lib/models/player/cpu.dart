@@ -1,12 +1,12 @@
 import 'dart:math';
-import 'package:card_battle_game/models/action_card.dart';
-import 'package:card_battle_game/models/action_card_type.dart';
-import 'package:card_battle_game/models/card.dart';
-import 'package:card_battle_game/models/card_database.dart';
-import 'package:card_battle_game/models/monster_card.dart';
-import 'package:card_battle_game/models/player.dart';
-import 'package:card_battle_game/models/upgrade_card.dart';
-import 'package:card_battle_game/models/upgrade_card_type.dart';
+import 'package:card_battle_game/models/cards/action_card.dart';
+import 'package:card_battle_game/models/enums/action_card_type.dart';
+import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/database/card_database.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/models/player/player.dart';
+import 'package:card_battle_game/models/cards/upgrade_card.dart';
+import 'package:card_battle_game/models/enums/upgrade_card_type.dart';
 
 class CpuPlayer extends Player {
   late bool isCPU;

@@ -1,9 +1,9 @@
-import 'package:card_battle_game/models/card_database.dart';
+import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
-import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
-import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 
 class StageSelectionScreen extends StatefulWidget {
@@ -15,9 +15,11 @@ class StageSelectionScreen extends StatefulWidget {
   _StageSelectionScreenState createState() => _StageSelectionScreenState();
 }
 
+enum RewardOptions { addCard, upgradeCard, skip }
+
 class _StageSelectionScreenState extends State<StageSelectionScreen> {
   GameCard? _selectedReward;
-  bool skipReward = false;
+  RewardOptions? _selectedOption;
   int currentStage =
       1; // The stage starts at 1 and increases with each completed stage
   List<GameCard> rewardCards = [];
@@ -64,30 +66,31 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
   void advanceToNextStage() async {
     if (gameOver && currentStage < rewardFromStage) {
       endGame(null);
+      return;
     }
-    if (_selectedReward != null || skipReward) {
-      if (gameOver) {
-        if (!skipReward) {
-          widget.userData.cards.add(_selectedReward!.id);
-        }
-        endGame(_selectedReward);
-      } else {
-        if (!skipReward) {
-          widget.userData.activeGame!.selectedRewards.add(_selectedReward!);
-          widget.userData.activeGame!.player.deck.add(_selectedReward!);
-        }
-        widget.userData.activeGame!.stageUp();
-        await saveActiveGame();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => GameScreen(userData: widget.userData)),
-        );
-      }
+    if (gameOver) {
+      widget.userData.cards.add(_selectedReward!.id);
+      endGame(_selectedReward);
+      return;
     }
+
+    if (_selectedOption == null) {
+      return;
+    }
+    if (_selectedOption == RewardOptions.addCard && _selectedReward == null) {
+      return;
+    }
+
+    widget.userData.activeGame!.advanceStage(_selectedOption!, _selectedReward);
+    await saveActiveGame();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => GameScreen(userData: widget.userData)),
+    );
   }
 
-  Future<void> saveActiveGame() async{
+  Future<void> saveActiveGame() async {
     await UserStorage.updateActiveGame(widget.userData.activeGame!);
   }
 
@@ -145,9 +148,95 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
               softWrap: true,
             ),
           ),
+          if (!gameOver) ...[
+            if (_selectedOption == null) ...[
+              Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedOption = RewardOptions.addCard;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(220, 75),
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.green,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                      textStyle:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    child: Column(
+                      children: [
+                        Text('Add card to deck'),
+                        Text(
+                            '(Current deck size: ${widget.userData.activeGame!.player.deck.length})',
+                            style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedOption = RewardOptions.upgradeCard;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(220, 75),
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                      textStyle:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    child: Column(
+                      children: [
+                        Text('Upgrade a card'),
+                        Text(
+                            '(${widget.userData.activeGame!.amountOfUpgradeCard} left)',
+                            style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                      onPressed:
+                          widget.userData.activeGame!.amountOfSkipReward <= 0
+                              ? null
+                              : () {
+                                  _selectedOption = RewardOptions.skip;
+                                  advanceToNextStage();
+                                },
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: Size(220, 75),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blueGrey,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                        textStyle: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('Skip reward'),
+                          Text(
+                              '(${widget.userData.activeGame!.amountOfSkipReward} left)',
+                              style: TextStyle(fontSize: 12)),
+                        ],
+                      ))
+                ]),
+              ),
+            ],
+          ],
 
           // Reward Description Box (Below Card Selection)
-          if (!gameOver || currentStage >= rewardFromStage) ...[
+          if (gameOver ||
+              (_selectedOption != null &&
+                  _selectedOption == RewardOptions.addCard)) ...[
+            //(!gameOver || currentStage >= rewardFromStage) ...[
             // Reward Card Selection Grid
             Center(
               child: Padding(
@@ -158,38 +247,21 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
-                  itemCount: rewardCards.length + 1,
+                  itemCount: rewardCards.length,
                   itemBuilder: (context, index) {
-                    if (index == rewardCards.length) {
-                      return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              skipReward = true;
-                              _selectedReward = null;
-                            });
-                          },
-                          child: Card(
-                            child: CardWidget(
-                                card: GameCard(
-                                    'Skip', '', 0, 'Do not take a reward', ''),
-                                isSelected: skipReward),
-                          ));
-                    } else {
-                      final card = rewardCards[index];
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedReward = card;
-                            skipReward = false;
-                          });
-                        },
-                        child: CardWidget(
-                          card: card,
-                          isSelected: _selectedReward ==
-                              card, // Highlight selected card
-                        ),
-                      );
-                    }
+                    final card = rewardCards[index];
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedReward = card;
+                        });
+                      },
+                      child: CardWidget(
+                        card: card,
+                        isSelected:
+                            _selectedReward == card, // Highlight selected card
+                      ),
+                    );
                   },
                 ),
               ),
@@ -217,15 +289,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
                     ),
                     SizedBox(height: 8),
                     _selectedReward == null
-                        ? skipReward 
-                          ? Text(
-                            'Skip: you gain no reward',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          )
-                          : Text(
+                        ? Text(
                             'Select a reward to see its description',
                             style: TextStyle(
                               color: Colors.white,
@@ -233,7 +297,9 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
                             ),
                           )
                         : Text(
-                            _selectedReward!.fullDescription ?? _selectedReward!.shortDescription ?? "",
+                            _selectedReward!.fullDescription ??
+                                _selectedReward!.shortDescription ??
+                                "",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -245,35 +311,43 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
             ),
           ],
 
-          // Confirm Button
-          Positioned(
-            bottom: 50,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: ElevatedButton(
-                onPressed: canNotAdvance() ? null : advanceToNextStage,
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: canNotAdvance() ? Colors.grey : Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 90, vertical: 20),
-                  textStyle:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          if (_selectedOption != null || gameOver) ...[
+            // Confirm Button
+            Positioned(
+              bottom: 50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: canNotAdvance() ? null : advanceToNextStage,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor:
+                        canNotAdvance() ? Colors.grey : Colors.blue,
+                    padding: EdgeInsets.symmetric(horizontal: 90, vertical: 20),
+                    textStyle:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  child: Text(gameOver
+                      ? 'End game'
+                      : 'Proceed to Stage ${currentStage + 1}'),
                 ),
-                child: Text(gameOver
-                    ? 'End game'
-                    : 'Proceed to Stage ${currentStage + 1}'),
               ),
-            ),
-          ),
+            )
+          ]
         ],
       ),
     );
   }
 
   bool canNotAdvance() {
-    return (_selectedReward == null &&
-        !skipReward &&
-        (!gameOver || currentStage >= rewardFromStage));
+    if (gameOver) {
+      if(currentStage < rewardFromStage){
+        return false;
+      }
+      return _selectedReward == null;
+    }
+    return (_selectedOption == null) ||
+        (_selectedOption == RewardOptions.addCard && _selectedReward == null);
   }
 }

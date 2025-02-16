@@ -1,8 +1,8 @@
-import 'package:card_battle_game/models/card.dart';
+import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
-import 'package:card_battle_game/models/cpu.dart';
-import 'package:card_battle_game/models/monster_card.dart';
-import 'package:card_battle_game/models/player.dart';
+import 'package:card_battle_game/models/player/cpu.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/models/player/player.dart';
 import 'package:card_battle_game/services/notification_service.dart';
 import 'package:card_battle_game/services/sound_player_service.dart';
 import 'package:flutter/material.dart';
@@ -54,8 +54,12 @@ class StageMatch {
   }
 
   Future<void> startTurn() async {
-    battleLog.add('-');
-    battleLog.add('TURN $currentTurn');
+    if (playerHasTakenTurn && opponentHasTakenTurn) {
+      battleLog.add('-');
+      battleLog.add('TURN $currentTurn');
+      playerHasTakenTurn = false;
+      opponentHasTakenTurn = false;
+    }
     battleLog.add(
         isPlayersTurn ? "${player.name}'s Turn" : "${opponent.name}'s Turn");
     if (isPlayersTurn) {

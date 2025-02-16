@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:card_battle_game/models/action_card.dart';
-import 'package:card_battle_game/models/card.dart';
-import 'package:card_battle_game/models/cpu.dart';
-import 'package:card_battle_game/models/monster_card.dart';
-import 'package:card_battle_game/models/upgrade_card.dart';
+import 'package:card_battle_game/models/cards/action_card.dart';
+import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/player/cpu.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/models/cards/upgrade_card.dart';
 import 'package:flutter/services.dart';
 
 class CardDatabase {

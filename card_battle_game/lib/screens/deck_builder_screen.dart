@@ -1,5 +1,6 @@
-import 'package:card_battle_game/models/card.dart';
-import 'package:card_battle_game/models/user_storage.dart';
+import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/database/user_storage.dart';
+import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/widgets/card_widget.dart'; // Your existing card widget
@@ -116,6 +117,14 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
   }
 
   Widget _buildCardList(List<GameCard> cards, String title, bool isDeck) {
+    Map<GameCard, int> grouped = {};
+    for (var card in cards) {
+          grouped[card] = (grouped[card] ?? 0) + 1;
+    }
+    // Sort the keys alphabetically by the name of the Item
+    var sortedGrouped = grouped.keys.toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+      
     return Column(
       children: [
         // Title with background and card count
@@ -150,7 +159,8 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
             child: Wrap(
               spacing: 10, // Horizontal space between cards
               runSpacing: 10, // Vertical space between rows
-              children: cards.map((card) {
+              children: sortedGrouped.map((card) {
+                var amount = grouped[card];
                 return LongPressDraggable<GameCard>(
                   data: card,
                   delay: Duration(microseconds: 750),
@@ -178,6 +188,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
                     child: CardWidget(
                       card: card,
                       onTap: () => showCardDetails(card),
+                      amount: amount
                     ),
                   ),
                 );

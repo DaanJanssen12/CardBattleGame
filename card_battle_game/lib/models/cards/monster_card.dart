@@ -1,10 +1,10 @@
-import 'package:card_battle_game/models/card.dart';
-import 'package:card_battle_game/models/effect.dart';
-import 'package:card_battle_game/models/game_effect.dart';
-import 'package:card_battle_game/models/mascot_effects.dart';
-import 'package:card_battle_game/models/player.dart';
-import 'package:card_battle_game/models/upgrade_card.dart';
-import 'package:card_battle_game/models/upgrade_card_type.dart';
+import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/game/effect.dart';
+import 'package:card_battle_game/models/game/game_effect.dart';
+import 'package:card_battle_game/models/cards/mascot_effects.dart';
+import 'package:card_battle_game/models/player/player.dart';
+import 'package:card_battle_game/models/cards/upgrade_card.dart';
+import 'package:card_battle_game/models/enums/upgrade_card_type.dart';
 
 class MonsterCard extends GameCard {
   //Stats

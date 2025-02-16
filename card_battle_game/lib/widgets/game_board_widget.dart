@@ -1,8 +1,8 @@
-import 'package:card_battle_game/models/monster_card.dart';
+import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/widgets/monster_zone_widget.dart';
-import '../models/player.dart';
-import '../models/card.dart';
+import '../models/player/player.dart';
+import '../models/cards/card.dart';
 
 class GameBoardWidget extends StatefulWidget {
   final Player player;
