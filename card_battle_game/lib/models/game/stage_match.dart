@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/cards/play_card_result.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/player/cpu.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
@@ -50,16 +51,15 @@ class StageMatch {
 
   void start() {
     gameIsActive = true;
-    startTurn();
+    startGame();
   }
 
-  Future<void> startTurn() async {
-    if (playerHasTakenTurn && opponentHasTakenTurn) {
-      battleLog.add('-');
-      battleLog.add('TURN $currentTurn');
-      playerHasTakenTurn = false;
-      opponentHasTakenTurn = false;
-    }
+  Future<void> startGame() async {
+    playerHasTakenTurn = false;
+    opponentHasTakenTurn = false;
+    battleLog.add('-');
+    battleLog.add('TURN $currentTurn');
+    battleLog.add('-');
     battleLog.add(
         isPlayersTurn ? "${player.name}'s Turn" : "${opponent.name}'s Turn");
     if (isPlayersTurn) {
@@ -92,14 +92,7 @@ class StageMatch {
   Future<void> startOpponentTurn() async {
     await Future.delayed(Duration(seconds: 1));
     opponent.startTurn(currentTurn, player, battleLog);
-    for (int i = 0; i < Constants.drawCardsPerTurn; i++) {
-      if (opponent.canDraw()) {
-        opponent.drawCard(battleLog);
-        updateGameState();
-      } else {
-        break;
-      }
-    }
+    opponent.drawCards(Constants.drawCardsPerTurn, battleLog);
     await Future.delayed(Duration(seconds: 1));
     await CPU.executeTurn(opponent, player, updateGameState, battleLog, () {
       return !gameIsActive;
@@ -126,6 +119,8 @@ class StageMatch {
       currentTurn++;
       battleLog.add('TURN $currentTurn');
       battleLog.add('-');
+      playerHasTakenTurn = false;
+      opponentHasTakenTurn = false;
     }
     isPlayersTurn = !isPlayersTurn;
     battleLog.add("${isPlayersTurn ? player.name : opponent.name}'s Turn");
@@ -138,17 +133,19 @@ class StageMatch {
     }
   }
 
-  Future<void> playCard(
+  Future<PlayCardResult?> playCard(
       GameCard card, int monsterZoneIndex, BuildContext context) async {
+    PlayCardResult? result;
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
-      await player.playCard(card, monsterZoneIndex, battleLog, opponent);
+      result = await player.playCard(card, monsterZoneIndex, battleLog, opponent);
       updateGameState();
       soundPlayerService.playDropSound();
     } else {
       NotificationService.showDialogMessage(context, canPlayCard.$2,
           title: "Can't play card!");
     }
+    return result;
   }
 
   Future<void> attackMonster(
@@ -186,8 +183,8 @@ class StageMatch {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
-          player.endGame(opponent);
           opponent.endGame(player);
+          player.endGame(opponent);
           endMatch(true);
         });
       });
@@ -199,8 +196,8 @@ class StageMatch {
         Future.sync(() async {
           await Future.delayed(Duration(seconds: 1));
         }).then((_) {
-          player.endGame(opponent);
           opponent.endGame(player);
+          player.endGame(opponent);
           endMatch(false);
         });
       });

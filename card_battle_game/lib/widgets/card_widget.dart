@@ -197,8 +197,13 @@ class CardWidget extends StatelessWidget {
   }
 
   Widget _buildDescriptionSection() {
+    var description = card.fullDescription ?? card.shortDescription ?? '';
+    double fontSize = 8;
+    if(description.length > 30){
+      fontSize = 6;
+    }
     return Container(
-        height: 48,
+        height: 60,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         // decoration: BoxDecoration(
@@ -206,11 +211,11 @@ class CardWidget extends StatelessWidget {
         //   borderRadius: BorderRadius.circular(8),
         // ),
         child: Text(
-          card.fullDescription ?? card.shortDescription ?? '',
-          style: const TextStyle(
+          description,
+          style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 8,
+            fontSize: fontSize,
           ),
         ));
   }

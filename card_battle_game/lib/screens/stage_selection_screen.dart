@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ enum RewardOptions { addCard, upgradeCard, skip }
 
 class _StageSelectionScreenState extends State<StageSelectionScreen> {
   GameCard? _selectedReward;
+  GameCard? _selectedCardToRemoveFromDeck;
   RewardOptions? _selectedOption;
   int currentStage =
       1; // The stage starts at 1 and increases with each completed stage
@@ -238,80 +240,192 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
                   _selectedOption == RewardOptions.addCard)) ...[
             //(!gameOver || currentStage >= rewardFromStage) ...[
             // Reward Card Selection Grid
-            Center(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+            if (!gameOver &&
+                widget.userData.activeGame!.player.deck.length >=
+                    Constants.playerMaxDeckSize) ...[
+              Center(
+                child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
+                    child: Scrollbar(
+                      thickness: 10,
+                      radius: Radius.circular(10),
+                      thumbVisibility: true,
+                      interactive: true,
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount:
+                            widget.userData.activeGame!.player.deck.length,
+                        itemBuilder: (context, index) {
+                          final card =
+                              widget.userData.activeGame!.player.deck[index];
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedCardToRemoveFromDeck = card;
+                              });
+                            },
+                            child: CardWidget(
+                              card: card,
+                              isSelected: _selectedCardToRemoveFromDeck ==
+                                  card, // Highlight selected card
+                            ),
+                          );
+                        },
+                      ),
+                    )),
+              ),
+              Positioned(
+                bottom: 120, // Adjust the position
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  itemCount: rewardCards.length,
-                  itemBuilder: (context, index) {
-                    final card = rewardCards[index];
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedReward = card;
-                        });
-                      },
-                      child: CardWidget(
-                        card: card,
-                        isSelected:
-                            _selectedReward == card, // Highlight selected card
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Selected:',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    );
-                  },
+                      SizedBox(height: 8),
+                      _selectedCardToRemoveFromDeck == null
+                          ? Text(
+                              'Select a card to remove from your deck',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            )
+                          : Text(
+                              _selectedCardToRemoveFromDeck!.name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 120, // Adjust the position
-              left: 20,
-              right: 20,
-              child: Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Reward Description:',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+            ] else ...[
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
                     ),
-                    SizedBox(height: 8),
-                    _selectedReward == null
-                        ? Text(
-                            'Select a reward to see its description',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          )
-                        : Text(
-                            _selectedReward!.fullDescription ??
-                                _selectedReward!.shortDescription ??
-                                "",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                  ],
+                    itemCount: rewardCards.length,
+                    itemBuilder: (context, index) {
+                      final card = rewardCards[index];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedReward = card;
+                          });
+                        },
+                        child: CardWidget(
+                          card: card,
+                          isSelected: _selectedReward ==
+                              card, // Highlight selected card
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
+              Positioned(
+                bottom: 120, // Adjust the position
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Reward Description:',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      _selectedReward == null
+                          ? Text(
+                              'Select a reward to see its description',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            )
+                          : Text(
+                              _selectedReward!.fullDescription ??
+                                  _selectedReward!.shortDescription ??
+                                  "",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
 
-          if (_selectedOption != null || gameOver) ...[
+          if (!gameOver &&
+              widget.userData.activeGame!.player.deck.length >=
+                  Constants.playerMaxDeckSize) ...[
+            // Confirm Button
+            Positioned(
+              bottom: 50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: _selectedCardToRemoveFromDeck == null
+                      ? null
+                      : () => {
+                            setState(() {
+                              widget.userData.activeGame!.player.deck
+                                  .remove(_selectedCardToRemoveFromDeck);
+                            })
+                          },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: _selectedCardToRemoveFromDeck == null
+                        ? Colors.grey
+                        : Colors.blue,
+                    padding: EdgeInsets.symmetric(horizontal: 90, vertical: 20),
+                    textStyle:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  child: Text('Remove from deck'),
+                ),
+              ),
+            )
+          ] else if (_selectedOption != null || gameOver) ...[
             // Confirm Button
             Positioned(
               bottom: 50,
@@ -342,7 +456,7 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
 
   bool canNotAdvance() {
     if (gameOver) {
-      if(currentStage < rewardFromStage){
+      if (currentStage < rewardFromStage) {
         return false;
       }
       return _selectedReward == null;

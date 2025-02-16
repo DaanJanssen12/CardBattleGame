@@ -359,6 +359,32 @@
         "fullDescription": "Steal 1 random card from your opponents hand."
       },
       {
+        "id": "action_meditate",
+        "rarity": "Uncommon",
+        "name": "Meditate",
+        "imagePath": "assets/images/actions/Meditate.png",
+        "type": "action",
+        "cost": 0,
+        "actionCardType": "gainMana",
+        "value": 1,
+        "extraData": null,
+        "shortDescription": "Gain 1 mana.",
+        "fullDescription": "You take some time to meditate. You gain 1 mana."
+      },
+      {
+        "id": "action_long_rest",
+        "rarity": "Uncommon",
+        "name": "Long Rest",
+        "imagePath": "assets/images/actions/LongRest.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "combined",
+        "value": 0,
+        "extraData": "draw:1;gainMana:3;endTurn",
+        "shortDescription": "Draw 1 card, gain 3 mana and end your turn.",
+        "fullDescription": "You take a long rest to recover. You gain draw 1 card and gain 3 mana. End your turn after playing this card."
+      },
+      {
         "id": "action_mana_surge",
         "rarity": "Rare",
         "name": "Mana Surge",
@@ -366,10 +392,10 @@
         "type": "action",
         "cost": 2,
         "actionCardType": "gainMana",
-        "value": 3,
+        "value": 4,
         "extraData": null,
-        "shortDescription": "Gain 3 mana.",
-        "fullDescription": "A sudden influx of energy courses through you. You gain 3 mana."
+        "shortDescription": "Gain 4 mana.",
+        "fullDescription": "A sudden influx of energy courses through you. You gain 4 mana."
       },
       {
         "id": "action_spyglass",

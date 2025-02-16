@@ -1,14 +1,5 @@
-import 'package:card_battle_game/models/cards/card.dart';
-import 'package:card_battle_game/models/constants.dart';
-import 'package:card_battle_game/models/player/cpu.dart';
-import 'package:card_battle_game/models/player/player.dart';
-import 'package:card_battle_game/models/game/stage_match.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
-import 'package:card_battle_game/screens/main_menu.dart';
-import 'package:card_battle_game/screens/stage_selection_screen.dart';
-import 'package:card_battle_game/widgets/card_details_dialog.dart';
-import 'package:card_battle_game/widgets/card_widget.dart';
-import 'package:card_battle_game/widgets/coin_flip_widget.dart';
+import 'package:card_battle_game/services/stage_match_service.dart';
 import 'package:card_battle_game/widgets/game_board_widget.dart';
 import 'package:card_battle_game/widgets/player_hand_widget.dart';
 import 'package:card_battle_game/widgets/player_info_widget.dart';
@@ -24,140 +15,22 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   bool _isLoading = true;
-  late StageMatch match;
+  late StageMatchService _stageMatchService;
 
   @override
   void initState() {
     super.initState();
+    _stageMatchService = StageMatchService(context, widget.userData, () => {setState(() {})});
     _loadData();
   }
 
-  Future<void> _loadData() async {
+     Future<void> _loadData() async {
     var player = widget.userData.activeGame!.player;
     var opponent = await widget.userData.activeGame!.initCPU();
     setState(() {
       _isLoading = false;
     });
-    await initGame(player, opponent);
-  }
-
-  Future<void> initGame(Player player, CpuPlayer opponent) async {
-    match = StageMatch(player, opponent, [], () => {setState(() {})},
-        showDeckOverlay, endGame, context);
-    await match.init();
-    showCoinFlipDialog();
-  }
-
-  void endGame(bool playerWon) {
-    if (!playerWon) {
-      widget.userData.activeGame!.playerHasLost = true;
-    }
-    toStageSelection();
-  }
-
-  void showBattleLog() async {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title:
-              Text("Battle Log", style: TextStyle(fontWeight: FontWeight.bold)),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: match.battleLog.length,
-                    itemBuilder: (context, index) {
-                      return match.battleLog[index] == '-'
-                          ? Padding(
-                              padding: EdgeInsets.symmetric(vertical: 4),
-                              child: Divider(
-                                color: Colors.blueGrey,
-                                thickness: 2,
-                              ),
-                            )
-                          : Card(
-                              elevation: 2,
-                              margin: EdgeInsets.symmetric(vertical: 4),
-                              child: Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Text(
-                                    match.battleLog[index],
-                                    style: TextStyle(fontSize: 16),
-                                  )),
-                            );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Close"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showCoinFlipDialog() async {
-    showDialog(
-      context: context,
-      barrierDismissible:
-          false, // Prevent closing before the animation finishes
-      builder: (BuildContext context) {
-        return CoinFlipWidget(onFlipComplete: (bool isPlayerFirst) async {
-          setState(() {
-            if (isPlayerFirst) {
-              match.log('${match.player.name} won the coin toss');
-            } else {
-              match.log('${match.opponent.name} won the coin toss');
-            }
-          });
-          match.setTurnPlayer(isPlayerFirst);
-          match.start();
-        });
-      },
-    );
-  }
-
-  void showCardDetails(GameCard card) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return CardDetailsDialog(card: card);
-      },
-    );
-  }
-
-  void playCard(GameCard card, int monsterZoneIndex) async {
-    await match.playCard(card, monsterZoneIndex, context);
-  }
-
-  void toStageSelection() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) =>
-              StageSelectionScreen(userData: widget.userData)),
-    );
-  }
-
-  void toMainMenu() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => MainMenu(userData: widget.userData)),
-    );
+    _stageMatchService.initGame(player, opponent);
   }
 
   @override
@@ -171,7 +44,7 @@ class _GameScreenState extends State<GameScreen> {
             backgroundColor: Colors.black,
             actions: [
               TextButton(
-                onPressed: showBattleLog, // Disable when it's the enemy's turn
+                onPressed: _stageMatchService.showBattleLog, // Disable when it's the enemy's turn
                 child: Text(
                   'Log',
                   style: TextStyle(
@@ -183,9 +56,9 @@ class _GameScreenState extends State<GameScreen> {
               ),
               // End Turn Button: Positioned at the top-right of the app bar
               TextButton(
-                onPressed: match.isPlayersTurn ? match.endPlayerTurn : null,
+                onPressed: _stageMatchService.match.isPlayersTurn ? _stageMatchService.match.endPlayerTurn : null,
                 style: TextButton.styleFrom(
-                  backgroundColor: match.isPlayersTurn
+                  backgroundColor: _stageMatchService.match.isPlayersTurn
                       ? Colors.green
                       : Colors.grey, // Green when active, grey when inactive
                   shape: RoundedRectangleBorder(
@@ -228,28 +101,28 @@ class _GameScreenState extends State<GameScreen> {
                               children: [
                                 Expanded(
                                     child: PlayerInfoWidget(
-                                        player: match.player,
-                                        isActive: match.isPlayersTurn,
+                                        player: _stageMatchService.match.player,
+                                        isActive: _stageMatchService.match.isPlayersTurn,
                                         handleAttackPlayerDirectly: null)),
                                 SizedBox(width: 16),
                                 Expanded(
                                     child: PlayerInfoWidget(
-                                        player: match.opponent,
-                                        isActive: !match.isPlayersTurn,
+                                        player: _stageMatchService.match.opponent,
+                                        isActive: !_stageMatchService.match.isPlayersTurn,
                                         handleAttackPlayerDirectly:
-                                            match.handleAttackPlayerDirectly)),
+                                            _stageMatchService.match.handleAttackPlayerDirectly)),
                               ],
                             ),
                           ),
                           SizedBox(height: 12),
                           // Game Board
                           GameBoardWidget(
-                              player: match.player,
-                              enemy: match.opponent,
-                              isPlayersTurn: match.isPlayersTurn,
-                              onCardDrop: playCard,
-                              onCardTap: showCardDetails,
-                              onMonsterAttack: match.attackMonster),
+                              player: _stageMatchService.match.player,
+                              enemy: _stageMatchService.match.opponent,
+                              isPlayersTurn: _stageMatchService.match.isPlayersTurn,
+                              onCardDrop: _stageMatchService.playCard,
+                              onCardTap: _stageMatchService.showCardDetails,
+                              onMonsterAttack: _stageMatchService.match.attackMonster),
                         ],
                       ),
                       // Player's Hand at the bottom of the screen
@@ -261,7 +134,7 @@ class _GameScreenState extends State<GameScreen> {
                           color: Colors.grey[
                               200], // Adding visual separation for the player hand
                           child: PlayerHandWidget(
-                              player: match.player, onCardTap: showCardDetails),
+                              player: _stageMatchService.match.player, onCardTap: _stageMatchService.showCardDetails),
                         ),
                       ),
                     ],
@@ -270,142 +143,4 @@ class _GameScreenState extends State<GameScreen> {
         ));
   }
 
-  void showDeckOverlay() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.8, // 80% screen width
-            height:
-                MediaQuery.of(context).size.height * 0.5, // 50% screen height
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Background
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                // Content
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min, // Prevent infinite height
-                    children: [
-                      Text(
-                        "Your turn",
-                        style: TextStyle(color: Colors.white, fontSize: 24),
-                      ),
-                      Text(
-                        "Tap to Draw your Cards",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Deck Image (Tappable)
-                      GestureDetector(
-                        onTap: () {
-                          List<GameCard> gameCards = [];
-                          setState(() {
-                            gameCards = match.player.drawCards(Constants.drawCardsPerTurn, match.battleLog);
-                          });
-                          Navigator.of(context).pop(); // Close overlay
-                          showDrawnCardAnimation(gameCards);
-                        },
-                        child: SizedBox(
-                          width: 120, // Ensures finite size
-                          height: 160,
-                          child: Stack(
-                            children: List.generate(
-                              2,
-                              (index) => Positioned(
-                                top: index * 2.0,
-                                left: 0,
-                                right: 0,
-                                child: Image.asset(
-                                  'assets/images/card_back.png',
-                                  width: 120, // Must be fixed
-                                  height: 160, // Must be fixed
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void showDrawnCardAnimation(List<GameCard> drawnCards) {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Don't allow closing mid-animation
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.transparent,
-          contentPadding: EdgeInsets.zero,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (drawnCards.isNotEmpty) ...[
-                Text(
-                  "You Drew:",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    for (var card in drawnCards) ...[
-                      SizedBox(
-                        width: 120,
-                        height: 200,
-                        child: CardWidget(card: card),
-                      ),
-                      SizedBox(width: 10),
-                    ]
-                  ],
-                )
-              ] else ...[
-                Text(
-                  "No cards to draw",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ]
-            ],
-          ),
-        );
-      },
-    );
-
-    Future.delayed(Duration(milliseconds: 750), () {
-      Navigator.of(context).pop();
-      setState(() {});
-    });
-  }
 }

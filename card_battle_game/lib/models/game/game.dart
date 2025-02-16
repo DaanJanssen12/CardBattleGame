@@ -54,9 +54,12 @@ class Game {
 
   Future<CpuPlayer> initCPU() async {
     var cpuPlayer = await CpuDatabase.getRandomCpuPlayer(stage, versedCPUs);
+    print(cpuPlayer);
     if (cpuPlayer == null) {
       return await CpuDatabase.generateCPU(stage);
     }
+    //print(cpuPlayer.id);
+    print(cpuPlayer.name);
     await cpuPlayer.init();
     versedCPUs.add(cpuPlayer.id ?? Uuid().v4());
     return cpuPlayer;

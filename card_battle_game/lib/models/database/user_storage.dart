@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/models/player/player.dart';
@@ -132,6 +133,10 @@ class UserData {
 
   Future<List<GameCard>> availableCards() async {
     var availableCards = await CardDatabase.getCards(cards);
+    if(Constants.testMode){
+      var allCards = await CardDatabase.getAllCards();
+      availableCards.addAll(allCards);
+    }
     return availableCards;
   }
 }

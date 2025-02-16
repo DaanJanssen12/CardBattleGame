@@ -75,20 +75,19 @@ class GameCard {
     return GameCard('', '', 0, null, null);
   }
 
- @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GameCard && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  bool equals(Object other) {
+    return other is GameCard &&
+        runtimeType == other.runtimeType &&
+        id == other.id;
+  }
 }
+
 enum CardRarity { Common, Uncommon, Rare, UltraRare, Legendary }
 
 extension CardRarityExtension on CardRarity {
   // Convert a string to an enum value
   static CardRarity fromString(String? str) {
-    if(str == null){
+    if (str == null) {
       return CardRarity.Common;
     }
     return CardRarity.values.firstWhere(

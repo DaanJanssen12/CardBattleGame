@@ -32,7 +32,7 @@ class CpuDatabase {
               w.possibleFromStage <= stage && w.possibleUntillStage >= stage)
           .toList();
       if (possibleCpuPlayers.isEmpty) {
-        return await generateCPU(stage);
+        return null;
       }
       return possibleCpuPlayers[Random().nextInt(possibleCpuPlayers.length)];
     }

@@ -4,7 +4,8 @@ enum ActionCardType {
   stealRandomCardFromOpponentHand,
   gainMana,
   showOpponentHand,
-  freezeOpponent
+  freezeOpponent,
+  combined
 }
 
 extension ActionCardTypeExtension on ActionCardType {

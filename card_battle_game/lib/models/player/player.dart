@@ -1,5 +1,6 @@
 import 'package:card_battle_game/models/cards/action_card.dart';
 import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/cards/play_card_result.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/cards/mascot_effects.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
@@ -89,7 +90,7 @@ class Player {
         faintMonster(monster.monsterZoneIndex!, [], opponent);
       }
     }
-    shuffleHandIntoDeck();
+    shuffleHandIntoDeck(opponent);
     shuffleDiscardPile();
   }
 
@@ -196,13 +197,18 @@ class Player {
     deck.shuffle();
   }
 
-  void shuffleHandIntoDeck() {
+  void shuffleHandIntoDeck(Player opponent) {
     if (hand.isEmpty) {
       return;
     }
 
     var cardsToAddBackIntoDeck =
         hand.where((w) => !w.oneTimeUse && !w.isOpponentCard).toList();
+    var cardsToAddBackIntoOpponentDeck =
+        hand.where((w) => w.isOpponentCard).toList();
+    if (cardsToAddBackIntoOpponentDeck.isNotEmpty) {
+      opponent.deck.addAll(cardsToAddBackIntoOpponentDeck);
+    }
     if (cardsToAddBackIntoDeck.isEmpty) {
       return;
     }
@@ -232,8 +238,10 @@ class Player {
     return (true, '');
   }
 
-  Future<void> playCard(GameCard card, int monsterZoneIndex,
+  Future<PlayCardResult?> playCard(GameCard card, int monsterZoneIndex,
       List<String> battleLog, Player opponent) async {
+    PlayCardResult? result;
+
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
@@ -261,7 +269,7 @@ class Player {
     }
     if (card.isAction()) {
       var actionCard = (card as ActionCard);
-      await actionCard.doAction(this, opponent);
+      result = await actionCard.doAction(this, opponent);
       battleLog.add('${card.name} played');
     }
     if (card.isOpponentCard && !card.isMonster()) {
@@ -271,6 +279,8 @@ class Player {
     if (!card.oneTimeUse && !card.isOpponentCard && !card.isMonster()) {
       discardPile.add(card);
     }
+
+    return result;
   }
 
   Future<void> summonMonster(

@@ -67,7 +67,7 @@ class HowToPlayScreen extends StatelessWidget {
               'During your turn you play cards, these cards have a mana cost to play. Played cards are put in your discard pile, when your deck is empty your discard pile is recycled back into your deck.\n'),
           _buildSubSectionTitle('Hand'),
           _buildSectionContent(
-              'You can play cards that are in your hand. Every turn you draw (if possible) 2 cards from your deck into your hand. The amount of cards in your hand is limited to ${Constants.playerMaxHandSize}.\n'),
+              'You can play cards that are in your hand. Every turn you draw (if possible) ${Constants.drawCardsPerTurn} card(s) from your deck into your hand. The amount of cards in your hand is limited to ${Constants.playerMaxHandSize}.\n'),
         ],
       ),
     );

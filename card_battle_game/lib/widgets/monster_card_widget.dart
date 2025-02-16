@@ -66,6 +66,10 @@ class MonsterCardWidget extends StatelessWidget {
   //   );
   // }
   Widget _buildNameHeader() {
+    double fontSize = 12;
+    if(monster!.name.length > 10){
+      fontSize = 10;
+    }
     return Stack(
       clipBehavior: Clip.none, // Allows the crown to slightly overflow
       children: [
@@ -77,8 +81,8 @@ class MonsterCardWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: fontSize,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),

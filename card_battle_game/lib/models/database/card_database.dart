@@ -31,6 +31,19 @@ class CardDatabase {
     return returnCards;
   }
 
+  static Future<List<GameCard>> getAllCards() async {
+    await loadCardsFromJson(filePath);
+    var filteredCards = [monsterCards, upgradeCards, actionCards]
+        .expand((gameCard) => gameCard)
+        .toList();
+
+    List<GameCard> returnCards = [];
+    for (var card in filteredCards) {
+      returnCards.add(card.clone());
+    }
+    return returnCards;
+  }
+
   static Future<List<GameCard>> generateDeck(
       int amount, CpuStrategy? playStyle, CpuLevels? level) async {
     await loadCardsFromJson(filePath);

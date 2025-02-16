@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:card_battle_game/models/cards/play_card_result.dart';
 import 'package:card_battle_game/models/enums/action_card_type.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
@@ -33,7 +34,8 @@ class ActionCard extends GameCard {
     return card;
   }
 
-  Future<void> doAction(Player player, Player opponent) async {
+  Future<PlayCardResult?> doAction(Player player, Player opponent) async {
+    PlayCardResult? result;
     switch (actionCardType) {
       case ActionCardType.draw:
         for (var i = 0; i < value; i++) {
@@ -43,7 +45,13 @@ class ActionCard extends GameCard {
       case ActionCardType.drawNotFromDeck:
         if (extraData == null) {
           print('EXTRA DATA NULL WITH drawNotFromDeck actioncard');
-          return;
+          var data = await CardDatabase.getCards([id]);
+          if (data.isNotEmpty) {
+            var actionCardData = data.first as ActionCard;
+            extraData = actionCardData.extraData;
+            value = actionCardData.value;
+          }
+          return result;
         }
         var cardIds = extraData!.split(";");
         var cards = await CardDatabase.getCards(cardIds);
@@ -55,7 +63,7 @@ class ActionCard extends GameCard {
         break;
       case ActionCardType.stealRandomCardFromOpponentHand:
         if (opponent.hand.isEmpty) {
-          return;
+          return result;
         }
         var opponentCard =
             opponent.hand[Random().nextInt(opponent.hand.length)];
@@ -67,6 +75,8 @@ class ActionCard extends GameCard {
         player.mana += value;
         break;
       case ActionCardType.showOpponentHand:
+        result = PlayCardResult();
+        result.type = PlayCardResultType.showOpponentHand;
         break;
       case ActionCardType.freezeOpponent:
         for (var monster in opponent.monsters) {
@@ -75,7 +85,29 @@ class ActionCard extends GameCard {
           }
         }
         break;
+      case ActionCardType.combined:
+        for (var effect in extraData!.split(";")) {
+          if (effect.contains(":")) {
+            var effectValues = effect.split(":");
+            switch (effectValues[0]) {
+              case 'draw':
+                player.drawCards(int.parse(effectValues[1]), []);
+                break;
+              case 'gainMana':
+                player.mana += int.parse(effectValues[1]);
+                break;
+            }
+          } else {
+            if (effect == 'endTurn') {
+              result = PlayCardResult();
+              result.type = PlayCardResultType.endTurn;
+            }
+          }
+        }
+        break;
     }
+
+    return result;
   }
 
   @override
