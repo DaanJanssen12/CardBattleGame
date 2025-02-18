@@ -80,36 +80,49 @@ class MascotAdditionalEffect {
       Player player,
       UpgradeCard? upgrade,
       Player opponent,
-      List<String> battleLog, 
+      List<String> battleLog,
       MonsterCard? attackingMonster) async {
     switch (trigger) {
       case MascotEffectTriggers.upgradeApplied:
         if (type ==
             MascotAdditionalEffectType.gainManaWhenUpgradeAppliedToSelf) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         } else if (type == MascotAdditionalEffectType.drawWhenHealed &&
             upgrade!.upgradeCardType == UpgradeCardType.heal) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         } else if (type == MascotAdditionalEffectType.copyUpgrade) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         }
         break;
       case MascotEffectTriggers.startOfTurn:
         if (type == MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked &&
             mascotMonster.hasAttacked) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         } else if (type == MascotAdditionalEffectType.summonAtStartOfTurn) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         }
         break;
       case MascotEffectTriggers.faintOpponentMonster:
         if (type == MascotAdditionalEffectType.summonWhenFaintOpponentMonster) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         }
         break;
       case MascotEffectTriggers.isAttacked:
         if (type == MascotAdditionalEffectType.dealDamageWhenAttacked) {
-          await apply(mascotMonster, player, upgrade, opponent, battleLog, attackingMonster);
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
+        }
+        break;
+      case MascotEffectTriggers.mascotFainted:
+        if (type == MascotAdditionalEffectType.summonWhenFaint) {
+          await apply(mascotMonster, player, upgrade, opponent, battleLog,
+              attackingMonster);
         }
         break;
       default:
@@ -117,8 +130,13 @@ class MascotAdditionalEffect {
     }
   }
 
-  Future<void> apply(MonsterCard mascotMonster, Player player,
-      UpgradeCard? upgrade, Player opponent, List<String> battleLog, MonsterCard? attackingMonster) async {
+  Future<void> apply(
+      MonsterCard mascotMonster,
+      Player player,
+      UpgradeCard? upgrade,
+      Player opponent,
+      List<String> battleLog,
+      MonsterCard? attackingMonster) async {
     switch (type) {
       case MascotAdditionalEffectType.gainManaWhenUpgradeAppliedToSelf:
         var intVal = int.parse(value);
@@ -188,8 +206,27 @@ class MascotAdditionalEffect {
       case MascotAdditionalEffectType.dealDamageWhenAttacked:
         var intVal = int.parse(value);
         var faint = attackingMonster!.takeDamage(intVal);
-        if(faint){
-          opponent.faintMonster(attackingMonster!.monsterZoneIndex!, battleLog, player);
+        if (faint) {
+          opponent.faintMonster(
+              attackingMonster!.monsterZoneIndex!, battleLog, player);
+        }
+        break;
+      case MascotAdditionalEffectType.summonWhenFaint:
+        if (player.monsters.any((a) => a == null)) {
+          var parts = value.split(";");
+          var howManyTimes = int.parse(parts[0]);
+          var monsterToSummonId = parts[1];
+          var monsterToSummon =
+              (await CardDatabase.getCards([monsterToSummonId]))[0];
+          for (var i = 0; i < howManyTimes; i++) {
+            if (!player.monsters.any((a) => a == null)) {
+              break;
+            }
+            var monsterZoneIndex = player.monsters.indexOf(null);
+            monsterToSummon.oneTimeUse = true;
+            await player.summonMonster(monsterToSummon.toMonster(),
+                monsterZoneIndex, battleLog, opponent, false);
+          }
         }
         break;
     }
@@ -200,7 +237,8 @@ enum MascotEffectTriggers {
   upgradeApplied,
   startOfTurn,
   faintOpponentMonster,
-  isAttacked
+  isAttacked,
+  mascotFainted
 }
 
 enum MascotAdditionalEffectType {
@@ -210,7 +248,8 @@ enum MascotAdditionalEffectType {
   copyUpgrade,
   drawWhenHealed,
   summonWhenFaintOpponentMonster,
-  dealDamageWhenAttacked
+  dealDamageWhenAttacked,
+  summonWhenFaint
 }
 
 extension MascotAdditionalEffectTypeExtension on MascotAdditionalEffectType {

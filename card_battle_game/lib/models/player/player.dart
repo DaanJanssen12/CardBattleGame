@@ -351,5 +351,19 @@ class Player {
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
     }
+    if (opponentMonster.isMascot &&
+        opponentMonster.mascotEffects.additionalEffect != null &&
+        opponentMonsterFainted) {
+      await opponentMonster.mascotEffects.additionalEffect!.trigger(
+          MascotEffectTriggers.mascotFainted,
+          opponentMonster,
+          opponent,
+          null,
+          this,
+          battleLog,
+          attackingMonster);
+      await Future.delayed(Duration(milliseconds: 500));
+      updateScreen();
+    }
   }
 }

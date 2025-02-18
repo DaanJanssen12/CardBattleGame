@@ -1,3 +1,4 @@
+import 'package:card_battle_game/models/constants.dart';
 import 'package:flutter/material.dart';
 import '../models/cards/card.dart';
 import '../models/player/player.dart';
@@ -29,13 +30,13 @@ class PlayerHandWidget extends StatelessWidget {
               onTap: () => onCardTap(card),
               child: LongPressDraggable<GameCard>(
                 data: card,
-                delay: Duration(milliseconds: 750),
+                delay: Duration(milliseconds: Constants.longPressDraggableDelayInMilliseconds),
                 feedback: Material(
                   color: Colors.transparent,
                   child: Container(
                     constraints: BoxConstraints(
                       maxWidth: 100, // Define max width for feedback
-                      maxHeight: 150, // Define max height for feedback
+                      maxHeight: 180, // Define max height for feedback
                     ),
                     child: Transform.translate(
                       offset: Offset(offset, 0), // Apply the offset to the feedback
@@ -47,7 +48,7 @@ class PlayerHandWidget extends StatelessWidget {
                 child: Container(
                   constraints: BoxConstraints(
                     maxWidth: 100, // Define max width for static card
-                    maxHeight: 150, // Define max height for static card
+                    maxHeight: 180, // Define max height for static card
                   ),
                   child: CardWidget(card: card),
                 ),

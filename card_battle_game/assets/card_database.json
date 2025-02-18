@@ -2,7 +2,7 @@
     "monsters": [
       {
         "id": "monster_penguin_mage",
-        "rarity": "Common",
+        "rarity": "Uncommon",
         "name": "Penguin Mage",
         "imagePath": "assets/images/monsters/PenguinMage.png",
         "type": "monster",
@@ -25,7 +25,7 @@
       },
       {
         "id": "monster_fire_dog",
-        "rarity": "Common",
+        "rarity": "Uncommon",
         "name": "Fire Dog",
         "imagePath": "assets/images/monsters/FlameDog.png",
         "type": "monster",
@@ -48,13 +48,13 @@
       },
       {
         "id": "monster_mushroom_man",
-        "rarity": "Rare",
+        "rarity": "UltraRare",
         "name": "Mushroom Man",
         "imagePath": "assets/images/monsters/MushroomMan.png",
         "type": "monster",
         "health": 3,
         "attack": 1,
-        "cost": 3,
+        "cost": 4,
         "summonEffect": {
           "type": "swarm",
           "value": "monster_mushroom_boy"
@@ -67,9 +67,9 @@
           "regainManaPerTurn": 0,
           "additionalEffect": {
             "name": "Spore Burst",
-            "description": "Summon 1 Fun Guy at the start of each turn",
-            "type": "summonAtStartOfTurn",
-            "value": "1;monster_mushroom_boy"
+            "description": "When this Mushroom man faints it summons up to 2 Fun Guy.",
+            "type": "summonWhenFaint",
+            "value": "2;monster_mushroom_boy"
           }
         }
       },
@@ -138,7 +138,7 @@
       },
       {
         "id": "monster_worker_bee",
-        "rarity": "Common",
+        "rarity": "Uncommon",
         "name": "Worker Bee",
         "imagePath": "assets/images/monsters/WorkerBee.png",
         "type": "monster",
@@ -163,7 +163,7 @@
         "attack": 2,
         "cost": 5,
         "shortDescription": null,
-        "fullDescription": "This bee is the queen of their colony.",
+        "fullDescription": "This bee is the queen of their colony. When summoned they swarm their field with worker bees.",
         "summonEffect": {
           "type": "swarm",
           "value": "monster_worker_bee"

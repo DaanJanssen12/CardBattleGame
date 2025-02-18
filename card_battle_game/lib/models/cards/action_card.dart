@@ -13,7 +13,9 @@ class ActionCard extends GameCard {
 
   ActionCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,
-      {this.actionCardType = ActionCardType.draw, this.value = 1}) {
+      {this.actionCardType = ActionCardType.draw, 
+      this.value = 1,
+      this.extraData}) {
     type = 'Action';
   }
 
@@ -27,9 +29,9 @@ class ActionCard extends GameCard {
       actionCardType:
           ActionCardTypeExtension.fromString(json['actionCardType']),
       value: json['value'],
+      extraData: json['extraData']
     );
     card.id = json['id'];
-    card.extraData = json['extraData'];
     card.rarity = CardRarityExtension.fromString(json['rarity']);
     return card;
   }
@@ -131,6 +133,7 @@ class ActionCard extends GameCard {
       ...super.toJson(),
       'actionCardType': actionCardType.toString().split(".")[1],
       'value': value,
+      'extraData': extraData
     };
   }
 

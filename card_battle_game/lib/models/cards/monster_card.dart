@@ -75,7 +75,7 @@ class MonsterCard extends GameCard {
   }
 
   bool canAttack() {
-    return !hasAttacked && isActive;
+    return !hasAttacked && isActive && currentAttack > 0;
   }
 
   bool doAttack(MonsterCard target, List<String> battleLog) {

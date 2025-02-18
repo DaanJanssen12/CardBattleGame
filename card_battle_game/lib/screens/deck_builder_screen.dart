@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
@@ -127,7 +128,17 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
     }
     // Sort the keys alphabetically by the name of the Item
     var sortedGrouped = grouped.keys.toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
+      ..sort((a, b) => a.type == b.type
+          ? a.name.compareTo(b.name)
+          : a.isMonster()
+              ? -1
+              : b.isMonster()
+                  ? 1
+                  : a.isUpgrade()
+                      ? -1
+                      : b.isUpgrade()
+                          ? 1
+                          : 0);
 
     return Column(
       children: [
@@ -165,34 +176,38 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen> {
               runSpacing: 10, // Vertical space between rows
               children: sortedGrouped.map((card) {
                 var amount = grouped[card];
-                return LongPressDraggable<GameCard>(
-                  data: card,
-                  delay: Duration(microseconds: 1000),
-                  feedback: Material(
-                    child: SizedBox(
-                      width: 100, // Fixed width for the card
-                      height: 160, // Fixed height for the card
-                      child: CardWidget(
-                        card: card,
-                        onTap: () => showCardDetails(card),
+                return GestureDetector(
+                  onTap: () => showCardDetails(card),
+                  child: LongPressDraggable<GameCard>(
+                    data: card,
+                    delay: Duration(
+                        milliseconds:
+                            Constants.longPressDraggableDelayInMilliseconds),
+                    feedback: Material(
+                      child: SizedBox(
+                        width: 100, // Fixed width for the card
+                        height: 160, // Fixed height for the card
+                        child: CardWidget(
+                          card: card,
+                        ),
                       ),
                     ),
-                  ),
-                  childWhenDragging: Opacity(
-                    opacity: 0.5,
+                    childWhenDragging: Opacity(
+                      opacity: 0.5,
+                      child: SizedBox(
+                        width: 100,
+                        height: 160,
+                        child: CardWidget(card: card),
+                      ),
+                    ),
                     child: SizedBox(
                       width: 100,
                       height: 160,
-                      child: CardWidget(card: card),
+                      child: CardWidget(
+                          card: card,
+                          onTap: () => showCardDetails(card),
+                          amount: amount),
                     ),
-                  ),
-                  child: SizedBox(
-                    width: 100,
-                    height: 160,
-                    child: CardWidget(
-                        card: card,
-                        onTap: () => showCardDetails(card),
-                        amount: amount),
                   ),
                 );
               }).toList(),

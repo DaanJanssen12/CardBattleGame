@@ -1,6 +1,7 @@
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
+import 'package:card_battle_game/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
@@ -66,6 +67,9 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
   }
 
   void advanceToNextStage() async {
+    if(canNotAdvance()){
+      return;
+    }
     if (gameOver && currentStage < rewardFromStage) {
       endGame(null);
       return;
@@ -90,6 +94,23 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
       MaterialPageRoute(
           builder: (context) => GameScreen(userData: widget.userData)),
     );
+  }
+
+  void skipReward() async {
+    NotificationService.showDialogMessageWithActions(
+        context,
+        'Are you sure you wanna proceed to the next stage without taking a reward?',
+        [
+          TextButton(
+              onPressed: () {
+                _selectedOption = RewardOptions.skip;
+                advanceToNextStage();
+              },
+              child: Text('Yes')),
+          TextButton(
+              onPressed: () => {Navigator.pop(context)}, child: Text('No'))
+        ],
+        title: 'Skip reward?');
   }
 
   Future<void> saveActiveGame() async {
@@ -117,39 +138,44 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
             fit: BoxFit.cover,
           ),
 
-          // Stage Header
           Positioned(
-            top: 50,
-            left: 20,
-            child: Text(
-              gameOver
-                  ? "Lost at Stage $currentStage"
-                  : "Stage $currentStage Completed",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          // Stage Header
-          Positioned(
-            top: 100,
-            left: 20,
-            child: Text(
-              gameOver
-                  ? currentStage >= rewardFromStage
-                      ? "Select a reward to add to your collection"
-                      : "Click the button below to end the game"
-                  : "Before you continue you can select a reward",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              softWrap: true,
-            ),
-          ),
+              top: 50,
+              left: 20,
+              right: 20,
+              child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        gameOver
+                            ? "Lost at Stage $currentStage"
+                            : "Stage $currentStage Completed",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        gameOver
+                            ? currentStage >= rewardFromStage
+                                ? "Select a reward to add to your collection"
+                                : "Click the button below to end the game"
+                            : "Before you continue you can select a reward",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        softWrap: true,
+                      ),
+                    ],
+                  ))),
+
           if (!gameOver) ...[
             if (_selectedOption == null) ...[
               Center(
@@ -428,24 +454,51 @@ class _StageSelectionScreenState extends State<StageSelectionScreen> {
           ] else if (_selectedOption != null || gameOver) ...[
             // Confirm Button
             Positioned(
-              bottom: 50,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: canNotAdvance() ? null : advanceToNextStage,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor:
-                        canNotAdvance() ? Colors.grey : Colors.blue,
-                    padding: EdgeInsets.symmetric(horizontal: 90, vertical: 20),
-                    textStyle:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                      onPressed:
+                          widget.userData.activeGame!.amountOfSkipReward <= 0
+                              ? null
+                              : () {
+                                  skipReward();
+                                },
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: Size(150, 65),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blueGrey,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                        textStyle: TextStyle(
+                            fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('Skip reward'),
+                          Text(
+                              '(${widget.userData.activeGame!.amountOfSkipReward} left)',
+                              style: TextStyle(fontSize: 10)),
+                        ],
+                      )),
+                  ElevatedButton(
+                    onPressed: advanceToNextStage,
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(150, 65),
+                      foregroundColor: Colors.white,
+                      backgroundColor:
+                          canNotAdvance() ? Colors.grey : Colors.blue,
+                      textStyle:
+                          TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                    child: Text(gameOver
+                        ? 'End game'
+                        : 'Proceed to Stage ${currentStage + 1}'),
                   ),
-                  child: Text(gameOver
-                      ? 'End game'
-                      : 'Proceed to Stage ${currentStage + 1}'),
-                ),
+                ],
               ),
             )
           ]

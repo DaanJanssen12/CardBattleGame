@@ -1,3 +1,4 @@
+import 'package:card_battle_game/animations/booster_pack_animation.dart';
 import 'package:card_battle_game/main.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/screens/deck_builder_screen.dart';
@@ -165,6 +166,14 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
                     }
                   },
                 ),
+                // SizedBox(width: 10),
+                // _buildRoundButton(
+                //   icon: FontAwesomeIcons.moneyBill,
+                //   color: Colors.green,
+                //   onPressed: () async {
+                //     showDialog(context: context, builder: (context) => BoosterPackOpenAnimation());
+                //   },
+                // ),
               ],
             ),
           ),

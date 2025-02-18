@@ -22,6 +22,7 @@ class CardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onDoubleTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -197,9 +198,12 @@ class CardWidget extends StatelessWidget {
   }
 
   Widget _buildDescriptionSection() {
-    var description = card.fullDescription ?? card.shortDescription ?? '';
+    var description = card.shortDescription;
+    if(description == null || (card.fullDescription != null && card.fullDescription!.length < 50)){
+      description = card.fullDescription;
+    }
     double fontSize = 8;
-    if(description.length > 30){
+    if(description!.length > 50){
       fontSize = 6;
     }
     return Container(
