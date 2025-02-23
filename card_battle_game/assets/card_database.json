@@ -14,7 +14,7 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 3,
-          "regainManaPerTurn": 0,
+          "startingGold": 100,
           "additionalEffect": {
             "name": "Arcane Infusion",
             "description": "Gain 1 mana whenever an upgrade is applied to Penguin Mage",
@@ -37,7 +37,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 2,
-          "regainManaPerTurn": 0,
+          "startingGold": 100,
           "additionalEffect": {
             "name": "Blazing Spirit",
             "description": "Gains +1 attack at the start of each turn if it attacked last turn",
@@ -64,7 +64,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 1,
-          "regainManaPerTurn": 0,
+          "startingGold": 100,
           "additionalEffect": {
             "name": "Spore Burst",
             "description": "When this Mushroom man faints it summons up to 2 Fun Guy.",
@@ -87,7 +87,7 @@
         "mascotEffects": {
           "startingHealth": 6,
           "startingMana": 2,
-          "regainManaPerTurn": 0,
+          "startingGold": 100,
           "additionalEffect": {
             "name": "Mycelium Network",
             "description": "When an upgrade is applied to this Fun Guy, copy it onto another random Fun Guy you control",
@@ -110,7 +110,7 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 2,
-          "regainManaPerTurn": 0,
+          "startingGold": 100,
           "additionalEffect": {
             "name": "Refreshing Presence",
             "description": "Whenever Droplet is healed, draw a card",
@@ -133,7 +133,7 @@
         "mascotEffects": {
           "startingHealth": 6,
           "startingMana": 2,
-          "regainManaPerTurn": 0
+          "startingGold": 100
         }
       },
       {
@@ -150,7 +150,7 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 3,
-          "regainManaPerTurn": 0
+          "startingGold": 100
         }
       },
       {
@@ -171,7 +171,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 2,
-          "regainManaPerTurn": 0
+          "startingGold": 150
         }
       },
       {
@@ -192,7 +192,7 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 1,
-          "regainManaPerTurn": 0
+          "startingGold": 100
         }
       },
       {
@@ -213,7 +213,7 @@
         "mascotEffects": {
           "startingHealth": 3,
           "startingMana": 3,
-          "regainManaPerTurn": 0
+          "startingGold": 100
         }
       },
       {
@@ -230,7 +230,7 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 3,
-          "regainManaPerTurn": 0,
+          "startingGold": 100,
           "additionalEffect": {
             "name": "Zombie Apocalypse",
             "description": "Whenever this Zombie faints an opponent monster, summon a Zombie on your side of the field.",

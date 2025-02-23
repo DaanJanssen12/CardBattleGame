@@ -156,7 +156,7 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
                               ),
                             ),
                             Text(
-                              'Regain Mana Per Turn: ${_selectedMascot!.toMonster().mascotEffects.regainManaPerTurn}',
+                              'Starting Gold: ${_selectedMascot!.toMonster().mascotEffects.startingGold}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

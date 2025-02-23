@@ -16,6 +16,16 @@ class CpuPlayer extends Player {
   late int possibleFromStage;
   late int possibleUntillStage;
   late String? id;
+  late String? tags;
+  bool hasTag(String? tag){
+    if(tags == null && tag == null){
+      return true;
+    }
+    if(tag != null && tags == null){
+      return false;
+    }
+    return tags!.contains(tag!);
+  }
 
   CpuPlayer({required super.name}) {
     isCPU = true;
@@ -45,6 +55,7 @@ class CpuPlayer extends Player {
     cpu.possibleFromStage = json['possibleFromStage'];
     cpu.possibleUntillStage = json['possibleUntillStage'];
     cpu.id = json['id'];
+    cpu.tags = json['tags'];
     return cpu;
   }
 

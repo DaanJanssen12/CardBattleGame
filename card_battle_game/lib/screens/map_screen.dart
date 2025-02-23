@@ -2,6 +2,8 @@ import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
 import 'package:card_battle_game/screens/mystery_event_screen.dart';
+import 'package:card_battle_game/screens/shop_screen.dart';
+import 'package:card_battle_game/screens/stage_completion_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -23,17 +25,24 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
   void initState() {
     super.initState();
     if (widget.userData.activeGame != null) {
+      map._startAtStage = widget.userData.activeGame!.currentMap!._startAtStage;
       map.setStages(widget.userData.activeGame!.currentMap!._stages);
       map._selectedMapStage =
           widget.userData.activeGame!.currentMap!._selectedMapStage;
     } else {
-      map.generateMap();
+      map.generateMap(1);
     }
 
     // Delay scrolling to allow the UI to build first
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedNode();
     });
+
+    _saveGame();
+  }
+
+  void _saveGame() async {
+    UserStorage.updateActiveGame(widget.userData.activeGame!);
   }
 
   void _moveToNode(MapStage node) {
@@ -45,12 +54,45 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
   void _scrollToSelectedNode() {
     if (map._selectedMapStage != null) {
       _scrollController.animateTo(
-        map._selectedMapStage
-            .y, // Scroll to the Y position of the selected node
+        map._selectedMapStage.y -
+            250, // Scroll to the Y position of the selected node
+        duration: Duration(milliseconds: 500), // Smooth animation
+        curve: Curves.easeInOut, // Smooth scrolling effect
+      );
+    } else {
+      //last cleared stage
+      MapStage? lastClearedStage;
+      for (var stage in map._stages.where((w) => w.cleared)) {
+        lastClearedStage ??= stage;
+        if (lastClearedStage.stage < stage.stage) {
+          lastClearedStage = stage;
+        }
+      }
+      _scrollController.animateTo(
+        lastClearedStage!.y -
+            250, // Scroll to the Y position of the selected node
         duration: Duration(milliseconds: 500), // Smooth animation
         curve: Curves.easeInOut, // Smooth scrolling effect
       );
     }
+  }
+
+  void newMap() {
+    map.generateMap(widget.userData.activeGame!.stage);
+    setState(() {
+      widget.userData.activeGame!.currentMap = map;
+    });
+    _scrollToSelectedNode();
+  }
+
+  void endGame() {
+    widget.userData.activeGame!.endGame(false);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => StageCompletionScreen(
+              userData: widget.userData, beatenPlayer: null)),
+    );
   }
 
   void startStage() {
@@ -63,12 +105,35 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
               builder: (context) => GameScreen(userData: widget.userData)),
         );
         break;
+      case NodeType.eliteBattle:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  GameScreen(userData: widget.userData, tag: 'elite')),
+        );
+        break;
+      case NodeType.bossBattle:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  GameScreen(userData: widget.userData, tag: 'boss')),
+        );
+        break;
       case NodeType.mystery:
         Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
                   MysteryEventScreen(userData: widget.userData)),
+        );
+        break;
+      case NodeType.shop:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ShopScreen(userData: widget.userData)),
         );
         break;
       default:
@@ -87,70 +152,136 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: Center(
-              child: SizedBox(
-                width: double.infinity,
-                child: Stack(
+          Column(
+            children: [
+              // Fixed Bar at the Top
+              Container(
+                height: 80, // Adjust height as needed
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                color: Colors.black
+                    .withOpacity(0.8), // Semi-transparent background
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CustomPaint(
-                      painter: NodeMapPainter(map._stages),
-                      size: Size(
-                          MediaQuery.of(context).size.width, map._yStart + 100),
+                    Text(
+                      "Stage: ${widget.userData.activeGame!.stage}",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
-                    ...map._stages.map((node) => Positioned(
-                          left: node.x,
-                          top: node.y,
-                          child: GestureDetector(
-                            onTap: () => map.canMoveToNode(node)
-                                ? _moveToNode(node)
-                                : null,
-                            child: NodeWidget(
-                                node: node,
-                                isActive: node == map._selectedMapStage ||
-                                    node.cleared),
-                          ),
-                        )),
-                    if (!map._selectedMapStage.cleared) ...[
-                      Positioned(
-                        top: map._selectedMapStage.y - 150,
-                        left: map._selectedMapStage.x -
-                            (MediaQuery.of(context).size.width / 4),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "Stage: ${map._selectedMapStage!.stage}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 18),
-                              ),
-                              Text(
-                                "Type: ${map._selectedMapStage!.type.toString().split('.').last}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                              SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: startStage,
-                                child: Text("Enter stage"),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ]
+                    Text(
+                      "Gold: ${widget.userData.activeGame!.gold}", // Replace with actual value
+                      style: TextStyle(color: Colors.yellow, fontSize: 18),
+                    ),
                   ],
                 ),
               ),
-            ),
+              // Scrollable Map Content
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Stack(
+                        children: [
+                          CustomPaint(
+                            painter: NodeMapPainter(map._stages),
+                            size: Size(MediaQuery.of(context).size.width,
+                                map._yStart + 100),
+                          ),
+                          ...map._stages.map((node) => Positioned(
+                                left: node.x,
+                                top: node.y,
+                                child: GestureDetector(
+                                  onTap: () => map.canMoveToNode(node)
+                                      ? _moveToNode(node)
+                                      : null,
+                                  child: NodeWidget(
+                                    node: node,
+                                    isActive: node == map._selectedMapStage ||
+                                        node.cleared,
+                                    isBossStage:
+                                        node.stage == map._amountOfStages,
+                                  ),
+                                ),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                height: 100, // Adjust height as needed
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                color: Colors.black
+                    .withOpacity(0.8), // Semi-transparent background
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (widget.userData.activeGame!.stage >
+                        map.lastStage()) ...[
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width - 20,
+                            child: Text(
+                              "You have cleared this map! Do you wanna continue or end this run?",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                              softWrap: true,
+                            ),
+                          ),
+                          Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ElevatedButton(
+                                onPressed: newMap,
+                                child: Text("Advance to stage ${widget.userData.activeGame!.stage}"),
+                              ),
+                              ElevatedButton(
+                                onPressed: endGame,
+                                child: Text("End game"),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ] else if (!map._selectedMapStage.cleared) ...[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Stage: ${map._selectedMapStage.stage}",
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          Text(
+                            "Type: ${map._selectedMapStage.typeString()}", // Replace with actual value
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ElevatedButton(
+                            onPressed: startStage,
+                            child: Text("Enter stage"),
+                          )
+                        ],
+                      )
+                    ] else ...[
+                      Text(
+                        "Select your next stage",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -190,29 +321,60 @@ class GameMap {
   final double _yDecreasePerStage = 120;
   final List<MapStage> _stages = [];
   final int _amountOfStages = 10;
+  int _startAtStage = 1;
   late MapStage _selectedMapStage;
+  int lastStage() {
+    return _startAtStage + (_amountOfStages - 1);
+  }
 
   GameMap();
 
-  void generateMap() {
+  factory GameMap.fromJson(Map<String, dynamic> json) {
+    var data = GameMap();
+    data._stages.addAll((json['stages'] as List<dynamic>)
+        .map((m) => MapStage.fromJson(m))
+        .toList());
+    data._selectedMapStage = MapStage.fromJson(json['selectedMapStage']);
+    data._startAtStage = json['startAtStage'] ?? 1;
+    return data;
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'stages': _stages.map((m) => m.toJson()).toList(),
+      'selectedMapStage': _selectedMapStage.toJson(),
+      'startAtStage': _startAtStage
+    };
+  }
+
+  void generateMap(int startingStage) {
+    _startAtStage = startingStage;
     _stages.clear();
-    for (int i = 1; i <= _amountOfStages; i++) {
-      if (i == 1) {
+    for (int i = 0; i < _amountOfStages; i++) {
+      var stage = i + _startAtStage;
+      if (i == 0) {
         _stages.add(MapStage(
-          stage: i,
+          stage: stage,
           connectToPaths: [1, 2, 3],
           type: NodeType.battle,
           x: _paths[1].getValueX().toDouble(),
-          y: getStageValueY(i),
+          y: getStageValueY(i + 1),
+        ));
+      } else if (i == _amountOfStages - 1) {
+        _stages.add(MapStage(
+          stage: stage,
+          connectToPaths: [1, 2, 3],
+          type: NodeType.bossBattle,
+          x: _paths[1].getValueX().toDouble(),
+          y: getStageValueY(i + 1),
         ));
       } else {
         for (var path in _paths) {
           _stages.add(MapStage(
-            stage: i,
+            stage: stage,
             connectToPaths: path.getPathConnections(),
             type: getRandomStageType(i),
             x: path.getValueX().toDouble(),
-            y: getStageValueY(i),
+            y: getStageValueY(i + 1),
           ));
         }
       }
@@ -239,21 +401,34 @@ class GameMap {
   }
 
   NodeType getRandomStageType(int stage) {
-    var rngResult = Random().nextInt(100) + 1; //Value between 1 and 100
-    switch (stage) {
-      case < 5:
-        switch (rngResult) {
-          case < 75:
-            return NodeType.battle;
-          case >= 75 && < 90:
-            return NodeType.mystery;
-          case >= 90:
-            return NodeType.shop;
-        }
-      default:
-        return NodeType.battle;
+    int rngResult = Random().nextInt(100) + 1; // Value between 1 and 100
+
+    if (stage < 5) {
+      if (rngResult < 75) return NodeType.battle;
+      if (rngResult < 90) return NodeType.mystery;
+      return NodeType.shop;
+    } else if (stage < 10) {
+      if (rngResult < 50) return NodeType.battle;
+      if (rngResult < 70) return NodeType.mystery;
+      if (rngResult < 85) return NodeType.shop;
+      return NodeType.eliteBattle;
+    } else if (stage < 20) {
+      if (rngResult < 40) return NodeType.battle;
+      if (rngResult < 65) return NodeType.mystery;
+      if (rngResult < 80) return NodeType.eliteBattle;
+      return NodeType.shop;
+    } else if (stage < 30) {
+      if (rngResult < 35) return NodeType.battle;
+      if (rngResult < 60) return NodeType.eliteBattle;
+      if (rngResult < 80) return NodeType.mystery;
+      return NodeType.shop;
+    } else {
+      // Stage 30+
+      if (rngResult < 25) return NodeType.battle;
+      if (rngResult < 60) return NodeType.eliteBattle;
+      if (rngResult < 85) return NodeType.mystery;
+      return NodeType.shop;
     }
-    return NodeType.battle;
   }
 
   void setCurrentStageCleared() {
@@ -286,6 +461,49 @@ class MapStage {
       required this.y,
       required this.connectToPaths});
 
+  String typeString() {
+    return type
+        .toString()
+        .split(".")
+        .last
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (match) {
+      return '${match.group(1)} ${match.group(2)}';
+    }).replaceFirstMapped(RegExp(r'^\w'), (match) {
+      return match.group(0)!.toUpperCase();
+    });
+  }
+
+  factory MapStage.fromJson(Map<String, dynamic> json) {
+    var nodeType = NodeType.values.firstWhere(
+      (e) =>
+          e.toString().split('.').last.toLowerCase() ==
+          json['type'].toLowerCase(),
+      orElse: () => NodeType.battle, // Default value
+    );
+    var data = MapStage(
+        stage: json['stage'],
+        type: nodeType,
+        x: json['x'],
+        y: json['y'],
+        connectToPaths: json['connectToPaths'] != null
+            ? (json['connectToPaths'] as List<dynamic>)
+                .map((m) => m as int)
+                .toList()
+            : []);
+    data.cleared = json['cleared'];
+    return data;
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'stage': stage,
+      'type': type.toString().toLowerCase().split(".").last,
+      'x': x,
+      'y': y,
+      'connectToPaths': connectToPaths,
+      'cleared': cleared,
+    };
+  }
+
   IconData getIcon() {
     switch (type) {
       case NodeType.battle:
@@ -296,6 +514,10 @@ class MapStage {
         return FontAwesomeIcons.question;
       case NodeType.shop:
         return FontAwesomeIcons.store;
+      case NodeType.eliteBattle:
+        return FontAwesomeIcons.chessKnight;
+      case NodeType.bossBattle:
+        return FontAwesomeIcons.crown;
     }
   }
 
@@ -319,13 +541,15 @@ class MapStage {
   }
 }
 
-enum NodeType { battle, shop, event, mystery }
+enum NodeType { battle, shop, event, mystery, bossBattle, eliteBattle }
 
 class NodeWidget extends StatelessWidget {
   final MapStage node;
   final bool isActive;
+  final bool isBossStage;
 
-  const NodeWidget({required this.node, required this.isActive});
+  const NodeWidget(
+      {required this.node, required this.isActive, required this.isBossStage});
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +563,7 @@ class NodeWidget extends StatelessWidget {
             width: 3, color: isActive ? Colors.yellow : Colors.black),
       ),
       child: Center(
-        child: Icon(node.getIcon()),
+        child: Icon(node.getIcon(), size: 20),
       ),
     );
   }

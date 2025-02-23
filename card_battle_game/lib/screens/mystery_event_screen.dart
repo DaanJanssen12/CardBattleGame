@@ -1,3 +1,5 @@
+import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/screens/map_screen.dart';
 import 'package:card_battle_game/screens/stage_completion_screen.dart';
@@ -40,12 +42,12 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
   void _generateRandomEvent() {
     final events = [
       MysteryEvent(
-        title: "The Lucky Fountain 🎩",
-        description: "You find a wishing fountain! Do you toss a coin?",
-        choice1: "Throw a coin!",
+        title: "The Wishing well 🎩",
+        description: "You find a wishing well! Do you toss a coin?",
+        choice1: "Toss a coin!",
         choice2: "Walk away",
         effect1: () {
-          advanceStage();
+          _tossACoin();
         },
         effect2: () {
           advanceStage();
@@ -55,8 +57,7 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
         title: "The Clown's Gamble 🤡",
         description: '📖 A grinning clown jumps out of nowhere! \n\n'
             '💬 "Wanna play a game? You could win big... or lose something dear!"',
-        choice1:
-            "Play the game!",
+        choice1: "Play the game!",
         choice2: "Ignore the clown and back away slowly...",
         effect1: () {
           _playTheGame();
@@ -65,7 +66,45 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
           advanceStage();
         },
       ),
-      // Add new events here
+      MysteryEvent(
+        title: "Abandoned Caravan 🏕️",
+        description:
+            'You stumble upon a wrecked merchant caravan. What do you do?',
+        choice1: "Loot the Caravan!",
+        choice2: "Ignore it and walk away",
+        effect1: () async {
+          var rngResult = Random().nextInt(100) + 1;
+          if (rngResult < 50) {
+            _showResultDialog(
+              "Nothing..",
+              "You found nothing of value...",
+              Colors.black,
+            );
+          } else if (rngResult < 80) {
+            var gold = widget.userData!.activeGame!.gold;
+            var minLoseAmount =  Random().nextInt((gold / 4).floor());
+            var maxLoseAmount =  Random().nextInt((gold / 2).floor());
+            var loseGold = Random().nextInt(maxLoseAmount - minLoseAmount) + minLoseAmount;
+            widget.userData!.activeGame!.removeGold(loseGold);
+            _showResultDialog(
+              "Run!",
+              "The owner came back and saw you snooping around. You managed to escape but lost $loseGold gold",
+              Colors.red,
+            );
+          } else {
+            var cards = await CardDatabase.getCards(["monster_zombie"]);
+            var card = cards[Random().nextInt(cards.length)];
+            _showResultDialog(
+              "Lucky!",
+              "You found a rare card. '${card.name}' has been added to your deck.",
+              Colors.green,
+            );
+          }
+        },
+        effect2: () {
+          advanceStage();
+        },
+      ),
     ];
 
     setState(() {
@@ -73,15 +112,24 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
     });
   }
 
+  void _tossACoin() async {
+    widget.userData!.activeGame!.addGold(-1);
+
+    _showResultDialog(
+      "You tossed a coin",
+      "Hopefully your wish comes true...",
+      Colors.white,
+    );
+  }
+
   // Event effect for "Play the game!"
-  void _playTheGame() {
+  void _playTheGame() async {
     final outcome =
         (Random().nextBool()) ? "win" : "lose"; // Random outcome (50/50)
 
     if (outcome == "win") {
-      // Player wins gold!
-      int rewardGold = 100; // Example reward
-      //widget.userData!.gold += rewardGold;
+      int rewardGold = 100;
+      widget.userData!.activeGame!.addGold(rewardGold);
 
       _showResultDialog(
         "You Won!",
@@ -89,13 +137,20 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
         Colors.greenAccent,
       );
     } else {
-      // Player loses a random item
-      // String lostItem = widget.userData!.inventory.isNotEmpty
-      //     ? widget.userData!.inventory.removeAt(0)
-      //     : "nothing";
+      //Player loses a random card
+      GameCard? cardToLose;
+      bool cardfound = false;
+      while (!cardfound) {
+        cardToLose = widget.userData!.activeGame!.player.deck[
+            Random().nextInt(widget.userData!.activeGame!.player.deck.length)];
+        if (!cardToLose.isMonster() || !(cardToLose.toMonster()).isMascot) {
+          cardfound = true;
+        }
+      }
+      widget.userData!.activeGame!.player.deck.remove(cardToLose);
       _showResultDialog(
         "You Lost!",
-        "You lost a random item: ",
+        "You lost ${cardToLose!.name} from your deck",
         Colors.redAccent,
       );
     }

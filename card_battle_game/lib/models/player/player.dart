@@ -5,6 +5,7 @@ import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/cards/mascot_effects.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:card_battle_game/models/cards/upgrade_card.dart';
+import 'package:card_battle_game/models/player/cpu.dart';
 
 class Player {
   String name;
@@ -17,7 +18,6 @@ class Player {
 
   late int startingHealth;
   late int startingMana;
-  late int regainManaPerTurn;
   late String mascot;
   late MonsterCard mascotCard;
 
@@ -30,7 +30,6 @@ class Player {
         monsters = List.filled(3, null) {
     startingHealth = 3;
     startingMana = 0;
-    regainManaPerTurn = 1;
     mascot = '';
   }
 
@@ -45,7 +44,6 @@ class Player {
     data.mana = json['mana'];
     data.startingHealth = json['startingHealth'];
     data.startingMana = json['startingMana'];
-    data.regainManaPerTurn = json['regainManaPerTurn'];
     data.mascot = json['mascot'];
     data.hand = json['hand'] != null
         ? (json['hand'] as List<dynamic>).map((cardJson) {
@@ -74,7 +72,6 @@ class Player {
       'mana': mana,
       'startingHealth': startingHealth,
       'startingMana': startingMana,
-      'regainManaPerTurn': regainManaPerTurn,
       'mascot': mascot,
       'mascotCard': mascotCard.toJson(),
       'hand': hand.map((m) => m.toJson()).toList(),
@@ -100,7 +97,6 @@ class Player {
     mascotCard = card;
     startingHealth = card.mascotEffects.startingHealth;
     startingMana = card.mascotEffects.startingMana;
-    regainManaPerTurn = card.mascotEffects.regainManaPerTurn;
   }
 
   Future<void> startGame(List<String> battleLog, Player opponent) async {
@@ -132,7 +128,6 @@ class Player {
         mana += 3;
         break;
     }
-    mana += regainManaPerTurn;
     if (mana > Constants.playerMaxMana) {
       mana = Constants.playerMaxMana;
     }
@@ -364,6 +359,20 @@ class Player {
           attackingMonster);
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
+    }
+  }
+
+  int getGoldReward() {
+    var cpuData = this as CpuPlayer;
+    switch (cpuData.level) {
+      case CpuLevels.easy:
+        return 50;
+      case CpuLevels.medium:
+        return 100;
+      case CpuLevels.hard:
+        return 150;
+      case CpuLevels.expert:
+        return 200;
     }
   }
 }

@@ -109,7 +109,7 @@ class UserData {
     var player = await asPlayer();
     activeGame!.setPlayer(player);
     var map = GameMap();
-    map.generateMap();
+    map.generateMap(1);
     activeGame!.currentMap = map;
   }
 

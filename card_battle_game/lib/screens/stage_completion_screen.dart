@@ -13,7 +13,7 @@ import 'package:card_battle_game/widgets/card_widget.dart';
 
 class StageCompletionScreen extends StatefulWidget {
   final UserData userData;
-  final Player beatenPlayer;
+  final Player? beatenPlayer;
 
   const StageCompletionScreen(
       {super.key, required this.userData, required this.beatenPlayer});
@@ -32,15 +32,18 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
       1; // The stage starts at 1 and increases with each completed stage
   List<GameCard> rewardCards = [];
   bool gameOver = false;
+  bool playerHasLost = false;
   final int rewardFromStage = 5;
 
   @override
   void initState() {
     super.initState();
     currentStage = widget.userData.activeGame!.stage;
-    gameOver = widget.userData.activeGame!.playerHasLost;
+    gameOver = widget.userData.activeGame!.gameHasEnded;
+    playerHasLost = widget.userData.activeGame!.playerHasLost;
+    _selectedOption = RewardOptions.addCard;
     if (gameOver) {
-      if (currentStage >= rewardFromStage) {
+      if (!playerHasLost) {
         _loadPermanentRewardCards();
       }
     } else {
@@ -68,20 +71,20 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
 
   // Simulate fetching reward cards from a service or backend
   Future<List<GameCard>> fetchRewardCardsForStage(int stage) async {
-    var card1 = Random().nextInt(widget.beatenPlayer.deck.length);
-    var card2 = Random().nextInt(widget.beatenPlayer.deck.length);
-    var card3 = Random().nextInt(widget.beatenPlayer.deck.length);
+    var card1 = Random().nextInt(widget.beatenPlayer!.deck.length);
+    var card2 = Random().nextInt(widget.beatenPlayer!.deck.length);
+    var card3 = Random().nextInt(widget.beatenPlayer!.deck.length);
     while (card2 == card1) {
-      card2 = Random().nextInt(widget.beatenPlayer.deck.length);
+      card2 = Random().nextInt(widget.beatenPlayer!.deck.length);
     }
     while (card3 == card1 || card3 == card2) {
-      card3 = Random().nextInt(widget.beatenPlayer.deck.length);
+      card3 = Random().nextInt(widget.beatenPlayer!.deck.length);
     }
 
     return [
-      widget.beatenPlayer.deck[card1],
-      widget.beatenPlayer.deck[card2],
-      widget.beatenPlayer.deck[card3]
+      widget.beatenPlayer!.deck[card1],
+      widget.beatenPlayer!.deck[card2],
+      widget.beatenPlayer!.deck[card3]
     ];
     //return await CardDatabase.generateRewards(stage, 3);
   }
@@ -105,6 +108,12 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
     }
     if (_selectedOption == RewardOptions.addCard && _selectedReward == null) {
       return;
+    }
+
+    if (_selectedReward != null && _selectedReward!.isMonster()) {
+      if (_selectedReward!.toMonster().isMascot) {
+        _selectedReward!.toMonster().isMascot = false;
+      }
     }
 
     widget.userData.activeGame!.advanceStage(_selectedOption!, _selectedReward);
@@ -172,7 +181,9 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                     children: [
                       Text(
                         gameOver
-                            ? "Lost at Stage $currentStage"
+                            ? playerHasLost 
+                              ? "Lost at Stage $currentStage"
+                              : "Stage $currentStage Completed"
                             : "Stage $currentStage Completed",
                         style: TextStyle(
                           fontSize: 28,
@@ -182,7 +193,7 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                       ),
                       Text(
                         gameOver
-                            ? currentStage >= rewardFromStage
+                            ? !playerHasLost
                                 ? "Select a reward to add to your collection"
                                 : "Click the button below to end the game"
                             : "Before you continue you can select a reward",

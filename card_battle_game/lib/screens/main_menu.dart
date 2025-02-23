@@ -64,7 +64,7 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => GameScreen(userData: _userData!)),
+            builder: (context) => NodeMapScreen(userData: _userData!)),
       );
       return;
     }
@@ -165,28 +165,6 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
                             updatedUserData; // Update user data in MainMenu
                       });
                     }
-                  },
-                ),
-                // SizedBox(width: 10),
-                // _buildRoundButton(
-                //   icon: FontAwesomeIcons.moneyBill,
-                //   color: Colors.green,
-                //   onPressed: () async {
-                //     showDialog(context: context, builder: (context) => BoosterPackOpenAnimation());
-                //   },
-                // ),
-                SizedBox(width: 10),
-                _buildRoundButton(
-                  icon: FontAwesomeIcons.map,
-                  color: Colors.black,
-                  onPressed: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            NodeMapScreen(userData:  _userData!),
-                      ),
-                    );
                   },
                 ),
               ],

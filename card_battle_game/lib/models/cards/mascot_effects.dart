@@ -7,10 +7,10 @@ import 'package:card_battle_game/models/enums/upgrade_card_type.dart';
 class MascotEffects {
   int startingHealth;
   int startingMana;
-  int regainManaPerTurn;
+  int startingGold;
   late MascotAdditionalEffect? additionalEffect;
 
-  MascotEffects(this.startingHealth, this.startingMana, this.regainManaPerTurn);
+  MascotEffects(this.startingHealth, this.startingMana, this.startingGold);
 
   factory MascotEffects.fromJson(Map<String, dynamic>? json) {
     var data = MascotEffects(3, 4, 1);
@@ -19,7 +19,7 @@ class MascotEffects {
     }
     data.startingHealth = json['startingHealth'];
     data.startingMana = json['startingMana'];
-    data.regainManaPerTurn = json['regainManaPerTurn'];
+    data.startingGold = json['startingGold'] ?? 0;
     data.additionalEffect = json['additionalEffect'] != null
         ? MascotAdditionalEffect.fromJson(json['additionalEffect'])
         : null;
@@ -30,7 +30,7 @@ class MascotEffects {
     return {
       'startingHealth': startingHealth,
       'startingMana': startingMana,
-      'regainManaPerTurn': regainManaPerTurn,
+      'startingGold': startingGold,
       'additionalEffect': additionalEffect?.toJson()
     };
   }
@@ -40,7 +40,7 @@ class MascotEffects {
     return """
 Starting health: $startingHealth
 Starting mana: $startingMana
-Regain mana per turn: $regainManaPerTurn
+Starting gold: $startingGold
 """;
   }
 }

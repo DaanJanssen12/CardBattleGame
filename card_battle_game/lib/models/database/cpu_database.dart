@@ -17,13 +17,14 @@ class CpuDatabase {
   }
 
   static Future<CpuPlayer?> getRandomCpuPlayer(
-      int? stage, List<String> excludeCpuIds) async {
+      int? stage, List<String> excludeCpuIds, {String? tag}) async {
     await loadData();
     if (cpuPlayers.isEmpty) {
       return null;
     }
     var possibleCpuPlayers =
-        cpuPlayers.where((w) => !excludeCpuIds.contains(w.id ?? '')).toList();
+        cpuPlayers.where((w) => !excludeCpuIds.contains(w.id ?? '')
+        && w.hasTag(tag)).toList();
     if (stage == null) {
       return possibleCpuPlayers[Random().nextInt(possibleCpuPlayers.length)];
     } else {
@@ -38,7 +39,7 @@ class CpuDatabase {
     }
   }
 
-  static Future<CpuPlayer> generateCPU(int? stage) async{
+  static Future<CpuPlayer> generateCPU(int? stage, {String? tag}) async{
     var level = CpuLevels.easy;
     var strategy = CpuStrategy.random;
     int deckSize = 5;

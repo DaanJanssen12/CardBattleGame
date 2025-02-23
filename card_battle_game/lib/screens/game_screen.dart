@@ -6,8 +6,9 @@ import 'package:card_battle_game/widgets/player_info_widget.dart';
 import 'package:flutter/material.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.userData});
+  const GameScreen({super.key, required this.userData, this.tag});
   final UserData userData;
+  final String? tag;
 
   @override
   _GameScreenState createState() => _GameScreenState();
@@ -26,7 +27,7 @@ class _GameScreenState extends State<GameScreen> {
 
      Future<void> _loadData() async {
     var player = widget.userData.activeGame!.player;
-    var opponent = await widget.userData.activeGame!.initCPU();
+    var opponent = await widget.userData.activeGame!.initCPU(tag: widget.tag);
     setState(() {
       _isLoading = false;
     });
@@ -131,8 +132,7 @@ class _GameScreenState extends State<GameScreen> {
                         left: 0,
                         right: 0,
                         child: Container(
-                          color: Colors.grey[
-                              200], // Adding visual separation for the player hand
+                          color: Colors.grey.withOpacity(0.50), // Adding visual separation for the player hand
                           child: PlayerHandWidget(
                               player: _stageMatchService.match.player, onCardTap: _stageMatchService.showCardDetails),
                         ),

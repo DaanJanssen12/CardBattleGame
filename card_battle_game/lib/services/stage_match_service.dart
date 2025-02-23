@@ -29,7 +29,9 @@ class StageMatchService {
 
   void endGame(bool playerWon, Player beatenPlayer) {
     if (!playerWon) {
-      userData.activeGame!.endGame();
+      userData.activeGame!.endGame(true);
+    }else{
+      userData.activeGame!.addGold(beatenPlayer.getGoldReward());
     }
     toStageCompletionScreen(beatenPlayer);
   }

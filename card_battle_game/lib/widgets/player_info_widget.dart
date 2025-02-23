@@ -83,7 +83,6 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
                           _buildStatRow("Starting Health", widget.player.mascotCard.mascotEffects.startingHealth,
                               Colors.red, FontAwesomeIcons.solidHeart),
                           _buildStatRow("Starting Mana", widget.player.mascotCard.mascotEffects.startingMana, Colors.blue, FontAwesomeIcons.droplet),
-                          _buildStatRow("Gain Mana per turn", widget.player.mascotCard.mascotEffects.regainManaPerTurn, Colors.blue, FontAwesomeIcons.droplet),
                           if(widget.player.mascotCard.mascotEffects.additionalEffect != null)...[
                             _buildStatRow(widget.player.mascotCard.mascotEffects.additionalEffect!.name, null, Colors.green, FontAwesomeIcons.wandMagic),
                             Text(widget.player.mascotCard.mascotEffects.additionalEffect!.description)
@@ -176,7 +175,7 @@ class _PlayerInfoWidgetState extends State<PlayerInfoWidget> {
                             ? '${widget.player.name} (Turn)'
                             : widget.player.name,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: widget.player.name.length > 8 ? 12 : 15,
                           fontWeight: FontWeight.bold,
                           color: Colors.blue[800],
                         ),

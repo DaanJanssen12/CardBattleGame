@@ -1,5 +1,28 @@
 [
     {
+        "id": "cpu_the_magician",
+        "name": "The Magician",
+        "possibleFromStage": 8,
+        "possibleUntillStage": 12,
+        "cpuLevel": "medium",
+        "cpuStrategy": "defensive",
+        "tags": "boss",
+        "deck": [
+            "monster_penguin_mage",
+            "monster_water_droplet",
+            "monster_water_droplet",
+            "monster_sheep",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_strengthen",
+            "upgrade_shield",
+            "action_blizzard",
+            "action_draw_twice",
+            "action_mana_surge"
+        ],
+        "mascot": "monster_penguin_mage"
+    },
+    {
         "id": "cpu_bill",
         "name": "Bill",
         "possibleFromStage": 1,
@@ -7,7 +30,6 @@
         "cpuLevel": "easy",
         "cpuStrategy": "random",
         "deck": [
-            "monster_mushroom_boy",
             "monster_mushroom_boy",
             "upgrade_heal",
             "upgrade_heal",
@@ -18,8 +40,8 @@
     {
         "id": "cpu_lily",
         "name": "Lily",
-        "possibleFromStage": 1,
-        "possibleUntillStage": 3,
+        "possibleFromStage": 2,
+        "possibleUntillStage": 4,
         "cpuLevel": "easy",
         "cpuStrategy": "random",
         "deck": [
@@ -40,10 +62,10 @@
         "cpuStrategy": "defensive",
         "deck": [
             "monster_sheep",
+            "monster_sheep",
             "upgrade_heal",
             "upgrade_strengthen",
-            "upgrade_strengthen",
-            "action_sheep_herder"
+            "upgrade_strengthen"
         ],
         "mascot": "monster_sheep"
     },
@@ -57,7 +79,7 @@
         "deck": [
             "monster_mushroom_boy",
             "monster_mushroom_boy",
-            "monster_mushroom_boy",
+            "upgrade_heal ",
             "upgrade_blueberry",
             "upgrade_raspberry"
         ],
