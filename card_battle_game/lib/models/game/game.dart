@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 class Game {
   late int stage;
   late int gold;
+  late int luck;
   late String mascot;
   late Player player;
   late bool playerHasLost = false;
@@ -22,10 +23,12 @@ class Game {
 
   late MapStage? currentStage;
   late GameMap? currentMap;
+  List<String> artifacts = [];
 
   Game() {
     stage = 0;
     gold = 0;
+    luck = 0;
     mascot = '';
     player = Player(name: '');
     currentMap = null;
@@ -41,8 +44,17 @@ class Game {
   void addGold(int addGold) {
     gold += addGold;
   }
+
   void removeGold(int removeGold) {
     gold -= removeGold;
+  }
+
+  void addLuck(int amount) {
+    luck += amount;
+  }
+
+  void addArtifact(String artifact) {
+    artifacts.add(artifact);
   }
 
   void advanceStage(RewardOptions rewardOption, GameCard? selectedCard) {
@@ -74,7 +86,8 @@ class Game {
   }
 
   Future<CpuPlayer> initCPU({String? tag}) async {
-    var cpuPlayer = await CpuDatabase.getRandomCpuPlayer(stage, versedCPUs, tag: tag);
+    var cpuPlayer =
+        await CpuDatabase.getRandomCpuPlayer(stage, versedCPUs, tag: tag);
     if (cpuPlayer == null) {
       return await CpuDatabase.generateCPU(stage, tag: tag);
     }
@@ -87,6 +100,7 @@ class Game {
     var data = Game();
     data.stage = json['stage'] ?? 1;
     data.gold = json['gold'] ?? 0;
+    data.luck = json['luck'] ?? 0;
     data.mascot = json['mascot'];
     data.player = Player.fromJson(json['player']);
     data.currentMap = json['currentMap'] != null
@@ -100,13 +114,18 @@ class Game {
     data.selectedRewards = (json['selectedRewards'] as List<dynamic>)
         .map((m) => GameCard.fromJson(m))
         .toList();
+    data.artifacts = json['artifacts'] != null
+        ? (json['artifacts'] as List<dynamic>).map((m) => m.toString()).toList()
+        : [];
     return data;
   }
   Map<String, dynamic> toJson() {
     return {
       'stage': stage,
       'gold': gold,
+      'luck': luck,
       'mascot': mascot,
+      'artifacts': artifacts,
       'player': player.toJson(),
       'currentMap': currentMap?.toJson(),
       'currentStage': currentStage?.toJson(),

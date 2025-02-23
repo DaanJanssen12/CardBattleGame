@@ -67,19 +67,10 @@ class CpuDatabase {
       }
     }
 
-    var cpu = CpuPlayer(name: 'CPU');
+    var cpu = CpuPlayer(name: cpuNames[Random().nextInt(cpuNames.length)]);
     cpu.strategy = strategy;
     cpu.level = level;
     await cpu.generateDeck(deckSize);
-    print('INIT CPU');
-    print('LEVEL: $level');
-    print('STRATEGY: $strategy');
-    print('DECKSIZE: ${cpu.deck.length}');
-    print('DECK:');
-    for(var card in cpu.deck){
-      print(card.name);
-    }
-    print('MASCOT: ${cpu.mascot}');
     return cpu;
   }
 
@@ -87,4 +78,14 @@ class CpuDatabase {
     var options = [CpuStrategy.defensive, CpuStrategy.offensive];
     return options[Random().nextInt(options.length)];
   }
+
+  static List<String> cpuNames = [
+    "Tom", "Emma", "Max", "Lucy", "Jake", "Mia", "Leo", "Sophie", "Ben", "Lily", 
+    "Alex", "Chloe", "Ethan", "Olivia", "Ryan", "Grace", "Sam", "Jack", "Zoe", 
+    "Noah", "Ella", "Owen", "Ava", "Luke", "Isla", "James", "Harper", "Jack", 
+    "Amelia", "Caleb", "Grace", "Henry", "Ivy", "Liam", "Charlotte", "Jacob", 
+    "Benjamin", "Natalie", "Mason", "Leah", "William", "Samantha", "Dylan", 
+    "Rachel", "Ella", "Michael", "Ella", "William", "Landon", "Zara", "Aiden", 
+    "Emily", "Lilly"
+];
 }

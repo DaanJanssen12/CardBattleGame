@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 
 class CoinFlipWidget extends StatefulWidget {
   final Function(bool) onFlipComplete;
+  final int luck;
+  final List<String> artifacts;
 
-  const CoinFlipWidget({super.key, required this.onFlipComplete});
+  const CoinFlipWidget(
+      {super.key,
+      required this.luck,
+      required this.onFlipComplete,
+      required this.artifacts});
 
   @override
   _CoinFlipWidgetState createState() => _CoinFlipWidgetState();
@@ -40,9 +46,16 @@ class _CoinFlipWidgetState extends State<CoinFlipWidget>
   void startFlip() {
     if (playerChoice == null) return; // Prevent flipping before choice
 
-    setState(() {
-      coinResult = Random().nextBool(); // Randomize coin result
-    });
+    if (widget.artifacts.contains("GamblersCoin")) {
+      //GamblersCoin = 75% tails
+      setState(() {
+        coinResult = Random().nextInt(4) == 0;
+      });
+    } else {
+      setState(() {
+        coinResult = Random().nextBool(); // Randomize coin result
+      });
+    }
 
     _controller.forward(); // Start animation
   }
@@ -67,8 +80,8 @@ class _CoinFlipWidgetState extends State<CoinFlipWidget>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () => setState(() => playerChoice = true),
-                  child: Column(
+                    onPressed: () => setState(() => playerChoice = true),
+                    child: Column(
                       children: [
                         const Text("Heads"),
                         Image.asset(

@@ -2,8 +2,8 @@
     {
         "id": "cpu_the_magician",
         "name": "The Magician",
-        "possibleFromStage": 8,
-        "possibleUntillStage": 12,
+        "possibleFromStage": 10,
+        "possibleUntillStage": 10,
         "cpuLevel": "medium",
         "cpuStrategy": "defensive",
         "tags": "boss",
@@ -21,6 +21,49 @@
             "action_mana_surge"
         ],
         "mascot": "monster_penguin_mage"
+    },
+    {
+        "id": "cpu_the_behemoth",
+        "name": "The Behemoth",
+        "possibleFromStage": 20,
+        "possibleUntillStage": 20,
+        "cpuLevel": "medium",
+        "cpuStrategy": "defensive",
+        "tags": "boss",
+        "deck": [
+            "monster_magma_golem",
+            "monster_flame_dog",
+            "monster_flame_dog",
+            "monster_sheep",
+            "monster_sheep",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_shield",
+            "action_blizzard",
+            "action_draw",
+            "action_draw_twice",
+            "action_mana_surge"
+        ],
+        "mascot": "monster_magma_golem"
+    },
+    {
+        "id": "cpu_the_magician",
+        "name": "The Farmer",
+        "possibleFromStage": 5,
+        "possibleUntillStage": 15,
+        "cpuLevel": "easy",
+        "cpuStrategy": "offensive",
+        "tags": "elite",
+        "deck": [
+            "monster_mushroom_man",
+            "monster_sheep",
+            "action_harvest",
+            "action_mushroom_garden",
+            "action_sheep_herder",
+            "action_long_rest"
+        ],
+        "mascot": "monster_mushroom_man"
     },
     {
         "id": "cpu_bill",

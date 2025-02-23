@@ -93,7 +93,7 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
     if (canNotAdvance()) {
       return;
     }
-    if (gameOver && currentStage < rewardFromStage) {
+    if (gameOver && playerHasLost) {
       endGame(null);
       return;
     }
@@ -181,9 +181,9 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                     children: [
                       Text(
                         gameOver
-                            ? playerHasLost 
-                              ? "Lost at Stage $currentStage"
-                              : "Stage $currentStage Completed"
+                            ? playerHasLost
+                                ? "Lost at Stage $currentStage"
+                                : "Stage $currentStage Completed"
                             : "Stage $currentStage Completed",
                         style: TextStyle(
                           fontSize: 28,
@@ -376,7 +376,7 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                   ),
                 ),
               ),
-            ] else ...[
+            ] else if(!gameOver || (gameOver && !playerHasLost))...[
               Center(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
@@ -491,30 +491,32 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                      onPressed:
-                          widget.userData.activeGame!.amountOfSkipReward <= 0
-                              ? null
-                              : () {
-                                  skipReward();
-                                },
-                      style: ElevatedButton.styleFrom(
-                        fixedSize: Size(150, 65),
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.blueGrey,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                        textStyle: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                      child: Column(
-                        children: [
-                          Text('Skip reward'),
-                          Text(
-                              '(${widget.userData.activeGame!.amountOfSkipReward} left)',
-                              style: TextStyle(fontSize: 10)),
-                        ],
-                      )),
+                  if (!gameOver) ...[
+                    ElevatedButton(
+                        onPressed:
+                            widget.userData.activeGame!.amountOfSkipReward <= 0
+                                ? null
+                                : () {
+                                    skipReward();
+                                  },
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(150, 65),
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.blueGrey,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 20),
+                          textStyle: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                        child: Column(
+                          children: [
+                            Text('Skip reward'),
+                            Text(
+                                '(${widget.userData.activeGame!.amountOfSkipReward} left)',
+                                style: TextStyle(fontSize: 10)),
+                          ],
+                        )),
+                  ],
                   ElevatedButton(
                     onPressed: advanceToNextStage,
                     style: ElevatedButton.styleFrom(
@@ -540,7 +542,7 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
 
   bool canNotAdvance() {
     if (gameOver) {
-      if (currentStage < rewardFromStage) {
+      if (playerHasLost) {
         return false;
       }
       return _selectedReward == null;

@@ -42,10 +42,10 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
   void _generateRandomEvent() {
     final events = [
       MysteryEvent(
-        title: "The Wishing well 🎩",
-        description: "You find a wishing well! Do you toss a coin?",
+        title: "The lucky fountain 🎩",
+        description: "You come across 'The lucky fountain'! People toss coins into it in exchange for good fortune. Do you toss a coin?",
         choice1: "Toss a coin!",
-        choice2: "Walk away",
+        choice2: "I don't believe that superstitious stuff. *Walk away*",
         effect1: () {
           _tossACoin();
         },
@@ -67,6 +67,44 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
         },
       ),
       MysteryEvent(
+        title: "Mysterious Stranger 🤵‍♂️",
+        description: '"Hey you there! Could you give me a hand?" \n\n'
+            'You see an old man trying to get up',
+        choice1: "Give the man a hand",
+        choice2: "Not my problem *I act like I did't hear him*",
+        effect1: () async {
+          var rngResult = Random().nextInt(100) + 1;
+          //Add luck
+          rngResult += widget.userData!.activeGame!.luck;
+
+          if(rngResult < 50){
+            var lostGold = Random().nextInt(100) + 1;
+            if(lostGold > widget.userData!.activeGame!.gold){
+              lostGold = widget.userData!.activeGame!.gold;
+            }
+            widget.userData!.activeGame!.removeGold(lostGold);
+            _showResultDialog(
+              "Who was that?",
+              "You helped the man, but a little while later you discover you're missing some gold... Did he? \n\n"
+              "You lost $lostGold gold",
+              Colors.red,
+            );
+          }else{
+            widget.userData!.activeGame!.addArtifact("GamblersCoin");
+            _showResultDialog(
+              "Who was that?",
+              '"Thanks young man! Here, take this as a small reward." \n\n'
+              "*You received an old coin*  \n\n"
+              '"This coin has a bigger chance to land on tails"',
+              Colors.green,
+            );
+          }
+        },
+        effect2: () {
+          advanceStage();
+        },
+      ),
+      MysteryEvent(
         title: "Abandoned Caravan 🏕️",
         description:
             'You stumble upon a wrecked merchant caravan. What do you do?',
@@ -74,13 +112,11 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
         choice2: "Ignore it and walk away",
         effect1: () async {
           var rngResult = Random().nextInt(100) + 1;
-          if (rngResult < 50) {
-            _showResultDialog(
-              "Nothing..",
-              "You found nothing of value...",
-              Colors.black,
-            );
-          } else if (rngResult < 80) {
+          //Add luck
+          rngResult += widget.userData!.activeGame!.luck;
+
+          //Determine result
+          if (rngResult < 30) {
             var gold = widget.userData!.activeGame!.gold;
             var minLoseAmount =  Random().nextInt((gold / 4).floor());
             var maxLoseAmount =  Random().nextInt((gold / 2).floor());
@@ -91,9 +127,17 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
               "The owner came back and saw you snooping around. You managed to escape but lost $loseGold gold",
               Colors.red,
             );
+          }
+          else if (rngResult < 80) {
+            _showResultDialog(
+              "Nothing..",
+              "You found nothing of value...",
+              Colors.black,
+            );
           } else {
             var cards = await CardDatabase.getCards(["monster_zombie"]);
             var card = cards[Random().nextInt(cards.length)];
+            widget.userData!.activeGame!.player.deck.add(card);
             _showResultDialog(
               "Lucky!",
               "You found a rare card. '${card.name}' has been added to your deck.",
@@ -113,11 +157,12 @@ class _MysteryEventScreenState extends State<MysteryEventScreen>
   }
 
   void _tossACoin() async {
-    widget.userData!.activeGame!.addGold(-1);
+    widget.userData!.activeGame!.removeGold(1);
+    widget.userData!.activeGame!.addLuck(1);
 
     _showResultDialog(
       "You tossed a coin",
-      "Hopefully your wish comes true...",
+      "Hopefully luck will be on your side...",
       Colors.white,
     );
   }

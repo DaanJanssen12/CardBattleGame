@@ -24,6 +24,9 @@ class CpuPlayer extends Player {
     if(tag != null && tags == null){
       return false;
     }
+    if(tag == null && tags != null){
+      return false;
+    }
     return tags!.contains(tag!);
   }
 

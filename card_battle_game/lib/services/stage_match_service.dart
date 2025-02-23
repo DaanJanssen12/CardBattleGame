@@ -95,7 +95,10 @@ class StageMatchService {
       barrierDismissible:
           false, // Prevent closing before the animation finishes
       builder: (BuildContext context) {
-        return CoinFlipWidget(onFlipComplete: (bool isPlayerFirst) async {
+        return CoinFlipWidget(
+          luck: userData.activeGame!.luck,
+          artifacts: userData.activeGame!.artifacts,
+          onFlipComplete: (bool isPlayerFirst) async {
           if (isPlayerFirst) {
             match.log('${match.player.name} won the coin toss');
           } else {
