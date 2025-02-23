@@ -4,7 +4,8 @@ import 'package:card_battle_game/models/player/cpu.dart';
 import 'package:card_battle_game/models/database/cpu_database.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:card_battle_game/models/player/player.dart';
-import 'package:card_battle_game/screens/stage_selection_screen.dart';
+import 'package:card_battle_game/screens/map_screen.dart';
+import 'package:card_battle_game/screens/stage_completion_screen.dart';
 import 'package:uuid/uuid.dart';
 
 class Game {
@@ -16,6 +17,9 @@ class Game {
   List<GameCard> selectedRewards = [];
   int amountOfSkipReward = Constants.gameAmountOfSkipReward;
   int amountOfUpgradeCard = Constants.gameAmountOfUpgradeCard;
+  
+  late MapStage? currentStage;
+  late GameMap? currentMap;
 
   Game() {
     stage = 0;
@@ -40,8 +44,11 @@ class Game {
       case RewardOptions.upgradeCard:
         amountOfUpgradeCard--;
         break;
+      case RewardOptions.none:
+        break;
     }
     stage++;
+    currentMap!.setCurrentStageCleared();
   }
 
   void setPlayer(Player player) {

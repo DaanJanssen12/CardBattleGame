@@ -1,5 +1,6 @@
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
+import 'package:card_battle_game/screens/map_screen.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
@@ -38,10 +39,15 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
   void startGame() {
     widget.userData.activeGame!.setMascot(_selectedMascot!.toMonster());
     widget.userData.activeGame!.stage = 1;
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) => GameScreen(userData: widget.userData)),
+    // );
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => GameScreen(userData: widget.userData)),
+          builder: (context) => NodeMapScreen(userData: widget.userData)),
     );
   }
 

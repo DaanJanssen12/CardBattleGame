@@ -22,7 +22,7 @@ class StageMatch {
   List<String> battleLog;
   Function updateGameState;
   Function playerDrawFunction;
-  Function(bool playerWon) endMatch;
+  Function(bool playerWon, Player beatenPlayer) endMatch;
   BuildContext context;
 
   StageMatch(this.player, this.opponent, this.battleLog, this.updateGameState,
@@ -138,7 +138,8 @@ class StageMatch {
     PlayCardResult? result;
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
-      result = await player.playCard(card, monsterZoneIndex, battleLog, opponent);
+      result =
+          await player.playCard(card, monsterZoneIndex, battleLog, opponent);
       updateGameState();
       soundPlayerService.playDropSound();
     } else {
@@ -185,7 +186,7 @@ class StageMatch {
         }).then((_) {
           opponent.endGame(player);
           player.endGame(opponent);
-          endMatch(true);
+          endMatch(true, opponent);
         });
       });
     } else if (player.health <= 0) {
@@ -198,7 +199,7 @@ class StageMatch {
         }).then((_) {
           opponent.endGame(player);
           player.endGame(opponent);
-          endMatch(false);
+          endMatch(false, opponent);
         });
       });
     }

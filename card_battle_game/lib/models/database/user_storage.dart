@@ -6,6 +6,7 @@ import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/models/player/player.dart';
+import 'package:card_battle_game/screens/map_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -107,6 +108,9 @@ class UserData {
     activeGame = Game();
     var player = await asPlayer();
     activeGame!.setPlayer(player);
+    var map = GameMap();
+    map.generateMap();
+    activeGame!.currentMap = map;
   }
 
   Future<void> endGame(int currentStage, GameCard? reward) async {

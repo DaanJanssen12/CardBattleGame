@@ -6,7 +6,7 @@ import 'package:card_battle_game/models/game/stage_match.dart';
 import 'package:card_battle_game/models/player/cpu.dart';
 import 'package:card_battle_game/models/player/player.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
-import 'package:card_battle_game/screens/stage_selection_screen.dart';
+import 'package:card_battle_game/screens/stage_completion_screen.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:card_battle_game/widgets/coin_flip_widget.dart';
@@ -27,11 +27,11 @@ class StageMatchService {
     showCoinFlipDialog();
   }
 
-  void endGame(bool playerWon) {
+  void endGame(bool playerWon, Player beatenPlayer) {
     if (!playerWon) {
       userData.activeGame!.endGame();
     }
-    toStageSelection();
+    toStageCompletionScreen(beatenPlayer);
   }
 
   void showBattleLog() async {
@@ -131,11 +131,11 @@ class StageMatchService {
     }
   }
 
-  void toStageSelection() {
+  void toStageCompletionScreen(Player beatenPlayer) {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => StageSelectionScreen(userData: userData)),
+          builder: (context) => StageCompletionScreen(userData: userData, beatenPlayer: beatenPlayer)),
     );
   }
 

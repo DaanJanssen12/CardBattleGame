@@ -4,6 +4,7 @@ import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/screens/deck_builder_screen.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
 import 'package:card_battle_game/screens/how_to_play_screen.dart';
+import 'package:card_battle_game/screens/map_screen.dart';
 import 'package:card_battle_game/screens/mascot_selection_screen.dart';
 import 'package:card_battle_game/screens/user_profile_screen.dart';
 import 'package:card_battle_game/services/notification_service.dart';
@@ -174,6 +175,20 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
                 //     showDialog(context: context, builder: (context) => BoosterPackOpenAnimation());
                 //   },
                 // ),
+                SizedBox(width: 10),
+                _buildRoundButton(
+                  icon: FontAwesomeIcons.map,
+                  color: Colors.black,
+                  onPressed: () async {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            NodeMapScreen(userData:  _userData!),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
