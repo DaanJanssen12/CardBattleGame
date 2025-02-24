@@ -1,8 +1,16 @@
 import 'package:card_battle_game/models/cards/card.dart';
+import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
+
+enum BoosterPackType { common }
 
 class BoosterPackOpenAnimation extends StatefulWidget {
+  final BoosterPackType type;
+
+  const BoosterPackOpenAnimation({super.key, required this.type});
+
   @override
   _BoosterPackOpenAnimationState createState() =>
       _BoosterPackOpenAnimationState();
@@ -11,40 +19,130 @@ class BoosterPackOpenAnimation extends StatefulWidget {
 class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _shakeAnimation;
-  late Animation<double> _flashAnimation;
-  late Animation<double> _cardFadeInAnimation;
-  bool _startAnimation = false;
+  late Animation<double> _glowAnimation;
+  late Animation<double> _shakeXAnimation, _shakeYAnimation;
+  late Animation<double> _fogAnimation;
+  late Animation<double> _cardFadeAnimation;
+  bool _showCard = false;
+  late GameCard rewardCard;
+
+  void _loadRewardCards() async {
+    var cardRarity = CardRarity.Common;
+    await CardDatabase.loadCardsFromJson(CardDatabase.filePath);
+    rewardCard = CardDatabase.getRandomCard(type: '', rarity: cardRarity);
+  }
+
+  final Random _random = Random();
+
+  List<TweenSequenceItem<double>> _generateShakeSequence(
+      {double maxOffset = 6.0, int shakes = 12}) {
+    List<TweenSequenceItem<double>> sequence = [];
+
+    double lastOffset = 0;
+    for (int i = 0; i < shakes; i++) {
+      double offset = _random.nextDouble() *
+          maxOffset *
+          (_random.nextBool() ? 1 : -1); // Random positive/negative
+      double weight =
+          _random.nextDouble() * 5 + 3; // Random weight (between 3-8)
+
+      sequence.add(TweenSequenceItem(
+        tween: Tween(begin: offset, end: -offset)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: weight,
+      ));
+
+      sequence.add(TweenSequenceItem(
+        tween: Tween(begin: -offset, end: offset)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: weight,
+      ));
+
+      if (i == shakes - 1) {
+        lastOffset = offset;
+      }
+    }
+
+    // Ensure it settles back to zero
+    sequence.add(TweenSequenceItem(
+      tween: Tween(begin: lastOffset, end: 0.0)
+          .chain(CurveTween(curve: Curves.elasticOut)),
+      weight: 10,
+    ));
+
+    return sequence;
+  }
 
   @override
   void initState() {
     super.initState();
+
+    _loadRewardCards();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 10),
+      duration: Duration(seconds: 4),
     );
 
-    // Shake animation - side-to-side movement for the booster pack
-    _shakeAnimation = Tween<double>(begin: 0.0, end: 10.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
-
-    // Flash animation - quickly fading in and out of the booster pack
-    _flashAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+    _glowAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Card fade-in animation (to reveal the card)
-    _cardFadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _shakeXAnimation = TweenSequence<double>([
+      for (int i = 0; i < 10; i++) ...[
+        TweenSequenceItem(
+            tween: Tween(begin: -5.0, end: 5.0)
+                .chain(CurveTween(curve: Curves.easeInOut)),
+            weight: 5),
+        TweenSequenceItem(
+            tween: Tween(begin: 5.0, end: -5.0)
+                .chain(CurveTween(curve: Curves.easeInOut)),
+            weight: 5),
+      ],
+      TweenSequenceItem(
+          tween: Tween(begin: -5.0, end: 0.0)
+              .chain(CurveTween(curve: Curves.elasticOut)),
+          weight: 10),
+    ]).animate(_controller);
+
+    _shakeYAnimation = TweenSequence<double>([
+      for (int i = 0; i < 10; i++) ...[
+        TweenSequenceItem(
+            tween: Tween(begin: -3.0, end: 3.0)
+                .chain(CurveTween(curve: Curves.easeInOut)),
+            weight: 5),
+        TweenSequenceItem(
+            tween: Tween(begin: 3.0, end: -3.0)
+                .chain(CurveTween(curve: Curves.easeInOut)),
+            weight: 5),
+      ],
+      TweenSequenceItem(
+          tween: Tween(begin: -3.0, end: 0.0)
+              .chain(CurveTween(curve: Curves.elasticOut)),
+          weight: 10),
+    ]).animate(_controller);
+
+    _shakeXAnimation =
+        TweenSequence<double>(_generateShakeSequence(maxOffset: 8.0))
+            .animate(_controller);
+    _shakeYAnimation =
+        TweenSequence<double>(_generateShakeSequence(maxOffset: 4.0))
+            .animate(_controller);
+
+    _fogAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _cardFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
   }
 
   void startAnimation() {
-    setState(() {
-      _startAnimation = true;
+    _controller.forward().whenComplete(() {
+      setState(() {
+        _showCard = true;
+      });
     });
-    _controller.forward(); // Start the animation
   }
 
   @override
@@ -55,71 +153,114 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Booster Pack Open Animation")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: 30),
-            if (!_startAnimation)
-              GestureDetector(
-                onTap: startAnimation, // Start animation when image is tapped
-                child: Container(
-                  width: 200,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/card_back.png'), // Replace with your booster pack image
-                      fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        if (_showCard) {
+          Navigator.of(context).pop(); // Close animation on tap
+        } else {
+          startAnimation();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Fog Effect
+              AnimatedBuilder(
+                animation: _fogAnimation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _fogAnimation.value,
+                    child: Container(
+                      width: 250,
+                      height: 250,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.7),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.5),
+                            blurRadius: 50,
+                            spreadRadius: 50,
+                          ),
+                        ],
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                  );
+                },
+              ),
+
+              // Booster Pack (Before Opening)
+              if (!_showCard)
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(
+                          _shakeXAnimation.value, _shakeYAnimation.value),
+                      child: Transform.scale(
+                        scale: _glowAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 120,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/card_back.png'),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blueAccent.withOpacity(0.5),
+                          blurRadius: 15,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            if (_startAnimation)
-              SizedBox(
-                width: 200,
-                height: 300,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Booster Pack Image (closed) that shakes and flashes
-                    AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        return Transform.translate(
-                          offset: Offset(_shakeAnimation.value, 0),
-                          child: Opacity(
-                            opacity: _flashAnimation.value,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 200,
-                        height: 300,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/card_back.png'), // Replace with your booster pack image
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+
+              // Single Card Reveal
+              if (_showCard)
+                AnimatedBuilder(
+                  animation: _cardFadeAnimation,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _cardFadeAnimation.value,
+                      child: Transform.scale(
+                        scale: _cardFadeAnimation.value,
+                        child: child,
                       ),
-                    ),
-                    // The Card widget that will fade in after the shake and flash
-                    FadeTransition(
-                      opacity: _cardFadeInAnimation,
-                      child: Positioned(
-                        bottom: 30,
-                        child: CardWidget(card: GameCard('TEST', '', 0, '', '')), // This is your existing card widget
-                      ),
-                    ),
-                  ],
+                    );
+                  },
+                  child: Container(
+                    width: 120,
+                    height: 200,
+                    child: CardWidget(card: rewardCard),
+                    // decoration: BoxDecoration(
+                    //   image: DecorationImage(
+                    //     image: AssetImage('assets/images/revealed_card.png'),
+                    //     fit: BoxFit.cover,
+                    //   ),
+                    //   borderRadius: BorderRadius.circular(16),
+                    //   boxShadow: [
+                    //     BoxShadow(
+                    //       color: Colors.white.withOpacity(0.8),
+                    //       blurRadius: 20,
+                    //       spreadRadius: 5,
+                    //     ),
+                    //   ],
+                    // ),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
