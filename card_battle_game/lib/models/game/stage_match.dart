@@ -24,6 +24,7 @@ class StageMatch {
   Function playerDrawFunction;
   Function(bool playerWon, Player beatenPlayer) endMatch;
   BuildContext context;
+  bool isBossBattle = false;
 
   StageMatch(this.player, this.opponent, this.battleLog, this.updateGameState,
       this.playerDrawFunction, this.endMatch, this.context);

@@ -70,6 +70,9 @@ class MonsterCardWidget extends StatelessWidget {
     if(monster!.name.length > 10){
       fontSize = 10;
     }
+    if(monster!.name.length > 15){
+      fontSize = 8;
+    }
     return Stack(
       clipBehavior: Clip.none, // Allows the crown to slightly overflow
       children: [

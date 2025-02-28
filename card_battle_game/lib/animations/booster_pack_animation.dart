@@ -1,15 +1,17 @@
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
+import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-enum BoosterPackType { common }
+enum BoosterPackType { common, uncommon, rare, best }
 
 class BoosterPackOpenAnimation extends StatefulWidget {
   final BoosterPackType type;
-
-  const BoosterPackOpenAnimation({super.key, required this.type});
+  final UserData userData;
+  const BoosterPackOpenAnimation(
+      {super.key, required this.type, required this.userData});
 
   @override
   _BoosterPackOpenAnimationState createState() =>
@@ -19,6 +21,7 @@ class BoosterPackOpenAnimation extends StatefulWidget {
 class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
     with TickerProviderStateMixin {
   late AnimationController _controller;
+  late AnimationController _fadeIncontroller;
   late Animation<double> _glowAnimation;
   late Animation<double> _shakeXAnimation, _shakeYAnimation;
   late Animation<double> _fogAnimation;
@@ -28,8 +31,27 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
 
   void _loadRewardCards() async {
     var cardRarity = CardRarity.Common;
+    switch (widget.type) {
+      case BoosterPackType.common:
+      cardRarity = CardRarity.Common;
+        break;
+      case BoosterPackType.uncommon:
+      cardRarity = CardRarity.Uncommon;
+        break;
+      case BoosterPackType.rare:
+      cardRarity = CardRarity.Rare;
+        break;
+      case BoosterPackType.best:
+      cardRarity = CardRarity.UltraRare;
+        break;
+      default:
+        break;
+    }
+
     await CardDatabase.loadCardsFromJson(CardDatabase.filePath);
     rewardCard = CardDatabase.getRandomCard(type: '', rarity: cardRarity);
+    widget.userData.cards.add(rewardCard.id);
+    await UserStorage.saveUserData(widget.userData);
   }
 
   final Random _random = Random();
@@ -82,6 +104,8 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
       vsync: this,
       duration: Duration(seconds: 4),
     );
+    _fadeIncontroller =
+        AnimationController(vsync: this, duration: Duration(seconds: 2));
 
     _glowAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
@@ -132,8 +156,8 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
-    _cardFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    _cardFadeAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeIncontroller, curve: Curves.easeIn),
     );
   }
 
@@ -142,6 +166,7 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
       setState(() {
         _showCard = true;
       });
+      _fadeIncontroller.forward();
     });
   }
 
@@ -234,7 +259,7 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
                     return Opacity(
                       opacity: _cardFadeAnimation.value,
                       child: Transform.scale(
-                        scale: _cardFadeAnimation.value,
+                        scale: 1,
                         child: child,
                       ),
                     );

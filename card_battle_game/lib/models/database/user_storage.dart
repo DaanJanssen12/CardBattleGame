@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:card_battle_game/animations/booster_pack_animation.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
@@ -88,6 +89,7 @@ class UserData {
   late Game? activeGame;
   late String background;
   late int highscore;
+  late Map<BoosterPackType, int> boosterPacks;
 
   UserData();
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -101,6 +103,14 @@ class UserData {
     data.activeGame =
         json['activeGame'] != null ? Game.fromJson(json['activeGame']) : null;
     data.highscore = json['highscore'] ?? 0;
+    data.boosterPacks = json['boosterPacks'] == null
+        ? <BoosterPackType, int>{}
+        : (json['boosterPacks'] as Map<String, dynamic>).map((key, value) {
+            BoosterPackType enumKey = BoosterPackType.values.firstWhere((e) =>
+                e.toString().split('.').last.toLowerCase() ==
+                key.toString().toLowerCase());
+            return MapEntry(enumKey, (value as num).toInt());
+          });
     return data;
   }
 
@@ -125,7 +135,10 @@ class UserData {
       'background': background,
       'deck': deck.toJson(),
       'highscore': highscore,
-      'activeGame': activeGame?.toJson()
+      'activeGame': activeGame?.toJson(),
+      'boosterPacks': boosterPacks.map((type, val) {
+        return MapEntry(type.name, val);
+      })
     };
   }
 
@@ -137,11 +150,20 @@ class UserData {
 
   Future<List<GameCard>> availableCards() async {
     var availableCards = await CardDatabase.getCards(cards);
-    if(Constants.testMode){
+    if (Constants.testMode) {
       var allCards = await CardDatabase.getAllCards();
-      availableCards.addAll(allCards.where((w) => !availableCards.any((a) => a.id == w.id)));
+      availableCards.addAll(
+          allCards.where((w) => !availableCards.any((a) => a.id == w.id)));
     }
     return availableCards;
+  }
+
+  void addBoosterPack(BoosterPackType boosterPackType) {
+    if (boosterPacks[boosterPackType] == null) {
+      boosterPacks[boosterPackType] = 1;
+    } else {
+      boosterPacks[boosterPackType] = boosterPacks[boosterPackType]! + 1;
+    }
   }
 }
 

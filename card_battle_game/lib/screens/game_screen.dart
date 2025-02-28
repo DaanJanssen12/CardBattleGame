@@ -21,17 +21,19 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    _stageMatchService = StageMatchService(context, widget.userData, () => {setState(() {})});
+    _stageMatchService =
+        StageMatchService(context, widget.userData, () => {setState(() {})});
     _loadData();
   }
 
-     Future<void> _loadData() async {
+  Future<void> _loadData() async {
     var player = widget.userData.activeGame!.player;
     var opponent = await widget.userData.activeGame!.initCPU(tag: widget.tag);
     setState(() {
       _isLoading = false;
     });
     _stageMatchService.initGame(player, opponent);
+    _stageMatchService.setTag(widget.tag);
   }
 
   @override
@@ -45,7 +47,8 @@ class _GameScreenState extends State<GameScreen> {
             backgroundColor: Colors.black,
             actions: [
               TextButton(
-                onPressed: _stageMatchService.showBattleLog, // Disable when it's the enemy's turn
+                onPressed: _stageMatchService
+                    .showBattleLog, // Disable when it's the enemy's turn
                 child: Text(
                   'Log',
                   style: TextStyle(
@@ -57,7 +60,9 @@ class _GameScreenState extends State<GameScreen> {
               ),
               // End Turn Button: Positioned at the top-right of the app bar
               TextButton(
-                onPressed: _stageMatchService.match.isPlayersTurn ? _stageMatchService.match.endPlayerTurn : null,
+                onPressed: _stageMatchService.match.isPlayersTurn
+                    ? _stageMatchService.match.endPlayerTurn
+                    : null,
                 style: TextButton.styleFrom(
                   backgroundColor: _stageMatchService.match.isPlayersTurn
                       ? Colors.green
@@ -103,15 +108,19 @@ class _GameScreenState extends State<GameScreen> {
                                 Expanded(
                                     child: PlayerInfoWidget(
                                         player: _stageMatchService.match.player,
-                                        isActive: _stageMatchService.match.isPlayersTurn,
+                                        isActive: _stageMatchService
+                                            .match.isPlayersTurn,
                                         handleAttackPlayerDirectly: null)),
                                 SizedBox(width: 16),
                                 Expanded(
                                     child: PlayerInfoWidget(
-                                        player: _stageMatchService.match.opponent,
-                                        isActive: !_stageMatchService.match.isPlayersTurn,
+                                        player:
+                                            _stageMatchService.match.opponent,
+                                        isActive: !_stageMatchService
+                                            .match.isPlayersTurn,
                                         handleAttackPlayerDirectly:
-                                            _stageMatchService.match.handleAttackPlayerDirectly)),
+                                            _stageMatchService.match
+                                                .handleAttackPlayerDirectly)),
                               ],
                             ),
                           ),
@@ -120,10 +129,12 @@ class _GameScreenState extends State<GameScreen> {
                           GameBoardWidget(
                               player: _stageMatchService.match.player,
                               enemy: _stageMatchService.match.opponent,
-                              isPlayersTurn: _stageMatchService.match.isPlayersTurn,
+                              isPlayersTurn:
+                                  _stageMatchService.match.isPlayersTurn,
                               onCardDrop: _stageMatchService.playCard,
                               onCardTap: _stageMatchService.showCardDetails,
-                              onMonsterAttack: _stageMatchService.match.attackMonster),
+                              onMonsterAttack:
+                                  _stageMatchService.match.attackMonster),
                         ],
                       ),
                       // Player's Hand at the bottom of the screen
@@ -132,9 +143,11 @@ class _GameScreenState extends State<GameScreen> {
                         left: 0,
                         right: 0,
                         child: Container(
-                          color: Colors.grey.withOpacity(0.50), // Adding visual separation for the player hand
+                          color: Colors.grey.withOpacity(
+                              0.50), // Adding visual separation for the player hand
                           child: PlayerHandWidget(
-                              player: _stageMatchService.match.player, onCardTap: _stageMatchService.showCardDetails),
+                              player: _stageMatchService.match.player,
+                              onCardTap: _stageMatchService.showCardDetails),
                         ),
                       ),
                     ],
@@ -142,5 +155,4 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ));
   }
-
 }

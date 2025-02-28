@@ -21,6 +21,7 @@ class MonsterCard extends GameCard {
   late int currentAttack;
   late int? monsterZoneIndex;
   List<GameEffect> effects = [];
+  int isAttackedCounter = 0;
 
   MonsterCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,
@@ -58,9 +59,11 @@ class MonsterCard extends GameCard {
     currentHealth = health;
     currentAttack = attack;
     monsterZoneIndex = spot;
+    isAttackedCounter = 0;
   }
 
   bool takeDamage(int damage) {
+    isAttackedCounter++;
     if (effects.isNotEmpty &&
         effects.any((a) => a.type == GameEffectType.shield)) {
       damage = (damage / 2).ceil();
@@ -108,6 +111,7 @@ class MonsterCard extends GameCard {
     }
     //This must be done after the mascot effect
     hasAttacked = false;
+    isAttackedCounter = 0;
 
     for (var effect in effects) {
       if (effect.type == GameEffectType.freeze) {
@@ -132,6 +136,7 @@ class MonsterCard extends GameCard {
     currentAttack = attack;
     monsterZoneIndex = null;
     effects = [];
+    isAttackedCounter = 0;
   }
 
   factory MonsterCard.fromJson(Map<String, dynamic> json) {
@@ -176,6 +181,8 @@ class MonsterCard extends GameCard {
     card.mascotEffects = mascotEffects;
     card.summonEffect = summonEffect;
     card.rarity = rarity;
+    card.isOpponentCard = isOpponentCard;
+    card.oneTimeUse = oneTimeUse;
     return card;
   }
 }

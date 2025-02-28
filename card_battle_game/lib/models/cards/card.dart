@@ -33,6 +33,11 @@ class GameCard {
     return this as MonsterCard;
   }
 
+  
+  MonsterCard cloneMonster() {
+    return (this as MonsterCard).clone().toMonster();
+  }
+
   bool canBePlayed() {
     //Already summoned monsters can't be played
     if (isMonster()) {

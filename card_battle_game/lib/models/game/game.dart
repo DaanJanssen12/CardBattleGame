@@ -1,3 +1,4 @@
+import 'package:card_battle_game/animations/booster_pack_animation.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/player/cpu.dart';
@@ -24,6 +25,7 @@ class Game {
   late MapStage? currentStage;
   late GameMap? currentMap;
   List<String> artifacts = [];
+  List<String> rewards = [];
 
   Game() {
     stage = 0;
@@ -117,6 +119,9 @@ class Game {
     data.artifacts = json['artifacts'] != null
         ? (json['artifacts'] as List<dynamic>).map((m) => m.toString()).toList()
         : [];
+    data.rewards = json['rewards'] != null
+        ? (json['rewards'] as List<dynamic>).map((m) => m.toString()).toList()
+        : [];
     return data;
   }
   Map<String, dynamic> toJson() {
@@ -126,6 +131,7 @@ class Game {
       'luck': luck,
       'mascot': mascot,
       'artifacts': artifacts,
+      'rewards': rewards,
       'player': player.toJson(),
       'currentMap': currentMap?.toJson(),
       'currentStage': currentStage?.toJson(),

@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:card_battle_game/animations/booster_pack_animation.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/models/game/game.dart';
+import 'package:card_battle_game/services/helper_functions.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/widgets/card_widget.dart'; // Your existing card widget
@@ -20,7 +23,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
     with SingleTickerProviderStateMixin {
   List<GameCard> deck = [];
   List<GameCard> availableCards = [];
-  List<BoosterPackType> boosterPacks  = [BoosterPackType.common];
+  Map<BoosterPackType, int> boosterPacks = {};
   late TabController _tabController;
 
   @override
@@ -30,10 +33,10 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
     _loadData();
   }
 
-  void _loadData() async {
+  Future<void> _loadData() async {
     deck = await widget.userData.deck.asDeck();
     availableCards = await widget.userData.availableCards();
-    boosterPacks = [BoosterPackType.common]; // await widget.userData.boosterPacks;
+    boosterPacks = widget.userData.boosterPacks;
     setState(() {});
   }
 
@@ -144,41 +147,63 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            "Your Booster Packs",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            "Open packs to gain new cards. You get cards by winning boss battles.",
+            style: TextStyle(fontSize: 16),
           ),
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: boosterPacks.length,
+            itemCount: BoosterPackType.values.length,
             itemBuilder: (context, index) {
+              var amount = boosterPacks[BoosterPackType.values[index]] ?? 0;
               return ListTile(
-                title: Text(boosterPacks[index].name),
-                trailing: ElevatedButton(
-                  onPressed: () => _openBoosterPack(boosterPacks[index]),
-                  child: Text("Open"),
-                ),
-              );
+                  title: Text(
+                      "${Functions.getBoosterPackName(BoosterPackType.values[index])} (${amount})"),
+                  trailing: ElevatedButton(
+                    onPressed: () =>
+                        amount > 0 ? _openBoosterPack(BoosterPackType.values[index]) : null,
+                    child: Text("Open"),
+                  ),
+                );
             },
           ),
         ),
+        if (Constants.testMode) ...[
+          ElevatedButton(
+              onPressed: () {
+                var type = BoosterPackType
+                    .values[Random().nextInt(BoosterPackType.values.length)];
+                setState(() {
+                  boosterPacks[type] == null
+                      ? boosterPacks[type] = 1
+                      : boosterPacks[type] = boosterPacks[type]! + 1;
+                });
+              },
+              child: Text('Add pack'))
+        ]
         //BoosterPackOpenAnimation(key: _animationKey)
       ],
     );
   }
 
- void _openBoosterPack(BoosterPackType type) {
-  showDialog(
-    context: context,
-    barrierDismissible: false, // Prevents accidental closing
-    builder: (BuildContext context) {
-      return Dialog(
-        backgroundColor: Colors.transparent, // Makes it overlay-like
-        child: BoosterPackOpenAnimation(type: type),
-      );
-    },
-  );
-}
+  void _openBoosterPack(BoosterPackType type) async {
+    setState(() {
+      boosterPacks[type] = boosterPacks[type]! - 1;
+    });
+    widget.userData.boosterPacks = boosterPacks;
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // Prevents accidental closing
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent, // Makes it overlay-like
+          child:
+              BoosterPackOpenAnimation(type: type, userData: widget.userData),
+        );
+      },
+    );
+    await _loadData();
+  }
 
   Widget _buildCardList(List<GameCard> cards, String title, bool isDeck) {
     Map<GameCard, int> grouped = {};

@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:card_battle_game/animations/booster_pack_animation.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/cards/play_card_result.dart';
 import 'package:card_battle_game/models/constants.dart';
@@ -7,6 +10,8 @@ import 'package:card_battle_game/models/player/cpu.dart';
 import 'package:card_battle_game/models/player/player.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:card_battle_game/screens/stage_completion_screen.dart';
+import 'package:card_battle_game/services/helper_functions.dart';
+import 'package:card_battle_game/services/notification_service.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:card_battle_game/widgets/coin_flip_widget.dart';
@@ -27,11 +32,53 @@ class StageMatchService {
     showCoinFlipDialog();
   }
 
-  void endGame(bool playerWon, Player beatenPlayer) {
+  Future<void> endGame(bool playerWon, Player beatenPlayer) async {
     if (!playerWon) {
       userData.activeGame!.endGame(true);
-    }else{
+    } else {
       userData.activeGame!.addGold(beatenPlayer.getGoldReward());
+      if (match.isBossBattle) {
+        var stage = userData.activeGame!.stage;
+        var rng = Random().nextInt(100) + 1;
+        var boosterPack = BoosterPackType.common;
+        if (stage <= 10) {
+          if (rng <= 80) {
+            boosterPack = BoosterPackType.common;
+          } else if (rng <= 95) {
+            boosterPack = BoosterPackType.uncommon;
+          } else {
+            boosterPack = BoosterPackType.rare;
+          }
+        } else if (stage <= 20) {
+          if (rng <= 20) {
+            boosterPack = BoosterPackType.common;
+          } else if (rng <= 80) {
+            boosterPack = BoosterPackType.uncommon;
+          } else {
+            boosterPack = BoosterPackType.rare;
+          }
+        } else {
+          if (rng <= 10) {
+            boosterPack = BoosterPackType.uncommon;
+          } else if (rng <= 80) {
+            boosterPack = BoosterPackType.rare;
+          } else {
+            boosterPack = BoosterPackType.best;
+          }
+        }
+        userData.addBoosterPack(boosterPack);
+        userData.activeGame!.rewards
+            .add(Functions.getBoosterPackName(boosterPack));
+        await UserStorage.saveUserData(userData);
+
+        await NotificationService.showDialogMessage(
+            context, 'You received a booster pack!', title: "Reward",
+            callback: () async {
+          Future.sync(() async {
+            await Future.delayed(Duration(seconds: 1));
+          }).then((_) {});
+        });
+      }
     }
     toStageCompletionScreen(beatenPlayer);
   }
@@ -96,18 +143,18 @@ class StageMatchService {
           false, // Prevent closing before the animation finishes
       builder: (BuildContext context) {
         return CoinFlipWidget(
-          luck: userData.activeGame!.luck,
-          artifacts: userData.activeGame!.artifacts,
-          onFlipComplete: (bool isPlayerFirst) async {
-          if (isPlayerFirst) {
-            match.log('${match.player.name} won the coin toss');
-          } else {
-            match.log('${match.opponent.name} won the coin toss');
-          }
-          updateGameState();
-          match.setTurnPlayer(isPlayerFirst);
-          match.start();
-        });
+            luck: userData.activeGame!.luck,
+            artifacts: userData.activeGame!.artifacts,
+            onFlipComplete: (bool isPlayerFirst) async {
+              if (isPlayerFirst) {
+                match.log('${match.player.name} won the coin toss');
+              } else {
+                match.log('${match.opponent.name} won the coin toss');
+              }
+              updateGameState();
+              match.setTurnPlayer(isPlayerFirst);
+              match.start();
+            });
       },
     );
   }
@@ -140,7 +187,8 @@ class StageMatchService {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => StageCompletionScreen(userData: userData, beatenPlayer: beatenPlayer)),
+          builder: (context) => StageCompletionScreen(
+              userData: userData, beatenPlayer: beatenPlayer)),
     );
   }
 
@@ -196,16 +244,32 @@ class StageMatchService {
                       // Deck Image (Tappable)
                       GestureDetector(
                         onTap: () {
+                          GameCard? discardedCard;
+                          if (match.player.hand.length ==
+                                  Constants.playerMaxHandSize &&
+                              (match.player.deck.isNotEmpty ||
+                                  match.player.discardPile.isNotEmpty)) {
+                            // Hand is full and player has things to draw
+                            // Discard a random card
+                            discardedCard = match.player.hand[
+                                Random().nextInt(match.player.hand.length)];
+                            match.player.hand.remove(discardedCard);
+                            match.player.discardPile.add(discardedCard);
+                          }
                           List<GameCard> gameCards = match.player.drawCards(
                               Constants.drawCardsPerTurn, match.battleLog);
                           Navigator.of(context).pop(); // Close overlay
-                          showCards(
-                              gameCards,
-                              gameCards.isNotEmpty
-                                  ? "You Drew:"
-                                  : "No cards to draw",
-                              false,
-                              750);
+                          var msg = "";
+                          if (discardedCard != null) {
+                            msg +=
+                                ' Your hand was full, ${discardedCard!.name} has been discarded. \n\n';
+                          }
+                          if (gameCards.isNotEmpty) {
+                            msg += "You Drew:";
+                          } else {
+                            msg += "No cards to draw";
+                          }
+                          showCards(gameCards, msg, false, 750);
                         },
                         child: SizedBox(
                           width: 120, // Ensures finite size
@@ -302,6 +366,16 @@ class StageMatchService {
         Navigator.of(context).pop();
         updateGameState();
       });
+    }
+  }
+
+  void setTag(String? tag) {
+    if (tag == null) {
+      return;
+    }
+
+    if (tag.toLowerCase() == "boss") {
+      match.isBossBattle = true;
     }
   }
 }

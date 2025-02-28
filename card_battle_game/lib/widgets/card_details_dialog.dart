@@ -137,6 +137,10 @@ class CardDetailsDialog extends StatelessWidget {
 
   Widget _buildDescriptionSection(double width) {
     var description = card.fullDescription ?? card.shortDescription ?? '';
+    double fontSize = 16;
+    if(description.length > 30){
+      fontSize = 14;
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -150,7 +154,7 @@ class CardDetailsDialog extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: fontSize,
                 ),
                 softWrap: true),
             ),

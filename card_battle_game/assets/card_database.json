@@ -133,7 +133,13 @@
         "mascotEffects": {
           "startingHealth": 6,
           "startingMana": 2,
-          "startingGold": 100
+          "startingGold": 100,
+          "additionalEffect": {
+            "name": "Unbothered",
+            "description": "Once per turn, completely negate the damage from one attack targeting this card.",
+            "type": "negateDamage",
+            "value": "1"
+          }
         }
       },
       {
@@ -150,7 +156,13 @@
         "mascotEffects": {
           "startingHealth": 4,
           "startingMana": 3,
-          "startingGold": 100
+          "startingGold": 100,
+          "additionalEffect": {
+            "name": "Honey Gather",
+            "description": "At the start of your turn add 1 'Honey' to your hand.",
+            "type": "addCardStartOfTurn",
+            "value": "1;upgrade_honey"
+          }
         }
       },
       {
@@ -171,7 +183,13 @@
         "mascotEffects": {
           "startingHealth": 5,
           "startingMana": 2,
-          "startingGold": 150
+          "startingGold": 150,
+          "additionalEffect": {
+            "name": "Queen's Guard",
+            "description": "When their are any 'Worker Bee' cards on your side of the field this card can't be targeted for an attack.",
+            "type": "canNotBeAttacked",
+            "value": "monster_worker_bee"
+          }
         }
       },
       {

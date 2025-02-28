@@ -311,18 +311,40 @@ class Player {
       MonsterCard opponentMonster,
       List<String> battleLog,
       Function updateScreen) async {
-    var opponentMonsterFainted =
-        attackingMonster.doAttack(opponentMonster, battleLog);
+    var monsterHealthBeforeAttack = opponentMonster.currentHealth;
+    bool negateAttack = false;
+    bool targetCanNotBeAttacked = false;
+
     if (opponentMonster.isMascot &&
         opponentMonster.mascotEffects.additionalEffect != null) {
-      await opponentMonster.mascotEffects.additionalEffect!.trigger(
-          MascotEffectTriggers.isAttacked,
-          opponentMonster,
-          opponent,
-          null,
-          this,
-          battleLog,
-          attackingMonster);
+      var mascotEffectResult =
+          await opponentMonster.mascotEffects.additionalEffect!.trigger(
+              MascotEffectTriggers.isAttacked,
+              opponentMonster,
+              opponent,
+              null,
+              this,
+              battleLog,
+              attackingMonster);
+      if (mascotEffectResult.isTriggered) {
+        if (mascotEffectResult.effect == "negateAttack") {
+          negateAttack = true;
+        }
+        if (mascotEffectResult.effect == "canNotBeTargeted") {
+          targetCanNotBeAttacked = true;
+        }
+      }
+    }
+    if (targetCanNotBeAttacked) {
+      return;
+    }
+
+    var opponentMonsterFainted =
+        attackingMonster.doAttack(opponentMonster, battleLog);
+    if (negateAttack) {
+      opponentMonster.currentHealth = monsterHealthBeforeAttack;
+      opponentMonsterFainted = false;
+      battleLog.add('${opponentMonster.name} negated the attack');
     }
 
     updateScreen();

@@ -98,8 +98,10 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
       return;
     }
     if (gameOver) {
-      widget.userData.cards.add(_selectedReward!.id);
-      endGame(_selectedReward);
+      if (_selectedReward != null) {
+        widget.userData.cards.add(_selectedReward!.id);
+      }
+      await endGame(_selectedReward);
       return;
     }
 
@@ -183,19 +185,17 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                         gameOver
                             ? playerHasLost
                                 ? "Lost at Stage $currentStage"
-                                : "Stage $currentStage Completed"
+                                : "Game ended at Stage $currentStage"
                             : "Stage $currentStage Completed",
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: gameOver ? 24 : 28,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                       Text(
                         gameOver
-                            ? !playerHasLost
-                                ? "Select a reward to add to your collection"
-                                : "Click the button below to end the game"
+                            ? "You accumulated the following rewards"
                             : "Before you continue you can select a reward",
                         style: TextStyle(
                           fontSize: 12,
@@ -288,6 +288,79 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                       ))
                 ]),
               ),
+            ]
+            else if (!gameOver) ...[
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemCount: rewardCards.length,
+                    itemBuilder: (context, index) {
+                      final card = rewardCards[index];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedReward = card;
+                          });
+                        },
+                        child: CardWidget(
+                          card: card,
+                          isSelected: _selectedReward ==
+                              card, // Highlight selected card
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 120, // Adjust the position
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Reward Description:',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      _selectedReward == null
+                          ? Text(
+                              'Select a reward to see its description',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            )
+                          : Text(
+                              _selectedReward!.fullDescription ??
+                                  _selectedReward!.shortDescription ??
+                                  "",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ],
 
@@ -376,77 +449,22 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                   ),
                 ),
               ),
-            ] else if(!gameOver || (gameOver && !playerHasLost))...[
+            ] else if (gameOver) ...[
               Center(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: rewardCards.length,
-                    itemBuilder: (context, index) {
-                      final card = rewardCards[index];
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedReward = card;
-                          });
-                        },
-                        child: CardWidget(
-                          card: card,
-                          isSelected: _selectedReward ==
-                              card, // Highlight selected card
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 120, // Adjust the position
-                left: 20,
-                right: 20,
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Reward Description:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      _selectedReward == null
-                          ? Text(
-                              'Select a reward to see its description',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            )
-                          : Text(
-                              _selectedReward!.fullDescription ??
-                                  _selectedReward!.shortDescription ??
-                                  "",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                    ],
-                  ),
-                ),
+                    padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
+                    child: widget.userData.activeGame!.rewards.length > 0
+                        ? ListView.builder(
+                            itemCount:
+                                widget.userData.activeGame!.rewards.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                    widget.userData.activeGame!.rewards[index]),
+                              );
+                            },
+                          )
+                        : Text('No rewards accumulated :(')),
               ),
             ],
           ],
@@ -542,10 +560,7 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
 
   bool canNotAdvance() {
     if (gameOver) {
-      if (playerHasLost) {
-        return false;
-      }
-      return _selectedReward == null;
+      return false;
     }
     return (_selectedOption == null) ||
         (_selectedOption == RewardOptions.addCard && _selectedReward == null);
