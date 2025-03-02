@@ -2,6 +2,7 @@ import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/game/effect.dart';
 import 'package:card_battle_game/models/game/game_effect.dart';
 import 'package:card_battle_game/models/cards/mascot_effects.dart';
+import 'package:card_battle_game/models/game/monster_effect.dart';
 import 'package:card_battle_game/models/player/player.dart';
 import 'package:card_battle_game/models/cards/upgrade_card.dart';
 import 'package:card_battle_game/models/enums/upgrade_card_type.dart';
@@ -13,26 +14,28 @@ class MonsterCard extends GameCard {
   late MascotEffects mascotEffects;
   late bool isMascot = false;
   late SummonEffect? summonEffect;
+  late MonsterEffect? monsterEffect;
 
   //Game info
-  late bool hasAttacked;
   late bool isActive;
   late int currentHealth;
   late int currentAttack;
   late int? monsterZoneIndex;
   List<GameEffect> effects = [];
   int isAttackedCounter = 0;
+  int hasAttackedCounter = 0;
+  int maxAttacksPerTurn = 1;
 
   MonsterCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,
       {this.health = 10, this.attack = 3}) {
     isActive = false;
-    hasAttacked = false;
     type = 'Monster';
     currentHealth = health;
     currentAttack = attack;
     mascotEffects = MascotEffects.fromJson(null);
     summonEffect = null;
+    id = id;
     //id = Uuid().v4();
   }
   void apply(UpgradeCard card) {
@@ -53,13 +56,17 @@ class MonsterCard extends GameCard {
     }
   }
 
-  void summon(int spot) {
+  void summon(int spot, bool gameIsInOvertime) {
     isActive = true;
-    hasAttacked = false;
+    hasAttackedCounter = 0;
     currentHealth = health;
     currentAttack = attack;
     monsterZoneIndex = spot;
     isAttackedCounter = 0;
+    maxAttacksPerTurn = 1;
+    if (gameIsInOvertime) {
+      maxAttacksPerTurn = 2;
+    }
   }
 
   bool takeDamage(int damage) {
@@ -78,27 +85,47 @@ class MonsterCard extends GameCard {
   }
 
   bool canAttack() {
-    return !hasAttacked && isActive && currentAttack > 0;
+    if (!isActive || currentAttack <= 0) {
+      return false;
+    }
+    if (hasEffect(GameEffectType.freeze)) {
+      return false;
+    }
+    return hasAttackedCounter < maxAttacksPerTurn;
+  }
+
+  void setMaxAttacksPerTurn(int amount) {
+    maxAttacksPerTurn = amount;
+  }
+
+  bool hasEffect(GameEffectType effectType) {
+    for (var effect in effects) {
+      if (effect.type == effectType) {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool doAttack(MonsterCard target, List<String> battleLog) {
     var targetFainted = target.takeDamage(currentAttack);
-    hasAttacked = true;
+    hasAttackedCounter++;
     battleLog.add('$name attacked ${target.name} ($currentAttack dmg)');
     return targetFainted;
   }
 
-  void attackPlayer(Player player, List<String> battleLog) {
-    player.health--;
-    if(player.health < 0){
+  void attackPlayer(
+      Player player, List<String> battleLog, bool gameIsInOvertime) {
+    player.health -= currentAttack;
+    if (player.health < 0) {
       player.health = 0;
     }
-    hasAttacked = true;
+    hasAttackedCounter++;
     battleLog.add('$name attacked ${player.name} directly');
   }
 
-  Future<void> startnewTurn(
-      Player player, Player opponent, List<String> battleLog) async {
+  Future<void> startnewTurn(Player player, Player opponent,
+      List<String> battleLog, bool isGameInOvertime) async {
     if (isMascot && mascotEffects.additionalEffect != null) {
       await mascotEffects.additionalEffect!.trigger(
           MascotEffectTriggers.startOfTurn,
@@ -107,20 +134,15 @@ class MonsterCard extends GameCard {
           null,
           opponent,
           battleLog,
-          null);
+          null,
+          isGameInOvertime);
     }
     //This must be done after the mascot effect
-    hasAttacked = false;
+    hasAttackedCounter = 0;
     isAttackedCounter = 0;
-
-    for (var effect in effects) {
-      if (effect.type == GameEffectType.freeze) {
-        hasAttacked = true;
-      }
-    }
   }
 
-  Future<void> endTurn() async{
+  Future<void> endTurn() async {
     for (var effect in effects) {
       effect.value--;
     }
@@ -131,7 +153,7 @@ class MonsterCard extends GameCard {
 
   void faint() {
     isActive = false;
-    hasAttacked = false;
+    hasAttackedCounter = 0;
     currentHealth = health;
     currentAttack = attack;
     monsterZoneIndex = null;
@@ -155,6 +177,8 @@ class MonsterCard extends GameCard {
     card.summonEffect = json['summonEffect'] == null
         ? null
         : SummonEffect.fromJson(json['summonEffect']);
+    card.monsterEffect =
+        json['effect'] == null ? null : MonsterEffect.fromJson(json['effect']);
     card.rarity = CardRarityExtension.fromString(json['rarity']);
 
     return card;
@@ -168,7 +192,8 @@ class MonsterCard extends GameCard {
       'attack': attack,
       'isMascot': isMascot,
       'mascotEffects': mascotEffects.toJson(),
-      'summonEffect': summonEffect?.toJson()
+      'summonEffect': summonEffect?.toJson(),
+      'effect': monsterEffect?.toJson()
     };
   }
 
@@ -183,6 +208,7 @@ class MonsterCard extends GameCard {
     card.rarity = rarity;
     card.isOpponentCard = isOpponentCard;
     card.oneTimeUse = oneTimeUse;
+    card.monsterEffect = monsterEffect;
     return card;
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:card_battle_game/models/cards/action_card.dart';
+import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/enums/action_card_type.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
@@ -17,14 +18,14 @@ class CpuPlayer extends Player {
   late int possibleUntillStage;
   late String? id;
   late String? tags;
-  bool hasTag(String? tag){
-    if(tags == null && tag == null){
+  bool hasTag(String? tag) {
+    if (tags == null && tag == null) {
       return true;
     }
-    if(tag != null && tags == null){
+    if (tag != null && tags == null) {
       return false;
     }
-    if(tag == null && tags != null){
+    if (tag == null && tags != null) {
       return false;
     }
     return tags!.contains(tag!);
@@ -36,10 +37,14 @@ class CpuPlayer extends Player {
     strategy = CpuStrategy.random;
   }
 
-  Future<void> executeTurn(Player opponent, Function updateGameState,
-      List<String> battleLog, bool Function() isGameOver) async {
-    await CPU.executeTurn(
-        this, opponent, updateGameState, battleLog, isGameOver);
+  Future<void> executeTurn(
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver,
+      bool isGameInOvertime) async {
+    await CPU.executeTurn(this, opponent, updateGameState, battleLog,
+        isGameOver, isGameInOvertime);
   }
 
   Future<void> init() async {
@@ -98,11 +103,12 @@ class CPU {
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
-    await playCardsFromHand(
-        cpu, opponent, updateGameState, battleLog, isGameOver);
-    await attackWithAllActiveMonsters(
-        cpu, opponent, updateGameState, battleLog, isGameOver);
+      bool Function() isGameOver,
+      bool isGameInOvertime) async {
+    await playCardsFromHand(cpu, opponent, updateGameState, battleLog,
+        isGameOver, isGameInOvertime);
+    await attackWithAllActiveMonsters(cpu, opponent, updateGameState, battleLog,
+        isGameOver, isGameInOvertime);
   }
 
   static Future<void> playCardsFromHand(
@@ -110,22 +116,27 @@ class CPU {
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool gameIsInOvertime) async {
     if (isGameOver()) {
       return;
     }
     switch (cpu.level) {
       case CpuLevels.easy:
-        await cpuEasyPlayCardsFromHand(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
-        break;
-      case CpuLevels.medium:
-        await cpuMediumPlayCardsFromHand(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
+        await cpuEasyPlayCardsFromHand(cpu, opponent, updateGameState,
+            battleLog, isGameOver, gameIsInOvertime);
         break;
       default:
-        await cpuEasyPlayCardsFromHand(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
+        for (int i = 0; i < 2; i++) {
+          //Empty hand and mana to spare: Exchange
+          if(cpu.hand.isEmpty && cpu.mana > Constants.cardExchangeCost){
+            cpu.mana -= Constants.cardExchangeCost;
+            cpu.drawCard(battleLog);
+            updateGameState();
+          }
+          await cpuMediumPlayCardsFromHand(cpu, opponent, updateGameState,
+              battleLog, isGameOver, gameIsInOvertime);
+        }
         break;
     }
   }
@@ -135,7 +146,8 @@ class CPU {
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool gameIsInOvertime) async {
     if (isGameOver()) {
       return;
     }
@@ -145,7 +157,7 @@ class CPU {
       for (var card in List.from(cpu.hand)) {
         for (var i = 0; i < 3; i++) {
           if (cpu.canPlayCard(card, i).$1) {
-            await cpu.playCard(card, i, battleLog, opponent);
+            await cpu.playCard(card, i, battleLog, opponent, gameIsInOvertime);
             updateGameState();
             await Future.delayed(Duration(seconds: 1));
             if (isGameOver()) {
@@ -156,20 +168,22 @@ class CPU {
           }
         }
       }
+      return;
     }
+
     //Do 2 loops
     for (var x = 0; x < 2; x++) {
       if (cpu.strategy == CpuStrategy.offensive) {
-        await playMonsterCards(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
-        await playOtherCards(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
+        await playMonsterCards(cpu, opponent, updateGameState, battleLog,
+            isGameOver, gameIsInOvertime);
+        await playOtherCards(cpu, opponent, updateGameState, battleLog,
+            isGameOver, gameIsInOvertime);
       }
       if (cpu.strategy == CpuStrategy.defensive) {
-        await playOtherCards(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
-        await playMonsterCards(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
+        await playOtherCards(cpu, opponent, updateGameState, battleLog,
+            isGameOver, gameIsInOvertime);
+        await playMonsterCards(cpu, opponent, updateGameState, battleLog,
+            isGameOver, gameIsInOvertime);
       }
     }
   }
@@ -179,23 +193,45 @@ class CPU {
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool gameIsInOvertime) async {
     if (isGameOver()) {
       return;
     }
 
-    // **Step 1: Sort Hand by Priority**
+    if (cpu.monsters.any((a) => a != null)) {
+      await playBestMonsterCard(cpu, opponent, updateGameState, battleLog,
+          isGameOver, gameIsInOvertime);
+    }
+
+    //Sort Hand by Priority**
     cpu.hand.sort((a, b) {
       int aPriority = getCardPriority(a, cpu);
       int bPriority = getCardPriority(b, cpu);
       return bPriority.compareTo(aPriority); // Higher priority first
     });
 
-    // **Step 2: Play Cards in Order of Priority**
+    // Has any monsters on the field?
+    var hasMonstersOnField = cpu.monsters.any((a) => a != null);
+    if (!hasMonstersOnField) {
+      if (cpu.hand.any((a) => a.isMonster())) {
+        //Get the first monster you can play
+        var cardToPlay = cpu.hand.where(
+            (w) => w.isMonster() && w.canBePlayed() && w.cost <= cpu.mana);
+        if (cardToPlay.isNotEmpty) {
+          await cpu.playCard(
+              cardToPlay.first, 1, battleLog, opponent, gameIsInOvertime);
+          updateGameState();
+          await Future.delayed(Duration(milliseconds: 500));
+        }
+      }
+    }
+
+    //Play Cards in Order of Priority**
     for (var card in List.from(cpu.hand)) {
       for (var i = 0; i < 3; i++) {
         if (cpu.canPlayCard(card, i).$1) {
-          await cpu.playCard(card, i, battleLog, opponent);
+          await cpu.playCard(card, i, battleLog, opponent, gameIsInOvertime);
           updateGameState();
           await Future.delayed(Duration(milliseconds: 500));
           if (isGameOver()) {
@@ -212,7 +248,8 @@ class CPU {
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool gameIsInOvertime) async {
     if (isGameOver()) {
       return;
     }
@@ -224,7 +261,8 @@ class CPU {
         for (var i = 0; i < 3; i++) {
           //If monster can be played > play it
           if (cpu.canPlayCard(monsterCard, i).$1) {
-            await cpu.playCard(monsterCard, i, battleLog, opponent);
+            await cpu.playCard(
+                monsterCard, i, battleLog, opponent, gameIsInOvertime);
             updateGameState();
             await Future.delayed(Duration(milliseconds: 500));
             //Played card, do not check the other spots
@@ -235,27 +273,67 @@ class CPU {
     }
   }
 
+  static Future<void> playBestMonsterCard(
+      CpuPlayer cpu,
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver,
+      bool gameIsInOvertime) async {
+    if (isGameOver()) {
+      return;
+    }
+    //Open monster zones ?
+    if (cpu.monsters.any((a) => a == null)) {
+      var monsterCards = cpu.hand.where((w) => w.isMonster()).toList();
+      if (monsterCards.isEmpty) {
+        return;
+      }
+      var mostValuableMonster = getBiggestThreat(
+          monsterCards.map((card) => card.toMonster()).toList(), cpu);
+      GameCard monsterCard =
+          monsterCards.firstWhere((w) => w.id == mostValuableMonster.id);
+      if (monsterCard.cost > cpu.mana) {
+        return;
+      }
+      for (var i = 0; i < 3; i++) {
+        //If monster can be played > play it
+        if (cpu.canPlayCard(monsterCard, i).$1) {
+          await cpu.playCard(
+              monsterCard, i, battleLog, opponent, gameIsInOvertime);
+          updateGameState();
+          await Future.delayed(Duration(milliseconds: 500));
+
+          //Played card
+          return;
+        }
+      }
+    }
+  }
+
   static Future<void> playOtherCards(
       CpuPlayer cpu,
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool gameIsInOvertime) async {
     if (isGameOver()) {
       return;
     }
-    var noneMonsterCards = cpu.hand.where((w) => !w.isMonster()).toList();
-    noneMonsterCards.sort((a, b) {
+    var nonMonsterCards = cpu.hand.where((w) => !w.isMonster()).toList();
+    nonMonsterCards.sort((a, b) {
       int aVal = getGameCardSortValue(a, cpu.strategy);
       int bVal = getGameCardSortValue(b, cpu.strategy);
       return aVal > bVal ? 1 : 0;
     });
-    for (var gameCard in noneMonsterCards) {
+    for (var gameCard in nonMonsterCards) {
       //Do a loop for every monster zone
       for (var i = 0; i < 3; i++) {
         //If card can be played > play it
         if (cpu.canPlayCard(gameCard, i).$1) {
-          await cpu.playCard(gameCard, i, battleLog, opponent);
+          await cpu.playCard(
+              gameCard, i, battleLog, opponent, gameIsInOvertime);
           updateGameState();
           await Future.delayed(Duration(milliseconds: 500));
           if (isGameOver()) {
@@ -328,85 +406,38 @@ class CPU {
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool isGameInOvertime) async {
     if (isGameOver() || opponent.health == 0) {
       return;
     }
 
-    switch (cpu.level) {
-      case CpuLevels.easy:
-        await cpuEasyAttackWithAllActiveMonsters(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
-        break;
-      case CpuLevels.medium:
-        await cpuMediumAttackWithAllActiveMonsters(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
-        break;
-      default:
-        await cpuEasyAttackWithAllActiveMonsters(
-            cpu, opponent, updateGameState, battleLog, isGameOver);
-        break;
-    }
-  }
-
-  static Future<void> cpuEasyAttackWithAllActiveMonsters(
-      CpuPlayer cpu,
-      Player opponent,
-      Function updateGameState,
-      List<String> battleLog,
-      bool Function() isGameOver) async {
-    if (isGameOver() || opponent.health == 0) {
-      return;
-    }
-    for (var monster in cpu.monsters) {
-      //No monster in spot so no attack
-      if (monster == null) {
-        continue;
-      }
-
-      //Monster can attack?
-      if (monster.canAttack()) {
-        //Opponent has no active monsters > attack player directly
-        if (opponent.monsters.isEmpty ||
-            !opponent.monsters.any((w) => w != null)) {
-          monster.attackPlayer(opponent, battleLog);
-          if (opponent.health == 0) {
-            return;
-          }
-        } else {
-          var opponentMonsters =
-              opponent.monsters.where((w) => w != null).toList();
-          if (cpu.strategy == CpuStrategy.random) {
-            //Attack a random opponent monster
-            await cpu.attackOpponentMonster(
-                monster,
-                opponent,
-                opponentMonsters[Random().nextInt(opponentMonsters.length)]!,
-                battleLog,
-                updateGameState);
-          } else {
-            //Attack the opponent monster with the least health
-            var weakestMonster = opponentMonsters
-                .reduce((a, b) => a!.currentHealth < b!.currentHealth ? a : b);
-            await cpu.attackOpponentMonster(
-                monster, opponent, weakestMonster!, battleLog, updateGameState);
-          }
-        }
-        updateGameState();
-        await Future.delayed(Duration(milliseconds: 500));
-        if (isGameOver()) {
-          return;
-        }
+    var loops = isGameInOvertime ? 2 : 1;
+    for (int i = 0; i < loops; i++) {
+      switch (cpu.level) {
+        case CpuLevels.easy:
+          await cpuAttackWithAllActiveMonsters(cpu, opponent, updateGameState,
+              battleLog, isGameOver, isGameInOvertime);
+          break;
+        case CpuLevels.medium:
+          await cpuAttackWithAllActiveMonsters(cpu, opponent, updateGameState,
+              battleLog, isGameOver, isGameInOvertime);
+          break;
+        default:
+          await cpuAttackWithAllActiveMonsters(cpu, opponent, updateGameState,
+              battleLog, isGameOver, isGameInOvertime);
+          break;
       }
     }
   }
 
-  static Future<void> cpuMediumAttackWithAllActiveMonsters(
+  static Future<void> cpuAttackWithAllActiveMonsters(
       CpuPlayer cpu,
       Player opponent,
       Function updateGameState,
       List<String> battleLog,
-      bool Function() isGameOver) async {
+      bool Function() isGameOver,
+      bool isGameInOvertime) async {
     if (isGameOver() || opponent.health == 0) {
       return;
     }
@@ -416,9 +447,6 @@ class CPU {
     List<MonsterCard> opponentMonsters =
         opponent.monsters.where((m) => m != null).map((m) => m!).toList();
 
-    bool isAggressive = cpu.strategy == CpuStrategy.offensive;
-    bool isDefensive = cpu.strategy == CpuStrategy.defensive;
-
     for (var monster in activeMonsters) {
       if (!monster.canAttack()) continue;
 
@@ -426,46 +454,71 @@ class CPU {
           opponent.monsters.where((m) => m != null).map((m) => m!).toList();
       // Opponent has no monsters? Attack player directly!
       if (opponentMonsters.isEmpty) {
-        monster.attackPlayer(opponent, battleLog);
+        monster.attackPlayer(opponent, battleLog, isGameInOvertime);
         updateGameState();
         await Future.delayed(Duration(milliseconds: 500));
         if (isGameOver()) return;
         continue;
       }
 
-      // Opponent has monsters, so attack one of them based on strategy
-      MonsterCard target;
+      // Opponent has monsters, so determine the target
+      MonsterCard target = determineTarget(cpu, opponent, updateGameState,
+          battleLog, isGameOver, isGameInOvertime);
 
-      if (isAggressive) {
-        // Try to finish off a low-HP enemy first
-        MonsterCard? killableTarget;
-        if (opponentMonsters
-            .any((enemy) => enemy.currentHealth <= monster.attack)) {
-          opponentMonsters
-              .firstWhere((enemy) => enemy.currentHealth <= monster.attack);
-        }
-
-        target = killableTarget ??
-            opponentMonsters.reduce((a, b) => a.attack > b.attack
-                ? a
-                : b); // Otherwise, hit the strongest enemy
-      } else if (isDefensive) {
-        // Focus on the strongest enemy first
-        target = opponentMonsters
-            .reduce((a, b) => a.currentHealth > b.currentHealth ? a : b);
-      } else {
-        // Balanced: Attack the weakest enemy
-        target = opponentMonsters
-            .reduce((a, b) => a.currentHealth < b.currentHealth ? a : b);
-      }
-
-      await cpu.attackOpponentMonster(
-          monster, opponent, target, battleLog, updateGameState);
+      await cpu.attackOpponentMonster(monster, opponent, target, battleLog,
+          updateGameState, isGameInOvertime);
 
       updateGameState();
       await Future.delayed(Duration(milliseconds: 500));
       if (isGameOver()) return;
     }
+  }
+
+  static MonsterCard determineTarget(
+      CpuPlayer cpu,
+      Player opponent,
+      Function updateGameState,
+      List<String> battleLog,
+      bool Function() isGameOver,
+      bool isGameInOvertime) {
+    var opponentMonsters =
+        opponent.monsters.where((w) => w != null).map((m) => m!).toList();
+    return getBiggestThreat(opponentMonsters, cpu);
+  }
+
+  static bool canKnockOutMonster(MonsterCard monster, CpuPlayer cpu) {
+    var monstersToAttackWith =
+        cpu.monsters.where((w) => w != null && w.canAttack()).toList();
+    var totalAtkPower = 0;
+    var totalAttacks = 0;
+    for (var monster in monstersToAttackWith) {
+      totalAtkPower += monster!.currentAttack;
+      totalAttacks++;
+      if (cpu.gameIsInOvertime && monster.hasAttackedCounter == 0) {
+        totalAtkPower += monster.currentAttack;
+        totalAttacks++;
+      }
+    }
+
+    return monster.currentHealth <= totalAtkPower;
+  }
+
+  static MonsterCard getBiggestThreat(
+      List<MonsterCard> monsters, CpuPlayer cpu) {
+    Map<MonsterCard, TargetValue> targetValues = {};
+    MonsterCard? biggestThreat;
+
+    for (var monster in monsters) {
+      var targetValue = TargetValue(monster, cpu, null, null);
+      targetValues[monster] = targetValue;
+
+      biggestThreat ??= monster;
+      if (targetValues[monster]!.value > targetValues[biggestThreat]!.value) {
+        biggestThreat = monster;
+      }
+    }
+
+    return biggestThreat!;
   }
 
   static int getCardPriority(GameCard card, CpuPlayer cpu) {
@@ -504,21 +557,97 @@ class CPU {
     }
 
     if (card.isMonster()) {
-      int attackValue = card.toMonster().attack;
-      int basePrio = 50 + (attackValue * 5); // Adjust base priority
+      var monster = card.toMonster();
 
-      // Reduce priority for very weak monsters (attack 1-2)
-      if (attackValue <= 2) basePrio -= 10;
+      //When playing card from hand, apply reversed strategy then for targeting
+      var inverseStrategy = CpuStrategy.balanced;
+      if (cpu.strategy == CpuStrategy.defensive) {
+        inverseStrategy = CpuStrategy.offensive;
+      }
+      if (cpu.strategy == CpuStrategy.offensive) {
+        inverseStrategy = CpuStrategy.defensive;
+      }
+      var targetValue = TargetValue(monster, cpu, inverseStrategy, cpu.level);
 
-      // Aggressive CPUs push monster priority higher
-      if (isAggressive) return basePrio + 10;
-
-      // Defensive CPUs hesitate to play monsters unless they have defenses
-      if (isDefensive) return basePrio - 10;
-
-      return basePrio; // Balanced CPU gets normal priority
+      return targetValue.value;
     }
 
-    return 0; // Unknown cards get lowest priority
+    return 0;
+  }
+}
+
+class TargetValue {
+  int atk = 0;
+  int hp = 0;
+  int cost = 0;
+  bool isMascot = false;
+  bool canKO = false;
+  bool isOnField = false;
+
+  TargetValue(MonsterCard monster, CpuPlayer cpu, CpuStrategy? strategy,
+      CpuLevels? level) {
+    atk = monster.isActive ? monster.currentAttack : monster.attack;
+    hp = monster.isActive ? monster.currentHealth : monster.health;
+    isMascot = monster.isMascot;
+    isOnField = monster.isActive;
+    cost = monster.cost;
+    canKO = monster.isActive ? CPU.canKnockOutMonster(monster, cpu) : false;
+
+    level ??= cpu.level;
+    strategy ??= cpu.strategy;
+
+    calculateValue(level, strategy);
+  }
+
+  int value = 0;
+
+  // 1/1;no mascot;1cost;cpu_defensive = 30;
+  // 2/2;mascot;3cost;cpu_offensive = 80
+  // 1/2;no mascot;2cost;cpu_balanced = 40
+  calculateValue(CpuLevels level, CpuStrategy strategy) {
+    value = 0;
+    if (strategy == CpuStrategy.random) {
+      value = Random().nextInt(100);
+      return;
+    }
+
+    switch (strategy) {
+      case CpuStrategy.defensive:
+        value += (atk * 30) + (hp * 10);
+        break;
+      case CpuStrategy.offensive:
+        value += (atk * 10) + (hp * 30);
+        break;
+      default:
+        value += (atk * 20) + (hp * 20);
+        break;
+    }
+
+    if (level == CpuLevels.easy) {
+      return;
+    }
+
+    if (isMascot) {
+      value += 30;
+    }
+    if (canKO) {
+      value += 50;
+    }
+
+    //value for playing card from hand
+    if (!isOnField) {
+      value -= (cost * 10);
+    }
+    if (level == CpuLevels.medium) {
+      return;
+    }
+
+    if (level == CpuLevels.hard) {
+      return;
+    }
+
+    if (level == CpuLevels.expert) {
+      return;
+    }
   }
 }

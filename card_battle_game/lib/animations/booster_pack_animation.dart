@@ -5,13 +5,14 @@ import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-enum BoosterPackType { common, uncommon, rare, best }
+enum BoosterPackType { starterDeck, common, uncommon, rare, best }
 
 class BoosterPackOpenAnimation extends StatefulWidget {
   final BoosterPackType type;
   final UserData userData;
+  final List<GameCard> rewardsCards;
   const BoosterPackOpenAnimation(
-      {super.key, required this.type, required this.userData});
+      {super.key, required this.type, required this.userData, required this.rewardsCards});
 
   @override
   _BoosterPackOpenAnimationState createState() =>
@@ -27,9 +28,16 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
   late Animation<double> _fogAnimation;
   late Animation<double> _cardFadeAnimation;
   bool _showCard = false;
-  late GameCard rewardCard;
+  late List<GameCard> rewardCards;
+  int i = 0;
 
   void _loadRewardCards() async {
+
+    if(widget.type == BoosterPackType.starterDeck){
+      rewardCards = widget.rewardsCards;
+      return;
+    }
+
     var cardRarity = CardRarity.Common;
     switch (widget.type) {
       case BoosterPackType.common:
@@ -49,8 +57,11 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
     }
 
     await CardDatabase.loadCardsFromJson(CardDatabase.filePath);
-    rewardCard = CardDatabase.getRandomCard(type: '', rarity: cardRarity);
+    var rewardCard = CardDatabase.getRandomCard(type: '', rarity: cardRarity);
     widget.userData.cards.add(rewardCard.id);
+    rewardCards = [
+      rewardCard
+    ];
     await UserStorage.saveUserData(widget.userData);
   }
 
@@ -181,7 +192,13 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
     return GestureDetector(
       onTap: () {
         if (_showCard) {
+          if(i < rewardCards.length - 1){
+            setState(() {
+              i++;
+            });
+          }else{
           Navigator.of(context).pop(); // Close animation on tap
+          }
         } else {
           startAnimation();
         }
@@ -267,7 +284,7 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
                   child: Container(
                     width: 120,
                     height: 200,
-                    child: CardWidget(card: rewardCard),
+                    child: CardWidget(card: rewardCards[i]),
                     // decoration: BoxDecoration(
                     //   image: DecorationImage(
                     //     image: AssetImage('assets/images/revealed_card.png'),

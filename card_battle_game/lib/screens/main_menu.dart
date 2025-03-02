@@ -21,6 +21,8 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> with RouteAware {
   UserData? _userData; // Store user data
+  bool showTutorial = false;
+  int tutorialStep = 1;
 
   @override
   void initState() {
@@ -57,9 +59,66 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
         _userData = userData;
       });
     }
+
+    if (_userData!.isNewPlayer) {
+      await startTutorial();
+    }
+  }
+
+  String getTutorialStepText() {
+    if (tutorialStep == 1) {
+      return "Welcome to Mana Mayhem!";
+    }
+    if (tutorialStep == 2) {
+      return "In this game you build your deck whilst trying to clear as many stages as you can";
+    }
+    if (tutorialStep == 3) {
+      return "In the top-right you can go to your profile page or the deck-builder page where you can build the deck you start a game with.";
+    }
+    if (tutorialStep == 4) {
+      return "In the 'How to Play' section you can read the rules of the game. \n\nHave fun!";
+    }
+
+    return "";
+  }
+
+  Future<void> startTutorial() async {
+    setState(() {
+      showTutorial = true;
+    });
+  }
+
+  Future<void> endTutorial() async {
+    setState(() {
+      showTutorial = false;
+    });
+    _userData!.isNewPlayer = false;
+    await UserStorage.saveUserData(_userData!);
   }
 
   void startGame(bool newGame) async {
+    //New player (no cards yet)
+    if (_userData!.deck.cards.isEmpty && _userData!.cards.isEmpty) {
+      await NotificationService.showDialogMessageWithActions(
+        context,
+        "You don't have any cards yet",
+        [
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          DeckBuilderScreen(userData: _userData!, playerHasNoCardsYet: true)),
+                );
+                return;
+              },
+              child: Text('Choose my starter deck!'))
+        ],
+        title: "Welcome",
+      );
+    }
+
     if (!newGame) {
       Navigator.push(
         context,
@@ -115,62 +174,91 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background image
-          Image.asset(
-            'assets/images/${_userData == null ? "forrest.jpg" : _userData!.background}',
-            fit: BoxFit.cover,
-          ),
+      body: Stack(fit: StackFit.expand, children: [
+        // Background image
+        Image.asset(
+          'assets/images/${_userData == null ? "forrest.jpg" : _userData!.background}',
+          fit: BoxFit.cover,
+        ),
 
-          // Top right buttons
-          Positioned(
-            top: 40, // Adjust for status bar spacing
-            right: 20,
-            child: Row(
-              children: [
-                // User Profile Button
-                _buildRoundButton(
-                  icon: Icons.person,
-                  color: Colors.blue,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              UserProfileScreen(userData: _userData!)),
-                    );
-                  },
-                ),
-                SizedBox(width: 10),
-                // Deck Builder Button
-                _buildRoundButton(
-                  icon: FontAwesomeIcons.database,
-                  color: Colors.green,
-                  onPressed: () async {
-                    // Wait for the updated user data when the DeckBuilderScreen pops
-                    final updatedUserData = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
+        // Top right buttons
+        Positioned(
+          top: 40, // Adjust for status bar spacing
+          right: 20,
+          child: Row(
+            children: [
+              // User Profile Button
+              _buildRoundButton(
+                icon: Icons.person,
+                color: Colors.blue,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
                         builder: (context) =>
-                            DeckBuilderScreen(userData: _userData!),
-                      ),
-                    );
+                            UserProfileScreen(userData: _userData!)),
+                  );
+                },
+              ),
+              SizedBox(width: 10),
+              // Deck Builder Button
+              _buildRoundButton(
+                icon: FontAwesomeIcons.database,
+                color: Colors.green,
+                onPressed: () async {
+                  // Wait for the updated user data when the DeckBuilderScreen pops
+                  final updatedUserData = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DeckBuilderScreen(userData: _userData!),
+                    ),
+                  );
 
-                    // If updatedUserData is not null, update the user data
-                    if (updatedUserData != null) {
-                      setState(() {
-                        _userData =
-                            updatedUserData; // Update user data in MainMenu
-                      });
-                    }
-                  },
-                ),
-              ],
+                  // If updatedUserData is not null, update the user data
+                  if (updatedUserData != null) {
+                    setState(() {
+                      _userData =
+                          updatedUserData; // Update user data in MainMenu
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+
+        if (showTutorial) ...[
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.5), // Dark transparency
+              child: Padding(
+                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        getTutorialStepText(),
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (tutorialStep == 4) {
+                            endTutorial();
+                          } else {
+                            setState(() {
+                              tutorialStep++; // Hide tutorial when pressed
+                            });
+                          }
+                        },
+                        child: Text(tutorialStep == 4 ? "Got it!" : "Next"),
+                      ),
+                    ],
+                  )),
             ),
           ),
-
+        ] else ...[
           // Menu content
           Center(
             child: Column(
@@ -252,7 +340,7 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
             ),
           ),
         ],
-      ),
+      ]),
     );
   }
 

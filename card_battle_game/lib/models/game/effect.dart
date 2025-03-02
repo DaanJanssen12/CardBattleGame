@@ -25,7 +25,7 @@ class SummonEffect {
   }
 
   Future<void> apply(
-      MonsterCard triggeringMonster, Player player, Player? opponent) async {
+      MonsterCard triggeringMonster, Player player, Player? opponent, bool gameIsInOvertime) async {
     switch (type) {
       case SummonEffectType.swarm:
         var swarmCard = await CardDatabase.getCards([value!]);
@@ -33,7 +33,7 @@ class SummonEffect {
           if (player.monsters[i] == null) {
             var swarmMonster = swarmCard[0].toMonster().clone().toMonster();
             swarmMonster.oneTimeUse = true;
-            player.summonMonster(swarmMonster, i, [], null, false);
+            player.summonMonster(swarmMonster, i, [], null, false, gameIsInOvertime);
           }
         }
         break;

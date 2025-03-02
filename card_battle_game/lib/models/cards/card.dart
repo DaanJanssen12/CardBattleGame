@@ -20,6 +20,7 @@ class GameCard {
   GameCard(this.name, this.imagePath, this.cost, this.shortDescription,
       this.fullDescription) {
     //id = Uuid().v4();
+    id = "";
     isInDeck = false;
     rarity = CardRarity.Common;
     type = "";
@@ -51,8 +52,10 @@ class GameCard {
     var clone =
         GameCard(name, imagePath, cost, shortDescription, fullDescription);
     clone.id = id;
-    cloneId = Uuid().v4();
+    clone.cloneId = Uuid().v4();
     clone.rarity = rarity;
+    clone.oneTimeUse = oneTimeUse;
+    clone.isOpponentCard = isOpponentCard;
     return clone;
   }
 

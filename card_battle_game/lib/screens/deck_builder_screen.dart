@@ -7,13 +7,16 @@ import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/services/helper_functions.dart';
+import 'package:card_battle_game/services/notification_service.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/widgets/card_widget.dart'; // Your existing card widget
 
 class DeckBuilderScreen extends StatefulWidget {
-  const DeckBuilderScreen({super.key, required this.userData});
+  const DeckBuilderScreen(
+      {super.key, required this.userData, this.playerHasNoCardsYet = false});
   final UserData userData;
+  final bool playerHasNoCardsYet;
 
   @override
   _DeckBuilderScreenState createState() => _DeckBuilderScreenState();
@@ -76,6 +79,58 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.playerHasNoCardsYet) {
+      return Scaffold(
+          appBar: AppBar(
+            title: Text("Choose your deck"),
+            backgroundColor: Colors.white,
+          ),
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'assets/images/${widget.userData.background}',
+                fit: BoxFit.cover,
+              ),
+              Column(
+                children: [
+                  Text(
+                    "Our best players have compiled a couple of starter decks. You can pick one.", 
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+                  Expanded(
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 10), // Space between items
+                      padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                      itemCount: 3,
+                      itemBuilder: (context, index) {
+                        var text = getPackName(index);
+                        var subTitle = getPackDescription(index);
+
+                        return Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: ListTile(
+                            title: Text(text),
+                            subtitle: Text(subTitle),
+                            trailing: ElevatedButton(
+                              onPressed: () => {_chooseStarterDeck(index)},
+                              child: Text("Choose"),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                ],
+              )
+            ],
+          ));
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Deck Builder"),
@@ -157,14 +212,15 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
             itemBuilder: (context, index) {
               var amount = boosterPacks[BoosterPackType.values[index]] ?? 0;
               return ListTile(
-                  title: Text(
-                      "${Functions.getBoosterPackName(BoosterPackType.values[index])} (${amount})"),
-                  trailing: ElevatedButton(
-                    onPressed: () =>
-                        amount > 0 ? _openBoosterPack(BoosterPackType.values[index]) : null,
-                    child: Text("Open"),
-                  ),
-                );
+                title: Text(
+                    "${Functions.getBoosterPackName(BoosterPackType.values[index])} (${amount})"),
+                trailing: ElevatedButton(
+                  onPressed: () => amount > 0
+                      ? _openBoosterPack(BoosterPackType.values[index])
+                      : null,
+                  child: Text("Open"),
+                ),
+              );
             },
           ),
         ),
@@ -197,12 +253,110 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent, // Makes it overlay-like
-          child:
-              BoosterPackOpenAnimation(type: type, userData: widget.userData),
+          child: BoosterPackOpenAnimation(
+            type: type,
+            userData: widget.userData,
+            rewardsCards: [],
+          ),
         );
       },
     );
     await _loadData();
+  }
+
+  String getPackName(int i) {
+    if (i == 0) {
+      return "Magician's Pack";
+    }
+    if (i == 1) {
+      return "Farmer's Pack";
+    }
+    if (i == 2) {
+      return "Demon's Pack";
+    }
+    return "";
+  }
+  String getPackDescription(int i) {
+    if (i == 0) {
+      return "This deck is all about mana usage";
+    }
+    if (i == 1) {
+      return "This deck has a healthy balance of offense and defense";
+    }
+    if (i == 2) {
+      return "This deck is all about offense";
+    }
+    return "";
+  }
+
+  Future<List<GameCard>> getStarterDeckCards(int i) async {
+    List<String> cardIds = [];
+    // Magician's pack
+    if (i == 0) {
+      cardIds = [
+        'monster_penguin_mage',
+        'monster_water_droplet',
+        'upgrade_heal',
+        'upgrade_heal',
+        'upgrade_strengthen'
+      ];
+    }
+    // Farmer's pack
+    if (i == 1) {
+      cardIds = [
+        'monster_worker_bee',
+        'monster_mushroom_boy',
+        'upgrade_honey',
+        'upgrade_honey',
+        'action_harvest'
+      ];
+    }
+    // Demon's pack
+    if (i == 2) {
+      cardIds = [
+        'monster_fire_dog',
+        'monster_bat',
+        'upgrade_heal',
+        'upgrade_strengthen',
+        'upgrade_strengthen'
+      ];
+    }
+    var cards = await CardDatabase.getCards(cardIds);
+    return cards;
+  }
+
+  Future<void> _chooseStarterDeck(int i) async {
+    var packName = getPackName(i);
+    var deckCards = await getStarterDeckCards(i);
+    await NotificationService.showDialogMessageWithActions(
+        context, "You sure you want to pick the $packName", [
+      TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            widget.userData.deck.cards.addAll(deckCards.map((m) => m.id).toList());
+            await UserStorage.saveUserData(widget.userData);
+            await showDialog(
+              context: context,
+              barrierDismissible: false, // Prevents accidental closing
+              builder: (BuildContext context) {
+                return Dialog(
+                  backgroundColor: Colors.transparent, // Makes it overlay-like
+                  child: BoosterPackOpenAnimation(
+                      type: BoosterPackType.starterDeck,
+                      userData: widget.userData,
+                      rewardsCards: deckCards),
+                );
+              },
+            );
+          },
+          child: Text('Yes!')),
+      TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            return;
+          },
+          child: Text('Not sure yet...'))
+    ]);
   }
 
   Widget _buildCardList(List<GameCard> cards, String title, bool isDeck) {

@@ -5,12 +5,14 @@ import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/cards/mascot_effects.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:card_battle_game/models/cards/upgrade_card.dart';
+import 'package:card_battle_game/models/game/monster_effect.dart';
 import 'package:card_battle_game/models/player/cpu.dart';
 
 class Player {
   String name;
   int health;
   int mana;
+  int manabank = 0;
   List<GameCard> hand;
   List<MonsterCard?> monsters;
   List<GameCard> deck;
@@ -20,6 +22,7 @@ class Player {
   late int startingMana;
   late String mascot;
   late MonsterCard mascotCard;
+  bool gameIsInOvertime = false;
 
   Player({required this.name})
       : health = 3,
@@ -96,10 +99,11 @@ class Player {
     mascot = card.id;
     mascotCard = card;
     startingHealth = card.mascotEffects.startingHealth;
-    startingMana = card.mascotEffects.startingMana;
+    startingMana = 1; //card.mascotEffects.startingMana;
   }
 
   Future<void> startGame(List<String> battleLog, Player opponent) async {
+    gameIsInOvertime = false;
     if (mascot.isEmpty) {
       var newMascot = deck.firstWhere((w) => w.isMonster());
       mascot = newMascot.id;
@@ -111,29 +115,25 @@ class Player {
         ? deck.firstWhere((w) => w.isMonster() && w.toMonster().isMascot)
         : deck.firstWhere((w) => w.id == mascot);
     deck.remove(mascotCard);
-    await summonMonster(mascotCard.toMonster(), 1, battleLog, opponent, true);
+    await summonMonster(
+        mascotCard.toMonster(), 1, battleLog, opponent, true, false);
     deck.shuffle();
   }
 
   Future<void> startTurn(
       int currentTurn, Player opponent, List<String> battleLog) async {
-    switch (currentTurn) {
-      case >= 1 && < 3:
-        mana += 1;
-        break;
-      case >= 3 && < 5:
-        mana += 2;
-        break;
-      case >= 5:
-        mana += 3;
-        break;
+    //Mana = Current Turn Number
+    mana = currentTurn;
+    if (manabank > 0) {
+      mana += manabank;
+      manabank = 0;
     }
     if (mana > Constants.playerMaxMana) {
       mana = Constants.playerMaxMana;
     }
 
     for (var monster in monsters.where((w) => w != null)) {
-      await monster!.startnewTurn(this, opponent, battleLog);
+      await monster!.startnewTurn(this, opponent, battleLog, gameIsInOvertime);
     }
     if (deck.isEmpty || deck.isEmpty) {
       shuffleDiscardPile();
@@ -234,14 +234,14 @@ class Player {
   }
 
   Future<PlayCardResult?> playCard(GameCard card, int monsterZoneIndex,
-      List<String> battleLog, Player opponent) async {
+      List<String> battleLog, Player opponent, bool gameIsInOvertime) async {
     PlayCardResult? result;
 
     mana -= card.cost;
     hand.remove(card);
     if (card.isMonster()) {
-      summonMonster(
-          card as MonsterCard, monsterZoneIndex, battleLog, opponent, false);
+      summonMonster(card as MonsterCard, monsterZoneIndex, battleLog, opponent,
+          false, gameIsInOvertime);
     }
     if (card.isUpgrade()) {
       monsters[monsterZoneIndex]?.apply(card as UpgradeCard);
@@ -257,14 +257,15 @@ class Player {
                 card as UpgradeCard,
                 opponent,
                 battleLog,
-                null);
+                null,
+                gameIsInOvertime);
       }
       battleLog
           .add('${card.name} applied to ${monsters[monsterZoneIndex]?.name}');
     }
     if (card.isAction()) {
       var actionCard = (card as ActionCard);
-      result = await actionCard.doAction(this, opponent);
+      result = await actionCard.doAction(this, opponent, gameIsInOvertime);
       battleLog.add('${card.name} played');
     }
     if (card.isOpponentCard && !card.isMonster()) {
@@ -283,11 +284,23 @@ class Player {
       int monsterZoneIndex,
       List<String> battleLog,
       Player? opponent,
-      bool isInitialMascotSummon) async {
+      bool isInitialMascotSummon,
+      bool gameIsInOvertime) async {
     monsters[monsterZoneIndex] = monster;
-    monster.summon(monsterZoneIndex);
+    monster.summon(monsterZoneIndex, gameIsInOvertime);
     if (monster.summonEffect != null && !isInitialMascotSummon) {
-      await monster.summonEffect!.apply(monster, this, opponent);
+      await monster.summonEffect!
+          .apply(monster, this, opponent, gameIsInOvertime);
+    }
+    if (monster.monsterEffect != null) {
+      monster.monsterEffect!.onSummon(this, monster, opponent);
+    }
+    if (monsters
+        .any((a) => a != null && a.monsterEffect != null && a != monster)) {
+      for (var otherMonster in monsters
+          .where((a) => a != null && a.monsterEffect != null && a != monster)) {
+        otherMonster!.monsterEffect!.onSummonOther(this, monster, opponent);
+      }
     }
     battleLog.add('${monster.name} summoned');
   }
@@ -297,6 +310,9 @@ class Player {
     var monster = monsters[monsterZoneIndex];
     monster!.faint();
     monsters[monsterZoneIndex] = null;
+    if (monster.monsterEffect != null) {
+      monster.monsterEffect!.onFaint(this, monster, opponent);
+    }
     if (!monster.oneTimeUse && !monster.isOpponentCard) {
       discardPile.add(monster);
     }
@@ -310,9 +326,10 @@ class Player {
       Player opponent,
       MonsterCard opponentMonster,
       List<String> battleLog,
-      Function updateScreen) async {
+      Function updateScreen,
+      bool gameIsInOvertime) async {
     var monsterHealthBeforeAttack = opponentMonster.currentHealth;
-    bool negateAttack = false;
+    bool negateDamage = false;
     bool targetCanNotBeAttacked = false;
 
     if (opponentMonster.isMascot &&
@@ -325,10 +342,11 @@ class Player {
               null,
               this,
               battleLog,
-              attackingMonster);
+              attackingMonster,
+              gameIsInOvertime);
       if (mascotEffectResult.isTriggered) {
-        if (mascotEffectResult.effect == "negateAttack") {
-          negateAttack = true;
+        if (mascotEffectResult.effect == "negateDamage") {
+          negateDamage = true;
         }
         if (mascotEffectResult.effect == "canNotBeTargeted") {
           targetCanNotBeAttacked = true;
@@ -341,7 +359,7 @@ class Player {
 
     var opponentMonsterFainted =
         attackingMonster.doAttack(opponentMonster, battleLog);
-    if (negateAttack) {
+    if (negateDamage) {
       opponentMonster.currentHealth = monsterHealthBeforeAttack;
       opponentMonsterFainted = false;
       battleLog.add('${opponentMonster.name} negated the attack');
@@ -364,7 +382,8 @@ class Player {
           null,
           opponent,
           battleLog,
-          null);
+          null,
+          gameIsInOvertime);
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
     }
@@ -378,7 +397,8 @@ class Player {
           null,
           this,
           battleLog,
-          attackingMonster);
+          attackingMonster,
+          gameIsInOvertime);
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
     }
@@ -395,6 +415,15 @@ class Player {
         return 150;
       case CpuLevels.expert:
         return 200;
+    }
+  }
+
+  void setGameOvertime() {
+    gameIsInOvertime = true;
+    for (var monster in monsters) {
+      if (monster != null) {
+        monster.maxAttacksPerTurn = 2;
+      }
     }
   }
 }

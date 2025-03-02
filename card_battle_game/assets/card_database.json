@@ -12,14 +12,14 @@
         "shortDescription": null,
         "fullDescription": "A penguin mage",
         "mascotEffects": {
-          "startingHealth": 4,
+          "startingHealth": 10,
           "startingMana": 3,
           "startingGold": 100,
           "additionalEffect": {
             "name": "Arcane Infusion",
-            "description": "Gain 1 mana whenever an upgrade is applied to Penguin Mage",
-            "type": "gainManaWhenUpgradeAppliedToSelf",
-            "value": "1"
+            "description": "At the start of your turn add 1 'Meditate' card to your hand.",
+            "type": "addCardStartOfTurn",
+            "value": "1;action_meditate"
           }
         }
       },
@@ -30,12 +30,12 @@
         "imagePath": "assets/images/monsters/FlameDog.png",
         "type": "monster",
         "health": 3,
-        "attack": 1,
-        "cost": 3,
+        "attack": 2,
+        "cost": 4,
         "shortDescription": null,
         "fullDescription": "A fire dog",
         "mascotEffects": {
-          "startingHealth": 5,
+          "startingHealth": 12,
           "startingMana": 2,
           "startingGold": 100,
           "additionalEffect": {
@@ -52,7 +52,7 @@
         "name": "Mushroom Man",
         "imagePath": "assets/images/monsters/MushroomMan.png",
         "type": "monster",
-        "health": 3,
+        "health": 4,
         "attack": 1,
         "cost": 4,
         "summonEffect": {
@@ -62,7 +62,7 @@
         "shortDescription": null,
         "fullDescription": "Mushroom Man swarms the board with Fun Guys",
         "mascotEffects": {
-          "startingHealth": 5,
+          "startingHealth": 10,
           "startingMana": 1,
           "startingGold": 100,
           "additionalEffect": {
@@ -80,12 +80,12 @@
         "imagePath": "assets/images/monsters/MushroomBoy.png",
         "type": "monster",
         "health": 1,
-        "attack": 1,
+        "attack": 2,
         "cost": 2,
         "shortDescription": null,
         "fullDescription": "a Fun Guy",
         "mascotEffects": {
-          "startingHealth": 6,
+          "startingHealth": 14,
           "startingMana": 2,
           "startingGold": 100,
           "additionalEffect": {
@@ -97,18 +97,35 @@
         }
       },
       {
+        "id": "monster_bat",
+        "rarity": "Common",
+        "name": "Bat",
+        "imagePath": "assets/images/monsters/Bat.png",
+        "type": "monster",
+        "health": 2,
+        "attack": 2,
+        "cost": 3,
+        "shortDescription": null,
+        "fullDescription": "This bat swarms his opponent looking for the right time to strike",
+        "mascotEffects": {
+          "startingHealth": 14,
+          "startingMana": 2,
+          "startingGold": 100
+        }
+      },
+      {
         "id": "monster_water_droplet",
         "rarity": "Common",
         "name": "Droplet",
         "imagePath": "assets/images/monsters/WaterDroplet.png",
         "type": "monster",
-        "health": 1,
+        "health": 2,
         "attack": 1,
         "cost": 2,
         "shortDescription": null,
         "fullDescription": "This cute little water droplet is just happy to be there.",
         "mascotEffects": {
-          "startingHealth": 4,
+          "startingHealth": 14,
           "startingMana": 2,
           "startingGold": 100,
           "additionalEffect": {
@@ -131,7 +148,7 @@
         "shortDescription": null,
         "fullDescription": "Just a sheep.",
         "mascotEffects": {
-          "startingHealth": 6,
+          "startingHealth": 16,
           "startingMana": 2,
           "startingGold": 100,
           "additionalEffect": {
@@ -143,18 +160,39 @@
         }
       },
       {
+        "id": "monster_german_shepherd",
+        "rarity": "Rare",
+        "name": "German Shepherd",
+        "imagePath": "assets/images/monsters/GermanShepherd.png",
+        "type": "monster",
+        "health": 4,
+        "attack": 1,
+        "cost": 5,
+        "shortDescription": null,
+        "fullDescription": "This dog is a born shepherd, when on the field it boosts the sheeps.",
+        "effect":{
+          "trigger": "passive",
+          "value": "boostOthers;monster_sheep;1;1"
+        },
+        "mascotEffects": {
+          "startingHealth": 14,
+          "startingMana": 2,
+          "startingGold": 100
+        }
+      },
+      {
         "id": "monster_worker_bee",
         "rarity": "Uncommon",
         "name": "Worker Bee",
         "imagePath": "assets/images/monsters/WorkerBee.png",
         "type": "monster",
-        "health": 1,
+        "health": 2,
         "attack": 2,
-        "cost": 2,
+        "cost": 3,
         "shortDescription": null,
         "fullDescription": "This worker bee will do anything for his queen.",
         "mascotEffects": {
-          "startingHealth": 4,
+          "startingHealth": 14,
           "startingMana": 3,
           "startingGold": 100,
           "additionalEffect": {
@@ -172,8 +210,8 @@
         "imagePath": "assets/images/monsters/QueenBee.png",
         "type": "monster",
         "health": 5,
-        "attack": 2,
-        "cost": 5,
+        "attack": 3,
+        "cost": 6,
         "shortDescription": null,
         "fullDescription": "This bee is the queen of their colony. When summoned they swarm their field with worker bees.",
         "summonEffect": {
@@ -181,7 +219,7 @@
           "value": "monster_worker_bee"
         },
         "mascotEffects": {
-          "startingHealth": 5,
+          "startingHealth": 15,
           "startingMana": 2,
           "startingGold": 150,
           "additionalEffect": {
@@ -199,8 +237,8 @@
         "imagePath": "assets/images/monsters/GlacialSeal.png",
         "type": "monster",
         "health": 4,
-        "attack": 1,
-        "cost": 4,
+        "attack": 2,
+        "cost": 5,
         "shortDescription": null,
         "fullDescription": "A slow but sturdy seal, radiating an icy chill. On summon: Freeze one random enemy for 1 turn.",
         "summonEffect": {
@@ -208,7 +246,7 @@
           "value": "1"
         },
         "mascotEffects": {
-          "startingHealth": 5,
+          "startingHealth": 12,
           "startingMana": 1,
           "startingGold": 100
         }
@@ -229,7 +267,7 @@
           "value": "1"
         },
         "mascotEffects": {
-          "startingHealth": 3,
+          "startingHealth": 10,
           "startingMana": 3,
           "startingGold": 100
         }
@@ -246,7 +284,7 @@
         "shortDescription": null,
         "fullDescription": "BRAAAAAAAAAAAAAIIIIINSSSSS",
         "mascotEffects": {
-          "startingHealth": 4,
+          "startingHealth": 10,
           "startingMana": 3,
           "startingGold": 100,
           "additionalEffect": {
@@ -265,10 +303,10 @@
         "type": "monster",
         "health": 5,
         "attack": 2,
-        "cost": 5,
+        "cost": 6,
         "fullDescription": "A powerful golem forged from molten magma.",
         "mascotEffects": {
-          "startingHealth": 6,
+          "startingHealth": 15,
           "startingMana": 2,
           "regainManaPerTurn": 1,
           "additionalEffect": {
@@ -287,6 +325,18 @@
         "name": "Heal",
         "imagePath": "assets/images/upgrades/Heal.png",
         "type": "upgrade",
+        "cost": 2,
+        "upgradeCardType": "heal",
+        "value": 1,
+        "shortDescription": "Heal a monster by 1.",
+        "fullDescription": "Heal a monster by 1."
+      },
+      {
+        "id": "upgrade_honey",
+        "rarity": "Common",
+        "name": "Honey",
+        "imagePath": "assets/images/upgrades/Honey.png",
+        "type": "upgrade",
         "cost": 1,
         "upgradeCardType": "heal",
         "value": 1,
@@ -299,7 +349,7 @@
         "name": "Strengthen",
         "imagePath": "assets/images/upgrades/Strengthen.png",
         "type": "upgrade",
-        "cost": 1,
+        "cost": 2,
         "upgradeCardType": "boostAtk",
         "value": 1,
         "shortDescription": "Boost a monster's attack by 1.",
@@ -311,7 +361,7 @@
         "name": "Health Potion",
         "imagePath": "assets/images/upgrades/HealthPotion.png",
         "type": "upgrade",
-        "cost": 3,
+        "cost": 4,
         "upgradeCardType": "heal",
         "value": null,
         "shortDescription": "Heal a monster to it's original health.",
@@ -335,7 +385,7 @@
         "name": "Raspberry",
         "imagePath": "assets/images/upgrades/Raspberry.png",
         "type": "upgrade",
-        "cost": 0,
+        "cost": 1,
         "upgradeCardType": "boostAtk",
         "value": 1,
         "shortDescription": "Boost a monster's attack by 1.",
@@ -347,7 +397,7 @@
         "name": "Blueberry",
         "imagePath": "assets/images/upgrades/Blueberry.png",
         "type": "upgrade",
-        "cost": 0,
+        "cost": 1,
         "upgradeCardType": "heal",
         "value": 1,
         "shortDescription": "Heal a monster by 1.",
@@ -359,7 +409,7 @@
         "name": "Shield",
         "imagePath": "assets/images/upgrades/Shield.png",
         "type": "upgrade",
-        "cost": 3,
+        "cost": 4,
         "upgradeCardType": "effectShield",
         "value": 3,
         "shortDescription": "Reduces incoming damage for 3 turns.",
@@ -386,7 +436,7 @@
         "name": "Fate Draw",
         "imagePath": "assets/images/actions/DrawTwice.png",
         "type": "action",
-        "cost": 1,
+        "cost": 2,
         "actionCardType": "draw",
         "value": 2,
         "shortDescription": "Draw 2 cards from your deck.",
@@ -411,7 +461,7 @@
         "name": "Mushroom Garden",
         "imagePath": "assets/images/actions/MushroomGarden.png",
         "type": "action",
-        "cost": 1,
+        "cost": 2,
         "actionCardType": "drawNotFromDeck",
         "value": 2,
         "extraData": "monster_mushroom_boy",
@@ -450,12 +500,12 @@
         "name": "Long Rest",
         "imagePath": "assets/images/actions/LongRest.png",
         "type": "action",
-        "cost": 1,
+        "cost": 2,
         "actionCardType": "combined",
         "value": 0,
-        "extraData": "draw:1;gainMana:3;endTurn",
-        "shortDescription": "Draw 1 card, gain 3 mana and end your turn.",
-        "fullDescription": "You take a long rest to recover. You gain draw 1 card and gain 3 mana. End your turn after playing this card."
+        "extraData": "draw:1;gainManaNextTurn:3;endTurn",
+        "shortDescription": "Draw 1 card & end your turn. You gain 2 extra mana at the start of the next turn.",
+        "fullDescription": "You take a long rest to recover. Draw 1 card & end your turn. You gain 2 extra mana at the start of the next turn."
       },
       {
         "id": "action_mana_surge",
@@ -489,7 +539,7 @@
         "name": "Blizzard",
         "imagePath": "assets/images/actions/Blizzard.png",
         "type": "action",
-        "cost": 2,
+        "cost": 3,
         "actionCardType": "freezeOpponent",
         "value": 1,
         "extraData": null,
@@ -502,7 +552,7 @@
         "name": "Sheep Herder",
         "imagePath": "assets/images/actions/SheepHerder.png",
         "type": "action",
-        "cost": 1,
+        "cost": 2,
         "actionCardType": "summon",
         "value": 2,
         "extraData": "monster_sheep",

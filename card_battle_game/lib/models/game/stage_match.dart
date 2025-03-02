@@ -9,11 +9,11 @@ import 'package:card_battle_game/services/sound_player_service.dart';
 import 'package:flutter/material.dart';
 
 class StageMatch {
-  static int startWithCards = 2;
   int currentTurn = 1;
   bool playerHasTakenTurn = false;
   bool opponentHasTakenTurn = false;
   bool gameIsActive = false;
+  bool gameIsInOvertime = false;
   SoundPlayerService soundPlayerService = SoundPlayerService();
 
   bool isPlayersTurn = false;
@@ -35,7 +35,7 @@ class StageMatch {
     await opponent.startGame(battleLog, player);
     updateGameState();
 
-    for (int i = 0; i < startWithCards; i++) {
+    for (int i = 0; i < Constants.startWithCardsInHand; i++) {
       player.drawCard(battleLog);
       opponent.drawCard(battleLog);
       updateGameState();
@@ -64,16 +64,21 @@ class StageMatch {
     battleLog.add(
         isPlayersTurn ? "${player.name}'s Turn" : "${opponent.name}'s Turn");
     if (isPlayersTurn) {
-      await startPlayerTurn();
+      await startPlayerTurn(isFirstTurn: true);
     } else {
-      await startOpponentTurn();
+      await startOpponentTurn(isFirstTurn: true);
     }
   }
 
-  Future<void> startPlayerTurn() async {
+  Future<void> startPlayerTurn({bool isFirstTurn = false}) async {
     await player.startTurn(currentTurn, opponent, battleLog);
     updateGameState();
-    if (player.canDraw()) {
+    if(isFirstTurn){
+      await NotificationService.showDialogMessage(
+          context, "You're up first, good luck!",
+          title: "Game started!");
+    }
+    else if (player.canDraw()) {
       playerDrawFunction();
       updateGameState();
     } else {
@@ -90,14 +95,16 @@ class StageMatch {
     await nextTurn();
   }
 
-  Future<void> startOpponentTurn() async {
+  Future<void> startOpponentTurn({bool isFirstTurn = false}) async {
     await Future.delayed(Duration(seconds: 1));
     opponent.startTurn(currentTurn, player, battleLog);
-    opponent.drawCards(Constants.drawCardsPerTurn, battleLog);
-    await Future.delayed(Duration(seconds: 1));
+    if (!isFirstTurn) {
+      opponent.drawCards(Constants.drawCardsPerTurn, battleLog);
+      await Future.delayed(Duration(seconds: 1));
+    }
     await CPU.executeTurn(opponent, player, updateGameState, battleLog, () {
       return !gameIsActive;
-    });
+    }, gameIsInOvertime);
     updateGameState();
     checkGameEnd();
     await Future.delayed(Duration(seconds: 1));
@@ -122,6 +129,15 @@ class StageMatch {
       battleLog.add('-');
       playerHasTakenTurn = false;
       opponentHasTakenTurn = false;
+
+      if (currentTurn == 10) {
+        gameIsInOvertime = true;
+        player.setGameOvertime();
+        opponent.setGameOvertime();
+        await NotificationService.showDialogMessage(context,
+            "The game is in overtime now, all monsters can attack twice every turn.",
+            title: "Overtime!");
+      }
     }
     isPlayersTurn = !isPlayersTurn;
     battleLog.add("${isPlayersTurn ? player.name : opponent.name}'s Turn");
@@ -139,8 +155,8 @@ class StageMatch {
     PlayCardResult? result;
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
-      result =
-          await player.playCard(card, monsterZoneIndex, battleLog, opponent);
+      result = await player.playCard(
+          card, monsterZoneIndex, battleLog, opponent, gameIsInOvertime);
       updateGameState();
       soundPlayerService.playDropSound();
     } else {
@@ -153,8 +169,13 @@ class StageMatch {
   Future<void> attackMonster(
       MonsterCard attackingMonster, int targetIndex) async {
     //soundPlayerService.playAttackSound();
-    await player.attackOpponentMonster(attackingMonster, opponent,
-        opponent.monsters[targetIndex]!, battleLog, updateGameState);
+    await player.attackOpponentMonster(
+        attackingMonster,
+        opponent,
+        opponent.monsters[targetIndex]!,
+        battleLog,
+        updateGameState,
+        gameIsInOvertime);
   }
 
   void handleAttackPlayerDirectly(MonsterCard attackingMonster) {
@@ -162,7 +183,7 @@ class StageMatch {
       return;
     }
 
-    attackingMonster.attackPlayer(opponent, battleLog);
+    attackingMonster.attackPlayer(opponent, battleLog, gameIsInOvertime);
     updateGameState();
 
     Future.sync(() async {

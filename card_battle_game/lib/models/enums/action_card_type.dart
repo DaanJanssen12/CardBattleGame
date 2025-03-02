@@ -3,6 +3,7 @@ enum ActionCardType {
   drawNotFromDeck,
   stealRandomCardFromOpponentHand,
   gainMana,
+  gainManaNextTurn,
   showOpponentHand,
   freezeOpponent,
   combined,

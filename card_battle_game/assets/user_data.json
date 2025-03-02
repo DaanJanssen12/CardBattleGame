@@ -1,14 +1,9 @@
 {
     "name": "Player",
     "deck": {
-        "cards":[
-            "monster_penguin_mage",
-            "monster_water_droplet",
-            "upgrade_heal",
-            "upgrade_heal",
-            "upgrade_strengthen"
-        ]
+        "cards": []
     },
-    "cards":[],
-    "background": "Evening.jpg"
+    "cards": [],
+    "background": "Evening.jpg",
+    "isNewPlayer": true
 }

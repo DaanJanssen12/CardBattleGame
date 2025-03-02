@@ -48,7 +48,7 @@
         "mascot": "monster_magma_golem"
     },
     {
-        "id": "cpu_the_magician",
+        "id": "cpu_the_farmer",
         "name": "The Farmer",
         "possibleFromStage": 5,
         "possibleUntillStage": 15,
@@ -105,7 +105,7 @@
         "cpuStrategy": "defensive",
         "deck": [
             "monster_sheep",
-            "monster_sheep",
+            "upgrade_heal",
             "upgrade_heal",
             "upgrade_strengthen",
             "upgrade_strengthen"

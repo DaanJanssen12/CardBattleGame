@@ -112,8 +112,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
                                   if (widget.player.monsters.length > index &&
                                       widget.player.monsters[index] != null &&
                                       widget.player.monsters[index]!
-                                              .hasAttacked ==
-                                          false) {
+                                              .canAttack()) {
                                     startDrag(widget.player.monsters[index]!);
                                   }
                                 },

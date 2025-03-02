@@ -26,9 +26,7 @@ class UserStorage {
     if (await file.exists()) {
       // Read existing file
       final String jsonString = await file.readAsString();
-      print(jsonString);
       final dynamic jsonResponse = json.decode(jsonString);
-      print(jsonResponse);
       return UserData.fromJson(jsonResponse);
     } else {
       // First time: Load from assets & create file
@@ -89,6 +87,7 @@ class UserData {
   late Game? activeGame;
   late String background;
   late int highscore;
+  late bool isNewPlayer;
   late Map<BoosterPackType, int> boosterPacks;
 
   UserData();
@@ -97,6 +96,7 @@ class UserData {
     data.name = json['name'];
     data.background = json['background'] ?? "ClearSky.jpg";
     data.deck = Deck.fromJson(json['deck']);
+    data.isNewPlayer = json['isNewPlayer'] ?? true;
     data.cards = json['cards'] != null
         ? (json['cards'] as List<dynamic>).map((m) => m.toString()).toList()
         : [];
@@ -138,7 +138,8 @@ class UserData {
       'activeGame': activeGame?.toJson(),
       'boosterPacks': boosterPacks.map((type, val) {
         return MapEntry(type.name, val);
-      })
+      }),
+      'isNewPlayer': isNewPlayer
     };
   }
 

@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/constants.dart';
+import 'package:card_battle_game/services/helper_functions.dart';
 import 'package:flutter/material.dart';
 import '../models/cards/card.dart';
 import '../models/player/player.dart';
@@ -17,12 +18,18 @@ class PlayerHandWidget extends StatelessWidget {
       height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: player.hand.length,
+        itemCount: player.hand.length + 1,
         itemBuilder: (context, index) {
-          var card = player.hand[index];
+          GameCard card;
+          if (index == player.hand.length) {
+            card = Functions.getConstantDrawCard();
+          } else {
+            card = player.hand[index];
+          }
 
           // Offset the card slightly based on the index to create the overlap effect
-          double offset = index * -30.0; // Adjust the value for more/less overlap
+          double offset =
+              index * -30.0; // Adjust the value for more/less overlap
 
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -30,7 +37,9 @@ class PlayerHandWidget extends StatelessWidget {
               onTap: () => onCardTap(card),
               child: LongPressDraggable<GameCard>(
                 data: card,
-                delay: Duration(milliseconds: Constants.longPressDraggableDelayInMilliseconds),
+                delay: Duration(
+                    milliseconds:
+                        Constants.longPressDraggableDelayInMilliseconds),
                 feedback: Material(
                   color: Colors.transparent,
                   child: Container(
@@ -39,7 +48,8 @@ class PlayerHandWidget extends StatelessWidget {
                       maxHeight: 180, // Define max height for feedback
                     ),
                     child: Transform.translate(
-                      offset: Offset(offset, 0), // Apply the offset to the feedback
+                      offset:
+                          Offset(offset, 0), // Apply the offset to the feedback
                       child: CardWidget(card: card),
                     ),
                   ),

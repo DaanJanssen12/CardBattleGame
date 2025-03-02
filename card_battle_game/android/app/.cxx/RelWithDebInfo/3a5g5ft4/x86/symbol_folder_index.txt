@@ -1,0 +1,1 @@
+C:\Git\CardBattleGame\card_battle_game\build\app\intermediates\cxx\RelWithDebInfo\3a5g5ft4\obj\x86

@@ -86,7 +86,8 @@ class MascotAdditionalEffect {
       UpgradeCard? upgrade,
       Player opponent,
       List<String> battleLog,
-      MonsterCard? attackingMonster) async {
+      MonsterCard? attackingMonster,
+      bool isGameInOvertime) async {
     bool doTrigger = false;
     switch (trigger) {
       case MascotEffectTriggers.upgradeApplied:
@@ -98,8 +99,9 @@ class MascotAdditionalEffect {
         break;
       case MascotEffectTriggers.startOfTurn:
         doTrigger = type == MascotAdditionalEffectType.summonAtStartOfTurn ||
+        type == MascotAdditionalEffectType.addCardStartOfTurn ||
             (type == MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked &&
-                mascotMonster.hasAttacked);
+                mascotMonster.hasAttackedCounter > 0);
         break;
       case MascotEffectTriggers.faintOpponentMonster:
         doTrigger =
@@ -120,8 +122,8 @@ class MascotAdditionalEffect {
 
     if (doTrigger) {
       return await apply(mascotMonster, player, upgrade, opponent, battleLog,
-          attackingMonster);
-    }else{
+          attackingMonster, isGameInOvertime);
+    } else {
       return TriggerEffectResult();
     }
   }
@@ -132,8 +134,9 @@ class MascotAdditionalEffect {
       UpgradeCard? upgrade,
       Player opponent,
       List<String> battleLog,
-      MonsterCard? attackingMonster) async {
-        var result = TriggerEffectResult();
+      MonsterCard? attackingMonster,
+      bool isGameInOvertime) async {
+    var result = TriggerEffectResult();
     switch (type) {
       case MascotAdditionalEffectType.gainManaWhenUpgradeAppliedToSelf:
         var intVal = int.parse(value);
@@ -157,7 +160,7 @@ class MascotAdditionalEffect {
             var monsterZoneIndex = player.monsters.indexOf(null);
             monsterToSummon.oneTimeUse = true;
             await player.summonMonster(monsterToSummon.toMonster(),
-                monsterZoneIndex, battleLog, opponent, false);
+                monsterZoneIndex, battleLog, opponent, false, isGameInOvertime);
           }
         }
         break;
@@ -195,12 +198,8 @@ class MascotAdditionalEffect {
             }
             var monsterZoneIndex = player.monsters.indexOf(null);
             monsterToSummon.oneTimeUse = true;
-            await player.summonMonster(
-                monsterToSummon.toMonster().clone().toMonster(),
-                monsterZoneIndex,
-                battleLog,
-                opponent,
-                false);
+            await player.summonMonster(monsterToSummon.cloneMonster(),
+                monsterZoneIndex, battleLog, opponent, false, isGameInOvertime);
           }
         }
         break;
@@ -226,14 +225,16 @@ class MascotAdditionalEffect {
             var monsterZoneIndex = player.monsters.indexOf(null);
             monsterToSummon.oneTimeUse = true;
             await player.summonMonster(monsterToSummon.cloneMonster(),
-                monsterZoneIndex, battleLog, opponent, false);
+                monsterZoneIndex, battleLog, opponent, false, isGameInOvertime);
           }
         }
         break;
       case MascotAdditionalEffectType.negateDamage:
+        print(mascotMonster.isAttackedCounter);
         if (mascotMonster.isAttackedCounter == 0) {
           result.isTriggered = true;
           result.effect = "negateDamage";
+          print(result.effect);
         }
         break;
       case MascotAdditionalEffectType.addCardStartOfTurn:
@@ -243,14 +244,15 @@ class MascotAdditionalEffect {
         var card = (await CardDatabase.getCards([cardId]))[0];
         for (var i = 0; i < howManyTimes; i++) {
           if (player.canDraw()) {
-            card.oneTimeUse = true;
-            player.hand.add(card.clone());
+            var cardToAdd = card.clone();
+            cardToAdd.oneTimeUse = true;
+            player.hand.add(cardToAdd);
           }
         }
         break;
       case MascotAdditionalEffectType.canNotBeAttacked:
         var monsterId = value;
-        if(opponent.monsters.any((a) => a != null && a.id == monsterId)){
+        if (opponent.monsters.any((a) => a != null && a.id == monsterId)) {
           result.isTriggered = true;
           result.effect = "canNotBeTargeted";
         }

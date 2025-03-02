@@ -36,7 +36,7 @@ class ActionCard extends GameCard {
     return card;
   }
 
-  Future<PlayCardResult?> doAction(Player player, Player opponent) async {
+  Future<PlayCardResult?> doAction(Player player, Player opponent, bool isGameInOvertime) async {
     PlayCardResult? result;
     switch (actionCardType) {
       case ActionCardType.draw:
@@ -70,11 +70,14 @@ class ActionCard extends GameCard {
         var opponentCard =
             opponent.hand[Random().nextInt(opponent.hand.length)];
         opponent.hand.remove(opponentCard);
-        opponentCard.isOpponentCard;
+        opponentCard.isOpponentCard = true;
         player.hand.add(opponentCard);
         break;
       case ActionCardType.gainMana:
         player.mana += value;
+        break;
+      case ActionCardType.gainManaNextTurn:
+        player.manabank += value;
         break;
       case ActionCardType.showOpponentHand:
         result = PlayCardResult();
@@ -96,7 +99,7 @@ class ActionCard extends GameCard {
             var monsterZone = player.monsters[x];
             if (monsterZone == null) {
               await player.summonMonster(
-                  cardToAdd.toMonster(), x, [], opponent, false);
+                  cardToAdd.toMonster(), x, [], opponent, false, isGameInOvertime);
               break;
             }
           }

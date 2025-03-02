@@ -1,0 +1,2 @@
+C:/Git/CardBattleGame/card_battle_game/android/app/.cxx/RelWithDebInfo/3a5g5ft4/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Git/CardBattleGame/card_battle_game/android/app/.cxx/RelWithDebInfo/3a5g5ft4/arm64-v8a/CMakeFiles/rebuild_cache.dir
