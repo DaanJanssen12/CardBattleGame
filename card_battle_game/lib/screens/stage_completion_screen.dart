@@ -452,19 +452,26 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
             ] else if (gameOver) ...[
               Center(
                 child: Padding(
-                    padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
+                    padding: EdgeInsets.fromLTRB(20, 150, 20, 200),
                     child: widget.userData.activeGame!.rewards.length > 0
-                        ? ListView.builder(
-                            itemCount:
-                                widget.userData.activeGame!.rewards.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(
-                                    widget.userData.activeGame!.rewards[index]),
-                              );
-                            },
-                          )
-                        : Text('No rewards accumulated :(')),
+                        ? ListView.separated(
+                separatorBuilder: (context, index) =>
+                    SizedBox(height: 10), // Space between items
+                padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                itemCount: widget.userData.activeGame!.rewards.length,
+                itemBuilder: (context, index) {
+                  var reward = widget.userData.activeGame!.rewards[index];
+                  return Container(
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: ListTile(
+                      title: Text(reward, style: TextStyle(color: Colors.white)),
+                    ),
+                  );
+                },
+              )
+                        : Text('No rewards accumulated :(', style: TextStyle(color: Colors.white))),
               ),
             ],
           ],

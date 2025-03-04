@@ -23,6 +23,7 @@ class Player {
   late String mascot;
   late MonsterCard mascotCard;
   bool gameIsInOvertime = false;
+  bool isBeingAttacked = false;
 
   Player({required this.name})
       : health = 3,
@@ -272,6 +273,7 @@ class Player {
       opponent.discardPile.add(card);
     }
 
+    print('Is one time use: ${card.oneTimeUse}');
     if (!card.oneTimeUse && !card.isOpponentCard && !card.isMonster()) {
       discardPile.add(card);
     }
@@ -328,6 +330,10 @@ class Player {
       List<String> battleLog,
       Function updateScreen,
       bool gameIsInOvertime) async {
+    
+    opponentMonster.isBeingAttacked = true;
+    updateScreen();
+
     var monsterHealthBeforeAttack = opponentMonster.currentHealth;
     bool negateDamage = false;
     bool targetCanNotBeAttacked = false;
@@ -354,6 +360,8 @@ class Player {
       }
     }
     if (targetCanNotBeAttacked) {
+    opponentMonster.isBeingAttacked = false;
+    updateScreen();
       return;
     }
 
@@ -402,6 +410,10 @@ class Player {
       await Future.delayed(Duration(milliseconds: 500));
       updateScreen();
     }
+    
+      await Future.delayed(Duration(milliseconds: 500));
+    opponentMonster.isBeingAttacked = false;
+    updateScreen();
   }
 
   int getGoldReward() {

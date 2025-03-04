@@ -151,11 +151,6 @@ class UserData {
 
   Future<List<GameCard>> availableCards() async {
     var availableCards = await CardDatabase.getCards(cards);
-    if (Constants.testMode) {
-      var allCards = await CardDatabase.getAllCards();
-      availableCards.addAll(
-          allCards.where((w) => !availableCards.any((a) => a.id == w.id)));
-    }
     return availableCards;
   }
 

@@ -33,6 +33,7 @@ class StageMatch {
     battleLog.add('Game Started');
     await player.startGame(battleLog, opponent);
     await opponent.startGame(battleLog, player);
+    opponent.setGameBuildContext(context);
     updateGameState();
 
     for (int i = 0; i < Constants.startWithCardsInHand; i++) {
@@ -73,12 +74,11 @@ class StageMatch {
   Future<void> startPlayerTurn({bool isFirstTurn = false}) async {
     await player.startTurn(currentTurn, opponent, battleLog);
     updateGameState();
-    if(isFirstTurn){
+    if (isFirstTurn) {
       await NotificationService.showDialogMessage(
           context, "You're up first, good luck!",
           title: "Game started!");
-    }
-    else if (player.canDraw()) {
+    } else if (player.canDraw()) {
       playerDrawFunction();
       updateGameState();
     } else {
@@ -102,9 +102,11 @@ class StageMatch {
       opponent.drawCards(Constants.drawCardsPerTurn, battleLog);
       await Future.delayed(Duration(seconds: 1));
     }
+    opponent.isMyTurn = true;
     await CPU.executeTurn(opponent, player, updateGameState, battleLog, () {
       return !gameIsActive;
     }, gameIsInOvertime);
+    opponent.isMyTurn = false;
     updateGameState();
     checkGameEnd();
     await Future.delayed(Duration(seconds: 1));
@@ -158,7 +160,7 @@ class StageMatch {
       result = await player.playCard(
           card, monsterZoneIndex, battleLog, opponent, gameIsInOvertime);
       updateGameState();
-      soundPlayerService.playDropSound();
+      soundPlayerService.playSound(context, Sounds.dropCard);
     } else {
       NotificationService.showDialogMessage(context, canPlayCard.$2,
           title: "Can't play card!");
@@ -169,13 +171,9 @@ class StageMatch {
   Future<void> attackMonster(
       MonsterCard attackingMonster, int targetIndex) async {
     //soundPlayerService.playAttackSound();
-    await player.attackOpponentMonster(
-        attackingMonster,
-        opponent,
-        opponent.monsters[targetIndex]!,
-        battleLog,
-        updateGameState,
-        gameIsInOvertime);
+    var targetMonster = opponent.monsters[targetIndex]!;
+    await player.attackOpponentMonster(attackingMonster, opponent,
+        targetMonster, battleLog, updateGameState, gameIsInOvertime);
   }
 
   void handleAttackPlayerDirectly(MonsterCard attackingMonster) {
@@ -183,6 +181,7 @@ class StageMatch {
       return;
     }
 
+    opponent.isBeingAttacked = true;
     attackingMonster.attackPlayer(opponent, battleLog, gameIsInOvertime);
     updateGameState();
 
@@ -190,6 +189,8 @@ class StageMatch {
       await Future.delayed(Duration(milliseconds: 500));
     }).then((_) {
       checkGameEnd();
+      opponent.isBeingAttacked = false;
+      updateGameState();
     });
   }
 

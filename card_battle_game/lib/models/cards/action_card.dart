@@ -13,30 +13,26 @@ class ActionCard extends GameCard {
 
   ActionCard(super.name, super.imagePath, super.cost, super.shortDescription,
       super.fullDescription,
-      {this.actionCardType = ActionCardType.draw, 
+      {this.actionCardType = ActionCardType.draw,
       this.value = 1,
       this.extraData}) {
     type = 'Action';
   }
 
   factory ActionCard.fromJson(Map<String, dynamic> json) {
-    var card = ActionCard(
-      json['name'],
-      json['imagePath'],
-      json['cost'],
-      json['shortDescription'],
-      json['fullDescription'],
-      actionCardType:
-          ActionCardTypeExtension.fromString(json['actionCardType']),
-      value: json['value'],
-      extraData: json['extraData']
-    );
+    var card = ActionCard(json['name'], json['imagePath'], json['cost'],
+        json['shortDescription'], json['fullDescription'],
+        actionCardType:
+            ActionCardTypeExtension.fromString(json['actionCardType']),
+        value: json['value'],
+        extraData: json['extraData']);
     card.id = json['id'];
     card.rarity = CardRarityExtension.fromString(json['rarity']);
     return card;
   }
 
-  Future<PlayCardResult?> doAction(Player player, Player opponent, bool isGameInOvertime) async {
+  Future<PlayCardResult?> doAction(
+      Player player, Player opponent, bool isGameInOvertime) async {
     PlayCardResult? result;
     switch (actionCardType) {
       case ActionCardType.draw:
@@ -79,6 +75,9 @@ class ActionCard extends GameCard {
       case ActionCardType.gainManaNextTurn:
         player.manabank += value;
         break;
+      case ActionCardType.damageOpponent:
+        opponent.health -= value;
+        break;
       case ActionCardType.showOpponentHand:
         result = PlayCardResult();
         result.type = PlayCardResultType.showOpponentHand;
@@ -98,8 +97,8 @@ class ActionCard extends GameCard {
           for (int x = 0; x < 3; x++) {
             var monsterZone = player.monsters[x];
             if (monsterZone == null) {
-              await player.summonMonster(
-                  cardToAdd.toMonster(), x, [], opponent, false, isGameInOvertime);
+              await player.summonMonster(cardToAdd.toMonster(), x, [], opponent,
+                  false, isGameInOvertime);
               break;
             }
           }
@@ -109,12 +108,18 @@ class ActionCard extends GameCard {
         for (var effect in extraData!.split(";")) {
           if (effect.contains(":")) {
             var effectValues = effect.split(":");
+            var actionCardClone = (clone() as ActionCard);
             switch (effectValues[0]) {
               case 'draw':
-                player.drawCards(int.parse(effectValues[1]), []);
+                actionCardClone.actionCardType = ActionCardType.draw;
+                actionCardClone.value = int.parse(effectValues[1]);
+                await actionCardClone.doAction(
+                    player, opponent, isGameInOvertime);
                 break;
-              case 'gainMana':
-                player.mana += int.parse(effectValues[1]);
+              case 'gainManaNextTurn':
+                actionCardClone.actionCardType =
+                    ActionCardType.gainManaNextTurn;
+                actionCardClone.value = int.parse(effectValues[1]);
                 break;
             }
           } else {

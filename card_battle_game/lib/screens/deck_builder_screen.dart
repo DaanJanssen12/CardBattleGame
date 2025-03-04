@@ -1,22 +1,26 @@
 import 'dart:math';
-
 import 'package:card_battle_game/animations/booster_pack_animation.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
-import 'package:card_battle_game/models/game/game.dart';
+import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:card_battle_game/services/helper_functions.dart';
 import 'package:card_battle_game/services/notification_service.dart';
 import 'package:card_battle_game/widgets/card_details_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:card_battle_game/widgets/card_widget.dart'; // Your existing card widget
+import 'package:card_battle_game/widgets/card_widget.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Your existing card widget
 
 class DeckBuilderScreen extends StatefulWidget {
   const DeckBuilderScreen(
-      {super.key, required this.userData, this.playerHasNoCardsYet = false});
+      {super.key,
+      required this.userData,
+      this.playerHasNoCardsYet = false,
+      this.openPage = 0});
   final UserData userData;
   final bool playerHasNoCardsYet;
+  final int openPage;
 
   @override
   _DeckBuilderScreenState createState() => _DeckBuilderScreenState();
@@ -28,12 +32,15 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
   List<GameCard> availableCards = [];
   Map<BoosterPackType, int> boosterPacks = {};
   late TabController _tabController;
+  bool _hasNoCardsYet = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadData();
+    _hasNoCardsYet = widget.playerHasNoCardsYet;
+    _tabController.index = widget.openPage;
   }
 
   Future<void> _loadData() async {
@@ -79,7 +86,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.playerHasNoCardsYet) {
+    if (_hasNoCardsYet) {
       return Scaffold(
           appBar: AppBar(
             title: Text("Choose your deck"),
@@ -95,11 +102,11 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
               Column(
                 children: [
                   Text(
-                    "Our best players have compiled a couple of starter decks. You can pick one.", 
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
+                      "Our best players have compiled a couple of starter decks. You can pick one.",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                   Expanded(
                     child: ListView.separated(
                       separatorBuilder: (context, index) =>
@@ -130,27 +137,39 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
               )
             ],
           ));
+    } else {
+      return PopScope(
+          canPop: false,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text("Deck Builder"),
+              backgroundColor: Colors.white,
+              leading: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MainMenu(userData: widget.userData)));
+                  },
+                  icon: Icon(Icons.arrow_back)),
+              bottom: TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: "Deck Builder"),
+                  Tab(text: "Booster Packs"),
+                ],
+              ),
+            ),
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildDeckBuilderTab(),
+                _buildBoosterPacksTab(),
+              ],
+            ),
+          ));
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Deck Builder"),
-        backgroundColor: Colors.white,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: "Deck Builder"),
-            Tab(text: "Booster Packs"),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildDeckBuilderTab(),
-          _buildBoosterPacksTab(),
-        ],
-      ),
-    );
   }
 
   Widget _buildDeckBuilderTab() {
@@ -172,7 +191,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
                   addCardToDeck(card.data);
                 },
                 builder: (context, candidateData, rejectedData) {
-                  return _buildCardList(deck, "Your Deck", true);
+                  return _buildCardList(deck, "Your Deck", true, 300, null);
                 },
               ),
             ),
@@ -186,7 +205,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
                 },
                 builder: (context, candidateData, rejectedData) {
                   return _buildCardList(
-                      availableCards, "Available Cards", false);
+                      availableCards, "Available Cards", false, 300, null);
                 },
               ),
             ),
@@ -197,47 +216,94 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
   }
 
   Widget _buildBoosterPacksTab() {
-    return Column(
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            "Open packs to gain new cards. You get cards by winning boss battles.",
-            style: TextStyle(fontSize: 16),
-          ),
+        Image.asset(
+          'assets/images/${widget.userData.background}',
+          fit: BoxFit.cover,
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: BoosterPackType.values.length,
-            itemBuilder: (context, index) {
-              var amount = boosterPacks[BoosterPackType.values[index]] ?? 0;
-              return ListTile(
-                title: Text(
-                    "${Functions.getBoosterPackName(BoosterPackType.values[index])} (${amount})"),
-                trailing: ElevatedButton(
-                  onPressed: () => amount > 0
-                      ? _openBoosterPack(BoosterPackType.values[index])
-                      : null,
-                  child: Text("Open"),
-                ),
-              );
-            },
-          ),
+        Column(
+          children: [
+            Text(
+                "Open packs to gain new cards. You get cards by winning boss battles.",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold)),
+            Expanded(
+              child: ListView.separated(
+                separatorBuilder: (context, index) =>
+                    SizedBox(height: 10), // Space between items
+                padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                itemCount: BoosterPackType.values.length - 1,
+                itemBuilder: (context, index) {
+                  var amount =
+                      boosterPacks[BoosterPackType.values[index + 1]] ?? 0;
+                  return Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: ListTile(
+                      title: Text(Functions.getBoosterPackName(
+                          BoosterPackType.values[index + 1])),
+                      //subtitle: Text(Functions.getBoosterPackDescription(BoosterPackType.values[index + 1])),
+                      leading: Text('($amount)'),
+                      trailing: ElevatedButton(
+                        onPressed: () => amount > 0
+                            ? _openBoosterPack(
+                                BoosterPackType.values[index + 1])
+                            : null,
+                        child: Text("Open"),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                    child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return StatefulBuilder(
+                                        builder: (context, setState) {
+                                      return _buildCardExchangeDialog(setState);
+                                    });
+                                  });
+                            },
+                            child: Text('Exchange cards'))))
+              ],
+            ),
+            if (Constants.testMode) ...[
+              Row(
+                children: [
+                  Expanded(
+                      child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                var type = BoosterPackType.values[Random()
+                                    .nextInt(BoosterPackType.values.length)];
+                                setState(() {
+                                  boosterPacks[type] == null
+                                      ? boosterPacks[type] = 1
+                                      : boosterPacks[type] =
+                                          boosterPacks[type]! + 1;
+                                });
+                              },
+                              child: Text('Add pack'))))
+                ],
+              )
+            ]
+          ],
         ),
-        if (Constants.testMode) ...[
-          ElevatedButton(
-              onPressed: () {
-                var type = BoosterPackType
-                    .values[Random().nextInt(BoosterPackType.values.length)];
-                setState(() {
-                  boosterPacks[type] == null
-                      ? boosterPacks[type] = 1
-                      : boosterPacks[type] = boosterPacks[type]! + 1;
-                });
-              },
-              child: Text('Add pack'))
-        ]
-        //BoosterPackOpenAnimation(key: _animationKey)
       ],
     );
   }
@@ -276,6 +342,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
     }
     return "";
   }
+
   String getPackDescription(int i) {
     if (i == 0) {
       return "This deck is all about mana usage";
@@ -290,38 +357,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
   }
 
   Future<List<GameCard>> getStarterDeckCards(int i) async {
-    List<String> cardIds = [];
-    // Magician's pack
-    if (i == 0) {
-      cardIds = [
-        'monster_penguin_mage',
-        'monster_water_droplet',
-        'upgrade_heal',
-        'upgrade_heal',
-        'upgrade_strengthen'
-      ];
-    }
-    // Farmer's pack
-    if (i == 1) {
-      cardIds = [
-        'monster_worker_bee',
-        'monster_mushroom_boy',
-        'upgrade_honey',
-        'upgrade_honey',
-        'action_harvest'
-      ];
-    }
-    // Demon's pack
-    if (i == 2) {
-      cardIds = [
-        'monster_fire_dog',
-        'monster_bat',
-        'upgrade_heal',
-        'upgrade_strengthen',
-        'upgrade_strengthen'
-      ];
-    }
-    var cards = await CardDatabase.getCards(cardIds);
+    var cards = await CardDatabase.getCards(Functions.getStarterDeck(i));
     return cards;
   }
 
@@ -333,7 +369,8 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
       TextButton(
           onPressed: () async {
             Navigator.of(context).pop();
-            widget.userData.deck.cards.addAll(deckCards.map((m) => m.id).toList());
+            widget.userData.deck.cards
+                .addAll(deckCards.map((m) => m.id).toList());
             await UserStorage.saveUserData(widget.userData);
             await showDialog(
               context: context,
@@ -348,6 +385,10 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
                 );
               },
             );
+            _loadData();
+            setState(() {
+              _hasNoCardsYet = false;
+            });
           },
           child: Text('Yes!')),
       TextButton(
@@ -359,7 +400,8 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
     ]);
   }
 
-  Widget _buildCardList(List<GameCard> cards, String title, bool isDeck) {
+  Widget _buildCardList(List<GameCard> cards, String title, bool isDeck,
+      double height, int? maxCards) {
     Map<GameCard, int> grouped = {};
     for (var card in cards) {
       var key = card;
@@ -398,7 +440,9 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
                     color: Colors.white),
               ),
               Text(
-                '${cards.length} Cards',
+                maxCards != null
+                    ? '${cards.length} / $maxCards Cards'
+                    : '${cards.length} Cards',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ],
@@ -410,7 +454,7 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
         ),
         // Set a fixed height for each section (deck or available cards)
         SizedBox(
-          height: 300,
+          height: height,
           child: SingleChildScrollView(
             child: Wrap(
               spacing: 10, // Horizontal space between cards
@@ -457,5 +501,164 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
         ),
       ],
     );
+  }
+
+  List<GameCard> cardsToExchange = [];
+  List<GameCard> allCards = [];
+  int maxExchangeCards = 5;
+  void addCardToExchange(GameCard card) {
+    if (cardsToExchange.length == maxExchangeCards) {
+      return;
+    }
+    setState(() {
+      card.isSetForExchange = true;
+      cardsToExchange.add(card);
+    });
+  }
+
+  void removeCardFromExchange(GameCard card) {
+    setState(() {
+      card.isSetForExchange = false;
+      cardsToExchange.remove(card);
+    });
+  }
+
+  void exchangeCards() {
+    if (cardsToExchange.length < maxExchangeCards) {
+      NotificationService.showSnackbar(context,
+          "To exchange your cards for a booster pack you need to add a total of $maxExchangeCards cards to exchange.");
+      return;
+    }
+    if (allCards.length - maxExchangeCards < Constants.playerMinDeckSize) {
+      NotificationService.showSnackbar(context,
+          "You can't exchange, you need to have at least ${Constants.playerMinDeckSize} cards left after exchanging.");
+      return;
+    }
+    CardRarity minRarity = cardsToExchange.first.rarity;
+    CardRarity maxRarity = cardsToExchange.first.rarity;
+    BoosterPackType boosterPackType = BoosterPackType.common;
+    for (var card in cardsToExchange) {
+      if (card.rarity.index < minRarity.index) {
+        minRarity = card.rarity;
+      }
+      if (card.rarity.index > maxRarity.index) {
+        maxRarity = card.rarity;
+      }
+    }
+    switch (minRarity) {
+      case CardRarity.Common:
+        boosterPackType = BoosterPackType.common;
+        break;
+      case CardRarity.Uncommon:
+        boosterPackType = BoosterPackType.uncommon;
+        break;
+      case CardRarity.Rare:
+        boosterPackType = BoosterPackType.rare;
+        break;
+      case CardRarity.UltraRare:
+        boosterPackType = BoosterPackType.best;
+        break;
+      case CardRarity.Legendary:
+        boosterPackType = BoosterPackType.best;
+        break;
+    }
+
+    bool addedTooHighValueCards = maxRarity.index > minRarity.index;
+    var text =
+        'You are going to exchange 5 cards for 1 ${Functions.getBoosterPackName(boosterPackType)}.\n\n';
+    if (addedTooHighValueCards) {
+      text +=
+          'Warning: for this pack you only need to exchange ${minRarity.name} cards.\nYou have included a ${maxRarity.name} card.\n\n';
+    }
+    text += 'Are you sure?';
+    NotificationService.showDialogMessageWithActions(
+        context,
+        text,
+        [
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                return;
+              },
+              child: Text('No, take me back')),
+          TextButton(
+              onPressed: () async {
+                var userData = await UserStorage.getUserData();
+                for (var card in cardsToExchange) {
+                  if (card.isInDeck) {
+                    userData.deck.cards.remove(card.id);
+                  } else {
+                    userData.cards.remove(card.id);
+                  }
+                }
+                userData.addBoosterPack(boosterPackType);
+                await UserStorage.saveUserData(userData);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DeckBuilderScreen(
+                          userData: userData,
+                          playerHasNoCardsYet: false,
+                          openPage: 1)),
+                );
+                return;
+              },
+              child: Text('Yes!'))
+        ],
+        title: "Exchange");
+  }
+
+  Widget _buildCardExchangeDialog(StateSetter setState) {
+    return Scaffold(
+        floatingActionButton:
+            ElevatedButton(onPressed: exchangeCards, child: Text("Exchange")),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/images/${widget.userData.background}',
+              fit: BoxFit.cover,
+            ),
+            Column(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: DragTarget<GameCard>(
+                    onWillAcceptWithDetails: (card) {
+                      return card.data.isSetForExchange;
+                    },
+                    onAcceptWithDetails: (card) {
+                      setState(() => removeCardFromExchange(card.data));
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      allCards = [];
+                      allCards.addAll(deck.where((w) => !w.isSetForExchange));
+                      allCards.addAll(
+                          availableCards.where((w) => !w.isSetForExchange));
+                      return _buildCardList(
+                          allCards, "Your Cards", true, 450, null);
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: DragTarget<GameCard>(
+                    onWillAcceptWithDetails: (card) {
+                      return !card.data.isSetForExchange;
+                    },
+                    onAcceptWithDetails: (card) {
+                      setState(() => addCardToExchange(card.data));
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      return _buildCardList(cardsToExchange,
+                          "Cards to Exchange", false, 200, maxExchangeCards);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }

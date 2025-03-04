@@ -181,6 +181,7 @@ class StageMatchService {
           break;
       }
     }
+    match.checkGameEnd();
   }
 
   void toStageCompletionScreen(Player beatenPlayer) {

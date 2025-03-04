@@ -7,7 +7,8 @@ enum ActionCardType {
   showOpponentHand,
   freezeOpponent,
   combined,
-  summon
+  summon,
+  damageOpponent
 }
 
 extension ActionCardTypeExtension on ActionCardType {

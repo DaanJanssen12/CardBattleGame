@@ -73,7 +73,7 @@ class MonsterCard extends GameCard {
     isAttackedCounter++;
     if (effects.isNotEmpty &&
         effects.any((a) => a.type == GameEffectType.shield)) {
-      damage = (damage / 2).ceil();
+      damage = damage - 1;
     }
     currentHealth -= damage;
     if (currentHealth <= 0) {

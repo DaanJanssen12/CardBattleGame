@@ -2,6 +2,7 @@ class Constants {
   //Player
   static int playerMaxMana = 7;
   static int playerMaxHandSize = 6;
+  static int playerMinDeckSize = 5;
   static int playerMaxDeckSize = 20;
 
   //Match

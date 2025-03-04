@@ -40,9 +40,9 @@
           "startingGold": 100,
           "additionalEffect": {
             "name": "Blazing Spirit",
-            "description": "Gains +1 attack at the start of each turn if it attacked last turn",
+            "description": "Gains +1 attack (to a maximum of 5) at the start of each turn if it attacked last turn",
             "type": "gainAtkStartOfTurnIfAttacked",
-            "value": "1"
+            "value": "1;max5"
           }
         }
       },
@@ -80,7 +80,7 @@
         "imagePath": "assets/images/monsters/MushroomBoy.png",
         "type": "monster",
         "health": 1,
-        "attack": 2,
+        "attack": 1,
         "cost": 2,
         "shortDescription": null,
         "fullDescription": "a Fun Guy",
@@ -102,7 +102,7 @@
         "name": "Bat",
         "imagePath": "assets/images/monsters/Bat.png",
         "type": "monster",
-        "health": 2,
+        "health": 1,
         "attack": 2,
         "cost": 3,
         "shortDescription": null,
@@ -413,7 +413,7 @@
         "upgradeCardType": "effectShield",
         "value": 3,
         "shortDescription": "Reduces incoming damage for 3 turns.",
-        "fullDescription": "Grants the user a shield that reduces all incoming damage by 50% for the next 3 turns."
+        "fullDescription": "Grants the user a shield that reduces all incoming damage by 1 for the next 3 turns."
       }
       
     ],
@@ -429,6 +429,18 @@
         "value": 1,
         "shortDescription": "Draw 1 card from your deck.",
         "fullDescription": "Draw 1 card from your deck."
+      },
+      {
+        "id": "action_energy_blast",
+        "rarity": "Common",
+        "name": "Energy Blast",
+        "imagePath": "assets/images/actions/EnergyBlast.png",
+        "type": "action",
+        "cost": 1,
+        "actionCardType": "damageOpponent",
+        "value": 1,
+        "shortDescription": "Do 1 damage to your opponent.",
+        "fullDescription": "You attack with a blast of energy doing 1 damage to your opponent."
       },
       {
         "id": "action_draw_twice",

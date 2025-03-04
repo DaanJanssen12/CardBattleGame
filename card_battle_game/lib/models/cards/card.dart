@@ -12,16 +12,19 @@ class GameCard {
   String? shortDescription;
   String? fullDescription;
   late bool isInDeck;
+  late bool isSetForExchange;
   late String cloneId;
   late bool oneTimeUse = false;
   late CardRarity rarity;
   late bool isOpponentCard = false;
+  bool isBeingAttacked = false;
 
   GameCard(this.name, this.imagePath, this.cost, this.shortDescription,
       this.fullDescription) {
     //id = Uuid().v4();
     id = "";
     isInDeck = false;
+    isSetForExchange = false;
     rarity = CardRarity.Common;
     type = "";
   }

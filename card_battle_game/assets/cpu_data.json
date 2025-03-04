@@ -5,17 +5,18 @@
         "possibleFromStage": 10,
         "possibleUntillStage": 10,
         "cpuLevel": "medium",
-        "cpuStrategy": "defensive",
+        "cpuStrategy": "balanced",
         "tags": "boss",
         "deck": [
             "monster_penguin_mage",
+            "monster_water_droplet",
             "monster_water_droplet",
             "monster_water_droplet",
             "monster_sheep",
             "upgrade_heal",
             "upgrade_heal",
             "upgrade_strengthen",
-            "upgrade_shield",
+            "action_energy_blast",
             "action_blizzard",
             "action_draw_twice",
             "action_mana_surge"
@@ -27,7 +28,7 @@
         "name": "The Behemoth",
         "possibleFromStage": 20,
         "possibleUntillStage": 20,
-        "cpuLevel": "medium",
+        "cpuLevel": "hard",
         "cpuStrategy": "defensive",
         "tags": "boss",
         "deck": [
@@ -99,16 +100,33 @@
     {
         "id": "cpu_shaun",
         "name": "Shaun",
-        "possibleFromStage": 1,
-        "possibleUntillStage": 2,
-        "cpuLevel": "easy",
+        "possibleFromStage": 5,
+        "possibleUntillStage": 9,
+        "cpuLevel": "medium",
         "cpuStrategy": "defensive",
         "deck": [
             "monster_sheep",
-            "upgrade_heal",
+            "monster_sheep",
+            "monster_sheep",
             "upgrade_heal",
             "upgrade_strengthen",
             "upgrade_strengthen"
+        ],
+        "mascot": "monster_sheep"
+    },
+    {
+        "id": "cpu_shelly",
+        "name": "Shelly",
+        "possibleFromStage": 1,
+        "possibleUntillStage": 2,
+        "cpuLevel": "easy",
+        "cpuStrategy": "random",
+        "deck": [
+            "monster_mushroom_boy",
+            "monster_sheep",
+            "upgrade_heal",
+            "upgrade_heal",
+            "upgrade_heal"
         ],
         "mascot": "monster_sheep"
     },

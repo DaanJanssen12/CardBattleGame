@@ -1,6 +1,7 @@
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/models/game/game.dart';
 import 'package:card_battle_game/screens/game_screen.dart';
+import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:card_battle_game/screens/mystery_event_screen.dart';
 import 'package:card_battle_game/screens/shop_screen.dart';
 import 'package:card_battle_game/screens/stage_completion_screen.dart';
@@ -157,20 +158,39 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
               // Fixed Bar at the Top
               Container(
                 height: 80, // Adjust height as needed
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                 color: Colors.black
                     .withOpacity(0.8), // Semi-transparent background
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Stage: ${widget.userData.activeGame!.stage}",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                    Text(
-                      "Gold: ${widget.userData.activeGame!.gold}", // Replace with actual value
-                      style: TextStyle(color: Colors.yellow, fontSize: 18),
-                    ),
+                    // Go to Main Menu button
+                    ElevatedButton(
+                        onPressed: () => {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        MainMenu(userData: widget.userData)),
+                              )
+                            },
+                        child: Text('Back To Main Menu',
+                            style: TextStyle(fontSize: 12))),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "Stage: ${widget.userData.activeGame!.stage}",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        Text(
+                          "Gold: ${widget.userData.activeGame!.gold}", // Replace with actual value
+                          textAlign: TextAlign.right,
+                          style: TextStyle(color: Colors.yellow, fontSize: 18),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -237,7 +257,8 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
                             children: [
                               ElevatedButton(
                                 onPressed: newMap,
-                                child: Text("Advance to stage ${widget.userData.activeGame!.stage}"),
+                                child: Text(
+                                    "Advance to stage ${widget.userData.activeGame!.stage}"),
                               ),
                               ElevatedButton(
                                 onPressed: endGame,

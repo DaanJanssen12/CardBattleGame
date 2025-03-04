@@ -1,6 +1,7 @@
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/database/card_database.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
+import 'package:card_battle_game/services/helper_functions.dart';
 import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
@@ -12,7 +13,10 @@ class BoosterPackOpenAnimation extends StatefulWidget {
   final UserData userData;
   final List<GameCard> rewardsCards;
   const BoosterPackOpenAnimation(
-      {super.key, required this.type, required this.userData, required this.rewardsCards});
+      {super.key,
+      required this.type,
+      required this.userData,
+      required this.rewardsCards});
 
   @override
   _BoosterPackOpenAnimationState createState() =>
@@ -28,40 +32,23 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
   late Animation<double> _fogAnimation;
   late Animation<double> _cardFadeAnimation;
   bool _showCard = false;
-  late List<GameCard> rewardCards;
+  late List<GameCard> rewardCards = [];
   int i = 0;
 
   void _loadRewardCards() async {
-
-    if(widget.type == BoosterPackType.starterDeck){
+    if (widget.type == BoosterPackType.starterDeck) {
       rewardCards = widget.rewardsCards;
       return;
     }
 
-    var cardRarity = CardRarity.Common;
-    switch (widget.type) {
-      case BoosterPackType.common:
-      cardRarity = CardRarity.Common;
-        break;
-      case BoosterPackType.uncommon:
-      cardRarity = CardRarity.Uncommon;
-        break;
-      case BoosterPackType.rare:
-      cardRarity = CardRarity.Rare;
-        break;
-      case BoosterPackType.best:
-      cardRarity = CardRarity.UltraRare;
-        break;
-      default:
-        break;
-    }
+    var cardRarities = Functions.getBoosterPackCardRarities(widget.type);
 
     await CardDatabase.loadCardsFromJson(CardDatabase.filePath);
-    var rewardCard = CardDatabase.getRandomCard(type: '', rarity: cardRarity);
-    widget.userData.cards.add(rewardCard.id);
-    rewardCards = [
-      rewardCard
-    ];
+    for (int i = 0; i < cardRarities.length; i++) {
+      var rewardCard = CardDatabase.getRandomCard(type: null, rarity: cardRarities[i]);
+      widget.userData.cards.add(rewardCard.id);
+      rewardCards.add(rewardCard);
+    }
     await UserStorage.saveUserData(widget.userData);
   }
 
@@ -192,12 +179,13 @@ class _BoosterPackOpenAnimationState extends State<BoosterPackOpenAnimation>
     return GestureDetector(
       onTap: () {
         if (_showCard) {
-          if(i < rewardCards.length - 1){
+          if (i < rewardCards.length - 1) {
             setState(() {
+              _fadeIncontroller.forward(from: 0);
               i++;
             });
-          }else{
-          Navigator.of(context).pop(); // Close animation on tap
+          } else {
+            Navigator.of(context).pop(); // Close animation on tap
           }
         } else {
           startAnimation();

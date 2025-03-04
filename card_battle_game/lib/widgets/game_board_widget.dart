@@ -1,4 +1,7 @@
+import 'package:card_battle_game/animations/play_card_animation.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/services/animation_service.dart';
+import 'package:card_battle_game/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:card_battle_game/widgets/monster_zone_widget.dart';
 import '../models/player/player.dart';
@@ -99,6 +102,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
                             onWillAcceptWithDetails: (details) => widget.isPlayersTurn && details.data
                                 .canBePlayed(), // Accept any draggable card
                             onAcceptWithDetails: (details) {
+                              // AnimationService().triggerCardPlayAnimation(context, details.data);
                               // Place card in player's monster zone if it's a monster card
                               widget.onCardDrop(details.data,
                                   index); // Drop logic remains unchanged

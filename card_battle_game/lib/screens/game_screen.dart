@@ -1,4 +1,7 @@
+import 'package:card_battle_game/animations/attack_animation.dart';
+import 'package:card_battle_game/effects/attack_effect.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
+import 'package:card_battle_game/services/animation_service.dart';
 import 'package:card_battle_game/services/stage_match_service.dart';
 import 'package:card_battle_game/widgets/game_board_widget.dart';
 import 'package:card_battle_game/widgets/player_hand_widget.dart';
@@ -106,14 +109,29 @@ class _GameScreenState extends State<GameScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
-                                    child: PlayerInfoWidget(
+                                    child: _stageMatchService.match.player.isBeingAttacked 
+                                    ? AttackEffect(child: PlayerInfoWidget(
+                                        player: _stageMatchService.match.player,
+                                        isActive: _stageMatchService
+                                            .match.isPlayersTurn,
+                                        handleAttackPlayerDirectly: null))
+                                    : PlayerInfoWidget(
                                         player: _stageMatchService.match.player,
                                         isActive: _stageMatchService
                                             .match.isPlayersTurn,
                                         handleAttackPlayerDirectly: null)),
                                 SizedBox(width: 16),
                                 Expanded(
-                                    child: PlayerInfoWidget(
+                                    child: _stageMatchService.match.opponent.isBeingAttacked
+                                    ? AttackEffect(child: PlayerInfoWidget(
+                                        player:
+                                            _stageMatchService.match.opponent,
+                                        isActive: !_stageMatchService
+                                            .match.isPlayersTurn,
+                                        handleAttackPlayerDirectly:
+                                            _stageMatchService.match
+                                                .handleAttackPlayerDirectly))
+                                    : PlayerInfoWidget(
                                         player:
                                             _stageMatchService.match.opponent,
                                         isActive: !_stageMatchService
@@ -133,8 +151,12 @@ class _GameScreenState extends State<GameScreen> {
                                   _stageMatchService.match.isPlayersTurn,
                               onCardDrop: _stageMatchService.playCard,
                               onCardTap: _stageMatchService.showCardDetails,
-                              onMonsterAttack:
-                                  _stageMatchService.match.attackMonster),
+                              onMonsterAttack: (monster, i){
+                                //PLay animation
+                                //AnimationService().playAnimation(context, AttackAnimation());
+                                //Action Gamelogic
+                                _stageMatchService.match.attackMonster(monster, i);
+                              }),
                         ],
                       ),
                       // Player's Hand at the bottom of the screen

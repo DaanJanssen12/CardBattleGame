@@ -239,6 +239,7 @@ class _MainMenuState extends State<MainMenu> with RouteAware {
                     children: [
                       Text(
                         getTutorialStepText(),
+                        textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white, fontSize: 24),
                       ),
                       SizedBox(height: 20),

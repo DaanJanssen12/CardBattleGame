@@ -1,8 +1,11 @@
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
+import 'package:card_battle_game/providers/sound_settings_provider.dart';
 import 'package:card_battle_game/screens/main_menu.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'package:provider/provider.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final UserData userData;
@@ -50,6 +53,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final soundSettings = Provider.of<SoundSettingsProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("User Profile"),
@@ -180,11 +185,33 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
-
+                Container(
+                  width: 300,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero, // Removes default padding
+                    title: Align(
+                      alignment: Alignment.centerLeft, // Align text to the left
+                      child: Text(
+                        'Mute Sound Effects',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                    value: soundSettings.isMuted,
+                    onChanged: (value) => soundSettings.toggleMute(value),
+                  ),
+                ),
+                SizedBox(height: 20),
                 // Save Button
                 ElevatedButton(
                   onPressed: save,
                   style: ElevatedButton.styleFrom(
+                    fixedSize: Size.fromWidth(300),
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),

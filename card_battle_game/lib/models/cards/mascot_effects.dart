@@ -99,7 +99,7 @@ class MascotAdditionalEffect {
         break;
       case MascotEffectTriggers.startOfTurn:
         doTrigger = type == MascotAdditionalEffectType.summonAtStartOfTurn ||
-        type == MascotAdditionalEffectType.addCardStartOfTurn ||
+            type == MascotAdditionalEffectType.addCardStartOfTurn ||
             (type == MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked &&
                 mascotMonster.hasAttackedCounter > 0);
         break;
@@ -143,8 +143,21 @@ class MascotAdditionalEffect {
         player.mana += intVal;
         break;
       case MascotAdditionalEffectType.gainAtkStartOfTurnIfAttacked:
-        var intVal = int.parse(value);
-        mascotMonster.currentAttack += intVal;
+        int intVal = 0;
+        int? max;
+        if (value.contains(";")) {
+          var parts = value.split(";");
+          intVal = int.parse(parts[0]);
+          max = int.parse(parts[1].replaceAll("max", ""));
+        } else {
+          intVal = int.parse(value);
+        }
+        if (max == null || mascotMonster.currentAttack <= max) {
+          mascotMonster.currentAttack += intVal;
+          if (max != null && mascotMonster.currentAttack > 5) {
+            mascotMonster.currentAttack = max;
+          }
+        }
         break;
       case MascotAdditionalEffectType.summonAtStartOfTurn:
         if (player.monsters.any((a) => a == null)) {
@@ -230,11 +243,9 @@ class MascotAdditionalEffect {
         }
         break;
       case MascotAdditionalEffectType.negateDamage:
-        print(mascotMonster.isAttackedCounter);
         if (mascotMonster.isAttackedCounter == 0) {
           result.isTriggered = true;
           result.effect = "negateDamage";
-          print(result.effect);
         }
         break;
       case MascotAdditionalEffectType.addCardStartOfTurn:

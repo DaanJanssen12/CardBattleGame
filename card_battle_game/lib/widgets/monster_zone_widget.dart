@@ -1,3 +1,4 @@
+import 'package:card_battle_game/effects/attack_effect.dart';
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:card_battle_game/widgets/monster_card_widget.dart';
@@ -91,7 +92,9 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
                 child: SizedBox(
                   width: 100, // Fixed size
                   height: 180,
-                  child: MonsterCardWidget(monster: widget.card!.toMonster()),
+                  child: widget.card!.isBeingAttacked 
+                    ? AttackEffect(child: MonsterCardWidget(monster: widget.card!.toMonster()))
+                    : MonsterCardWidget(monster: widget.card!.toMonster()),
                 ),
               ),
       ),

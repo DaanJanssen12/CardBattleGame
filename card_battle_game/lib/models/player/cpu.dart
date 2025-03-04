@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:card_battle_game/models/cards/action_card.dart';
+import 'package:card_battle_game/models/cards/play_card_result.dart';
 import 'package:card_battle_game/models/constants.dart';
 import 'package:card_battle_game/models/enums/action_card_type.dart';
 import 'package:card_battle_game/models/cards/card.dart';
@@ -8,9 +9,12 @@ import 'package:card_battle_game/models/cards/monster_card.dart';
 import 'package:card_battle_game/models/player/player.dart';
 import 'package:card_battle_game/models/cards/upgrade_card.dart';
 import 'package:card_battle_game/models/enums/upgrade_card_type.dart';
+import 'package:card_battle_game/services/animation_service.dart';
+import 'package:flutter/material.dart';
 
 class CpuPlayer extends Player {
   late bool isCPU;
+  bool isMyTurn = false;
   late CpuLevels level;
   late CpuStrategy strategy;
   late List<String> deckCardIds;
@@ -43,8 +47,10 @@ class CpuPlayer extends Player {
       List<String> battleLog,
       bool Function() isGameOver,
       bool isGameInOvertime) async {
+    isMyTurn = true;
     await CPU.executeTurn(this, opponent, updateGameState, battleLog,
         isGameOver, isGameInOvertime);
+    isMyTurn = false;
   }
 
   Future<void> init() async {
@@ -70,6 +76,11 @@ class CpuPlayer extends Player {
   Future<void> generateDeck(int deckSize) async {
     deck = await CardDatabase.generateDeck(deckSize, strategy, level);
     deck.shuffle();
+  }
+
+  late BuildContext gameBuildContext;
+  void setGameBuildContext(BuildContext context) {
+    gameBuildContext = context;
   }
 }
 
@@ -129,7 +140,7 @@ class CPU {
       default:
         for (int i = 0; i < 2; i++) {
           //Empty hand and mana to spare: Exchange
-          if(cpu.hand.isEmpty && cpu.mana > Constants.cardExchangeCost){
+          if (cpu.hand.isEmpty && cpu.mana > Constants.cardExchangeCost) {
             cpu.mana -= Constants.cardExchangeCost;
             cpu.drawCard(battleLog);
             updateGameState();
@@ -148,7 +159,7 @@ class CPU {
       List<String> battleLog,
       bool Function() isGameOver,
       bool gameIsInOvertime) async {
-    if (isGameOver()) {
+    if (isGameOver() || !cpu.isMyTurn) {
       return;
     }
     // If the enemy has cards to play, play them.
@@ -157,10 +168,17 @@ class CPU {
       for (var card in List.from(cpu.hand)) {
         for (var i = 0; i < 3; i++) {
           if (cpu.canPlayCard(card, i).$1) {
-            await cpu.playCard(card, i, battleLog, opponent, gameIsInOvertime);
+            await AnimationService()
+                .triggerCardPlayAnimation(cpu.gameBuildContext, card);
+            var playCardResult = await cpu.playCard(
+                card, i, battleLog, opponent, gameIsInOvertime);
+            if (playCardResult != null &&
+                playCardResult.type == PlayCardResultType.endTurn) {
+              cpu.isMyTurn = false;
+            }
             updateGameState();
-            await Future.delayed(Duration(seconds: 1));
-            if (isGameOver()) {
+            await Future.delayed(Duration(milliseconds: 500));
+            if (isGameOver() || !cpu.isMyTurn) {
               return;
             }
             //Played card, do not check the other spots
@@ -173,6 +191,9 @@ class CPU {
 
     //Do 2 loops
     for (var x = 0; x < 2; x++) {
+      if (isGameOver() || !cpu.isMyTurn) {
+        return;
+      }
       if (cpu.strategy == CpuStrategy.offensive) {
         await playMonsterCards(cpu, opponent, updateGameState, battleLog,
             isGameOver, gameIsInOvertime);
@@ -195,7 +216,7 @@ class CPU {
       List<String> battleLog,
       bool Function() isGameOver,
       bool gameIsInOvertime) async {
-    if (isGameOver()) {
+    if (isGameOver() || !cpu.isMyTurn) {
       return;
     }
 
@@ -219,6 +240,9 @@ class CPU {
         var cardToPlay = cpu.hand.where(
             (w) => w.isMonster() && w.canBePlayed() && w.cost <= cpu.mana);
         if (cardToPlay.isNotEmpty) {
+          await AnimationService()
+              .triggerCardPlayAnimation(cpu.gameBuildContext, cardToPlay.first);
+
           await cpu.playCard(
               cardToPlay.first, 1, battleLog, opponent, gameIsInOvertime);
           updateGameState();
@@ -229,12 +253,27 @@ class CPU {
 
     //Play Cards in Order of Priority**
     for (var card in List.from(cpu.hand)) {
+      if (isGameOver() || !cpu.isMyTurn) {
+        return;
+      }
       for (var i = 0; i < 3; i++) {
+        if (isGameOver() || !cpu.isMyTurn) {
+          return;
+        }
+
         if (cpu.canPlayCard(card, i).$1) {
-          await cpu.playCard(card, i, battleLog, opponent, gameIsInOvertime);
+          await AnimationService()
+              .triggerCardPlayAnimation(cpu.gameBuildContext, card);
+
+          var playCardResult = await cpu.playCard(
+              card, i, battleLog, opponent, gameIsInOvertime);
+          if (playCardResult != null &&
+              playCardResult.type == PlayCardResultType.endTurn) {
+            cpu.isMyTurn = false;
+          }
           updateGameState();
           await Future.delayed(Duration(milliseconds: 500));
-          if (isGameOver()) {
+          if (isGameOver() || !cpu.isMyTurn) {
             return;
           }
           break;
@@ -250,17 +289,29 @@ class CPU {
       List<String> battleLog,
       bool Function() isGameOver,
       bool gameIsInOvertime) async {
-    if (isGameOver()) {
+    if (isGameOver() || !cpu.isMyTurn) {
       return;
     }
     //Open monster zones ?
     if (cpu.monsters.any((a) => a == null)) {
+      if (isGameOver() || !cpu.isMyTurn) {
+        return;
+      }
       var monsterCards = cpu.hand.where((w) => w.isMonster()).toList();
       for (var monsterCard in monsterCards) {
+        if (isGameOver() || !cpu.isMyTurn) {
+          return;
+        }
         //Do a loop for every monster zone
         for (var i = 0; i < 3; i++) {
+          if (isGameOver() || !cpu.isMyTurn) {
+            return;
+          }
           //If monster can be played > play it
           if (cpu.canPlayCard(monsterCard, i).$1) {
+            await AnimationService()
+                .triggerCardPlayAnimation(cpu.gameBuildContext, monsterCard);
+
             await cpu.playCard(
                 monsterCard, i, battleLog, opponent, gameIsInOvertime);
             updateGameState();
@@ -299,6 +350,9 @@ class CPU {
       for (var i = 0; i < 3; i++) {
         //If monster can be played > play it
         if (cpu.canPlayCard(monsterCard, i).$1) {
+          await AnimationService()
+              .triggerCardPlayAnimation(cpu.gameBuildContext, monsterCard);
+
           await cpu.playCard(
               monsterCard, i, battleLog, opponent, gameIsInOvertime);
           updateGameState();
@@ -318,7 +372,7 @@ class CPU {
       List<String> battleLog,
       bool Function() isGameOver,
       bool gameIsInOvertime) async {
-    if (isGameOver()) {
+    if (isGameOver() || !cpu.isMyTurn) {
       return;
     }
     var nonMonsterCards = cpu.hand.where((w) => !w.isMonster()).toList();
@@ -328,15 +382,27 @@ class CPU {
       return aVal > bVal ? 1 : 0;
     });
     for (var gameCard in nonMonsterCards) {
+      if (isGameOver() || !cpu.isMyTurn) {
+        return;
+      }
       //Do a loop for every monster zone
       for (var i = 0; i < 3; i++) {
+        if (isGameOver() || !cpu.isMyTurn) {
+          return;
+        }
         //If card can be played > play it
         if (cpu.canPlayCard(gameCard, i).$1) {
-          await cpu.playCard(
+          await AnimationService()
+              .triggerCardPlayAnimation(cpu.gameBuildContext, gameCard);
+          var playCardResult = await cpu.playCard(
               gameCard, i, battleLog, opponent, gameIsInOvertime);
+          if (playCardResult != null &&
+              playCardResult.type == PlayCardResultType.endTurn) {
+            cpu.isMyTurn = false;
+          }
           updateGameState();
           await Future.delayed(Duration(milliseconds: 500));
-          if (isGameOver()) {
+          if (isGameOver() || !cpu.isMyTurn) {
             return;
           }
           //Played card, do not check the other spots
@@ -454,9 +520,13 @@ class CPU {
           opponent.monsters.where((m) => m != null).map((m) => m!).toList();
       // Opponent has no monsters? Attack player directly!
       if (opponentMonsters.isEmpty) {
+        opponent.isBeingAttacked = true;
         monster.attackPlayer(opponent, battleLog, isGameInOvertime);
         updateGameState();
         await Future.delayed(Duration(milliseconds: 500));
+        opponent.isBeingAttacked = false;
+        updateGameState();
+
         if (isGameOver()) return;
         continue;
       }
@@ -531,15 +601,42 @@ class CPU {
     bool isBalanced = cpu.strategy == CpuStrategy.balanced;
 
     if (card.isAction()) {
-      switch ((card as ActionCard).actionCardType) {
+      var actionCard = (card as ActionCard);
+      switch (actionCard.actionCardType) {
         case ActionCardType.draw:
-          return 100; // Always play draw cards first
+          return actionCard.value *
+              10; // Drawing is for when you don't have good cards
         case ActionCardType.stealRandomCardFromOpponentHand:
+          return isAggressive ? 60 : (isBalanced ? 40 : 50);
+        case ActionCardType.gainMana:
+          return 100;
+        case ActionCardType.damageOpponent:
           return isAggressive
-              ? 95
-              : (isBalanced ? 85 : 80); // Balanced in the middle
+              ? 90
+              : isBalanced
+                  ? 50
+                  : isDefensive
+                      ? 30
+                      : 50;
+        case ActionCardType.drawNotFromDeck:
+          return 60;
+        case ActionCardType.freezeOpponent:
+          return isDefensive ? 90 : 40;
+        case ActionCardType.gainManaNextTurn:
+          return isAggressive ? 0 : 40;
+        case ActionCardType.showOpponentHand:
+          return 0; // Of no use to a CPU
+        case ActionCardType.summon:
+          var monstersOnTheField = cpu.monsters.where((w) => w != null).length;
+          return monstersOnTheField == 0
+              ? 100
+              : monstersOnTheField == 3
+                  ? 0
+                  : monstersOnTheField == 2
+                      ? 30
+                      : 70;
         default:
-          return 50; // Other actions are mid-priority
+          return 10; // Other actions are low-priority
       }
     }
 
@@ -601,11 +698,12 @@ class TargetValue {
 
   int value = 0;
 
-  // 1/1;no mascot;1cost;cpu_defensive = 30;
-  // 2/2;mascot;3cost;cpu_offensive = 80
-  // 1/2;no mascot;2cost;cpu_balanced = 40
+  // 1/1;no mascot;1cost;cpu_defensive = 50;
+  // 2/2;mascot;3cost;cpu_offensive = 100
+  // 1/2;no mascot;2cost;cpu_balanced = 60
   calculateValue(CpuLevels level, CpuStrategy strategy) {
-    value = 0;
+    //Base value
+    value = 20;
     if (strategy == CpuStrategy.random) {
       value = Random().nextInt(100);
       return;
