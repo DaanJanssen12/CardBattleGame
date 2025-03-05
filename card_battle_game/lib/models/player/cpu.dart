@@ -171,7 +171,7 @@ class CPU {
             await AnimationService()
                 .triggerCardPlayAnimation(cpu.gameBuildContext, card);
             var playCardResult = await cpu.playCard(
-                card, i, battleLog, opponent, gameIsInOvertime);
+                card, i, battleLog, opponent, gameIsInOvertime, updateGameState);
             if (playCardResult != null &&
                 playCardResult.type == PlayCardResultType.endTurn) {
               cpu.isMyTurn = false;
@@ -244,7 +244,7 @@ class CPU {
               .triggerCardPlayAnimation(cpu.gameBuildContext, cardToPlay.first);
 
           await cpu.playCard(
-              cardToPlay.first, 1, battleLog, opponent, gameIsInOvertime);
+              cardToPlay.first, 1, battleLog, opponent, gameIsInOvertime, updateGameState);
           updateGameState();
           await Future.delayed(Duration(milliseconds: 500));
         }
@@ -266,7 +266,7 @@ class CPU {
               .triggerCardPlayAnimation(cpu.gameBuildContext, card);
 
           var playCardResult = await cpu.playCard(
-              card, i, battleLog, opponent, gameIsInOvertime);
+              card, i, battleLog, opponent, gameIsInOvertime, updateGameState);
           if (playCardResult != null &&
               playCardResult.type == PlayCardResultType.endTurn) {
             cpu.isMyTurn = false;
@@ -313,7 +313,7 @@ class CPU {
                 .triggerCardPlayAnimation(cpu.gameBuildContext, monsterCard);
 
             await cpu.playCard(
-                monsterCard, i, battleLog, opponent, gameIsInOvertime);
+                monsterCard, i, battleLog, opponent, gameIsInOvertime, updateGameState);
             updateGameState();
             await Future.delayed(Duration(milliseconds: 500));
             //Played card, do not check the other spots
@@ -354,7 +354,7 @@ class CPU {
               .triggerCardPlayAnimation(cpu.gameBuildContext, monsterCard);
 
           await cpu.playCard(
-              monsterCard, i, battleLog, opponent, gameIsInOvertime);
+              monsterCard, i, battleLog, opponent, gameIsInOvertime, updateGameState);
           updateGameState();
           await Future.delayed(Duration(milliseconds: 500));
 
@@ -395,7 +395,7 @@ class CPU {
           await AnimationService()
               .triggerCardPlayAnimation(cpu.gameBuildContext, gameCard);
           var playCardResult = await cpu.playCard(
-              gameCard, i, battleLog, opponent, gameIsInOvertime);
+              gameCard, i, battleLog, opponent, gameIsInOvertime, updateGameState);
           if (playCardResult != null &&
               playCardResult.type == PlayCardResultType.endTurn) {
             cpu.isMyTurn = false;

@@ -32,7 +32,7 @@ class ActionCard extends GameCard {
   }
 
   Future<PlayCardResult?> doAction(
-      Player player, Player opponent, bool isGameInOvertime) async {
+      Player player, Player opponent, bool isGameInOvertime, Function updateGameState) async {
     PlayCardResult? result;
     switch (actionCardType) {
       case ActionCardType.draw:
@@ -76,7 +76,12 @@ class ActionCard extends GameCard {
         player.manabank += value;
         break;
       case ActionCardType.damageOpponent:
+        opponent.isBeingAttacked = true;
+        updateGameState();
         opponent.health -= value;
+        await Future.delayed(Duration(milliseconds: 500));
+        opponent.isBeingAttacked = false;
+        updateGameState();
         break;
       case ActionCardType.showOpponentHand:
         result = PlayCardResult();
@@ -99,6 +104,7 @@ class ActionCard extends GameCard {
             if (monsterZone == null) {
               await player.summonMonster(cardToAdd.toMonster(), x, [], opponent,
                   false, isGameInOvertime);
+              updateGameState();
               break;
             }
           }
@@ -114,7 +120,7 @@ class ActionCard extends GameCard {
                 actionCardClone.actionCardType = ActionCardType.draw;
                 actionCardClone.value = int.parse(effectValues[1]);
                 await actionCardClone.doAction(
-                    player, opponent, isGameInOvertime);
+                    player, opponent, isGameInOvertime, updateGameState);
                 break;
               case 'gainManaNextTurn':
                 actionCardClone.actionCardType =

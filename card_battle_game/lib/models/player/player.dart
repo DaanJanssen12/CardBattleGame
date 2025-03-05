@@ -235,7 +235,7 @@ class Player {
   }
 
   Future<PlayCardResult?> playCard(GameCard card, int monsterZoneIndex,
-      List<String> battleLog, Player opponent, bool gameIsInOvertime) async {
+      List<String> battleLog, Player opponent, bool gameIsInOvertime, Function updateGameState) async {
     PlayCardResult? result;
 
     mana -= card.cost;
@@ -266,7 +266,7 @@ class Player {
     }
     if (card.isAction()) {
       var actionCard = (card as ActionCard);
-      result = await actionCard.doAction(this, opponent, gameIsInOvertime);
+      result = await actionCard.doAction(this, opponent, gameIsInOvertime, updateGameState);
       battleLog.add('${card.name} played');
     }
     if (card.isOpponentCard && !card.isMonster()) {

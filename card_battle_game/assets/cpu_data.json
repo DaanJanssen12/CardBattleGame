@@ -19,7 +19,8 @@
             "action_energy_blast",
             "action_blizzard",
             "action_draw_twice",
-            "action_mana_surge"
+            "action_mana_surge",
+            "action_draw"
         ],
         "mascot": "monster_penguin_mage"
     },
@@ -44,7 +45,8 @@
             "action_blizzard",
             "action_draw",
             "action_draw_twice",
-            "action_mana_surge"
+            "action_mana_surge",
+            "action_meditate"
         ],
         "mascot": "monster_magma_golem"
     },
@@ -62,7 +64,9 @@
             "action_harvest",
             "action_mushroom_garden",
             "action_sheep_herder",
-            "action_long_rest"
+            "action_long_rest",
+            "upgrade_heal",
+            "upgrade_strengthen"
         ],
         "mascot": "monster_mushroom_man"
     },
@@ -110,7 +114,10 @@
             "monster_sheep",
             "upgrade_heal",
             "upgrade_strengthen",
-            "upgrade_strengthen"
+            "upgrade_strengthen",
+            "action_heal",
+            "action_shield",
+            "action_draw"
         ],
         "mascot": "monster_sheep"
     },
@@ -128,7 +135,7 @@
             "upgrade_heal",
             "upgrade_heal"
         ],
-        "mascot": "monster_sheep"
+        "mascot": "monster_mushroom_boy"
     },
     {
         "id": "cpu_rick",
@@ -142,7 +149,9 @@
             "monster_mushroom_boy",
             "upgrade_heal ",
             "upgrade_blueberry",
-            "upgrade_raspberry"
+            "upgrade_raspberry",
+            "action_energy_blast",
+            "action_draw"
         ],
         "mascot": "monster_mushroom_boy"
     },
@@ -158,7 +167,9 @@
             "monster_water_droplet",
             "upgrade_heal",
             "upgrade_heal",
-            "upgrade_strengthen"
+            "upgrade_strengthen",
+            "action_mana_surge",
+            "action_draw"
         ],
         "mascot": "monster_water_droplet"
     },
@@ -174,7 +185,9 @@
             "monster_fire_dog",
             "upgrade_heal",
             "action_draw",
-            "action_harvest"
+            "action_harvest",
+            "action_mushroom_garden",
+            "upgrade_strengthen"
         ],
         "mascot": "monster_mushroom_boy"
     },
@@ -191,7 +204,9 @@
             "monster_water_droplet",
             "upgrade_blueberry",
             "upgrade_blueberry",
-            "upgrade_raspberry"
+            "upgrade_raspberry",
+            "action_harvest",
+            "action_meditate"
         ],
         "mascot": "monster_mushroom_boy"
     },
@@ -208,7 +223,9 @@
             "upgrade_heal",
             "upgrade_heal",
             "upgrade_shield",
-            "upgrade_strengthen"
+            "upgrade_strengthen",
+            "action_draw",
+            "action_mana_surge"
         ],
         "mascot": "monster_water_droplet"
     },
@@ -225,7 +242,10 @@
             "monster_zombie",
             "monster_zombie",
             "upgrade_heal",
-            "upgrade_heal"
+            "upgrade_heal",
+            "action_robber",
+            "action_meditate",
+            "action_energy_blast"
         ],
         "mascot": "monster_zombie"
     },

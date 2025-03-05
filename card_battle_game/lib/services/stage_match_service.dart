@@ -170,7 +170,7 @@ class StageMatchService {
   }
 
   void playCard(GameCard card, int monsterZoneIndex) async {
-    var result = await match.playCard(card, monsterZoneIndex, context);
+    var result = await match.playCard(card, monsterZoneIndex, context, updateGameState);
     if (result != null) {
       switch (result.type) {
         case PlayCardResultType.showOpponentHand:

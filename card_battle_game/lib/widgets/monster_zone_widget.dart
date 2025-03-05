@@ -39,7 +39,9 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
   void didUpdateWidget(covariant MonsterZoneWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isHovered && !oldWidget.isHovered) {
-      _pulseController.forward().then((_) => _pulseController.reverse());
+      _pulseController.forward();
+    }else{
+      _pulseController.reverse();
     }
   }
 

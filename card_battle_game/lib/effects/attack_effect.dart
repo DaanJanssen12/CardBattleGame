@@ -4,13 +4,18 @@ class AttackEffect extends StatefulWidget {
   final Widget child;
   final Duration duration;
 
-  const AttackEffect({Key? key, required this.child, this.duration = const Duration(milliseconds: 300)}) : super(key: key);
+  const AttackEffect(
+      {Key? key,
+      required this.child,
+      this.duration = const Duration(milliseconds: 300)})
+      : super(key: key);
 
   @override
   _AttackEffectState createState() => _AttackEffectState();
 }
 
-class _AttackEffectState extends State<AttackEffect> with SingleTickerProviderStateMixin {
+class _AttackEffectState extends State<AttackEffect>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
 
@@ -22,7 +27,8 @@ class _AttackEffectState extends State<AttackEffect> with SingleTickerProviderSt
       duration: widget.duration,
     );
 
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 0.6).animate(_controller);
+    _opacityAnimation =
+        Tween<double>(begin: 0.0, end: 0.6).animate(_controller);
 
     // Start effect when widget is created
     _controller.forward().then((_) => _controller.reverse());
@@ -43,7 +49,10 @@ class _AttackEffectState extends State<AttackEffect> with SingleTickerProviderSt
           animation: _controller,
           builder: (context, child) {
             return Container(
-              color: Colors.red.withOpacity(_opacityAnimation.value),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.red.withOpacity(_opacityAnimation.value)
+              ),
             );
           },
         ),

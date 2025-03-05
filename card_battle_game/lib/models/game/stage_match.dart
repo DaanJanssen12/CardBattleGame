@@ -153,12 +153,12 @@ class StageMatch {
   }
 
   Future<PlayCardResult?> playCard(
-      GameCard card, int monsterZoneIndex, BuildContext context) async {
+      GameCard card, int monsterZoneIndex, BuildContext context, Function updateGameState) async {
     PlayCardResult? result;
     var canPlayCard = player.canPlayCard(card, monsterZoneIndex);
     if (canPlayCard.$1) {
       result = await player.playCard(
-          card, monsterZoneIndex, battleLog, opponent, gameIsInOvertime);
+          card, monsterZoneIndex, battleLog, opponent, gameIsInOvertime, updateGameState);
       updateGameState();
       soundPlayerService.playSound(context, Sounds.dropCard);
     } else {
