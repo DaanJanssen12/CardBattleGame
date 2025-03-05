@@ -168,8 +168,8 @@ class CardDetailsDialog extends StatelessWidget {
   Widget _buildStatsSection(MonsterCard monster) {
     return Column(mainAxisSize: MainAxisSize.min, children: [
       _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
-          monster.currentHealth, Colors.redAccent),
-      _buildStatRow(FontAwesomeIcons.handFist, 'Attack', monster.currentAttack,
+          monster.health, Colors.redAccent),
+      _buildStatRow(FontAwesomeIcons.handFist, 'Attack', monster.attack,
           Colors.orangeAccent),
     ]);
   }

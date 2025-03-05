@@ -158,7 +158,7 @@ class _NodeMapScreenState extends State<NodeMapScreen> {
               // Fixed Bar at the Top
               Container(
                 height: 80, // Adjust height as needed
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                padding: EdgeInsets.fromLTRB(8, 25, 8, 10),
                 color: Colors.black
                     .withOpacity(0.8), // Semi-transparent background
                 child: Row(

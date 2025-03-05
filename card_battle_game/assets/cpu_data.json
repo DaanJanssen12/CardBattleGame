@@ -234,8 +234,8 @@
         "name": "Max",
         "possibleFromStage": 5,
         "possibleUntillStage": 9,
-        "cpuLevel": "easy",
-        "cpuStrategy": "random",
+        "cpuLevel": "medium",
+        "cpuStrategy": "balanced",
         "deck": [
             "monster_mushroom_boy",
             "monster_water_droplet",

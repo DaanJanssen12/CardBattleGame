@@ -1,5 +1,6 @@
 import 'package:card_battle_game/animations/attack_animation.dart';
 import 'package:card_battle_game/effects/attack_effect.dart';
+import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/database/user_storage.dart';
 import 'package:card_battle_game/services/animation_service.dart';
 import 'package:card_battle_game/services/stage_match_service.dart';
@@ -109,53 +110,73 @@ class _GameScreenState extends State<GameScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
-                                    child: _stageMatchService.match.player.isBeingAttacked 
-                                    ? AttackEffect(child: PlayerInfoWidget(
-                                        player: _stageMatchService.match.player,
-                                        isActive: _stageMatchService
-                                            .match.isPlayersTurn,
-                                        handleAttackPlayerDirectly: null))
-                                    : PlayerInfoWidget(
-                                        player: _stageMatchService.match.player,
-                                        isActive: _stageMatchService
-                                            .match.isPlayersTurn,
-                                        handleAttackPlayerDirectly: null)),
+                                    child: _stageMatchService
+                                            .match.player.isBeingAttacked
+                                        ? AttackEffect(
+                                            child: PlayerInfoWidget(
+                                                player: _stageMatchService
+                                                    .match.player,
+                                                isActive: _stageMatchService
+                                                    .match.isPlayersTurn,
+                                                handleAttackPlayerDirectly:
+                                                    null))
+                                        : PlayerInfoWidget(
+                                            player:
+                                                _stageMatchService.match.player,
+                                            isActive: _stageMatchService
+                                                .match.isPlayersTurn,
+                                            handleAttackPlayerDirectly: null)),
                                 SizedBox(width: 16),
                                 Expanded(
-                                    child: _stageMatchService.match.opponent.isBeingAttacked
-                                    ? AttackEffect(child: PlayerInfoWidget(
-                                        player:
-                                            _stageMatchService.match.opponent,
-                                        isActive: !_stageMatchService
-                                            .match.isPlayersTurn,
-                                        handleAttackPlayerDirectly:
-                                            _stageMatchService.match
-                                                .handleAttackPlayerDirectly))
-                                    : PlayerInfoWidget(
-                                        player:
-                                            _stageMatchService.match.opponent,
-                                        isActive: !_stageMatchService
-                                            .match.isPlayersTurn,
-                                        handleAttackPlayerDirectly:
-                                            _stageMatchService.match
-                                                .handleAttackPlayerDirectly)),
+                                    child: _stageMatchService
+                                            .match.opponent.isBeingAttacked
+                                        ? AttackEffect(
+                                            child: PlayerInfoWidget(
+                                                player: _stageMatchService
+                                                    .match.opponent,
+                                                isActive: !_stageMatchService
+                                                    .match.isPlayersTurn,
+                                                handleAttackPlayerDirectly:
+                                                    _stageMatchService.match
+                                                        .handleAttackPlayerDirectly))
+                                        : PlayerInfoWidget(
+                                            player: _stageMatchService
+                                                .match.opponent,
+                                            isActive: !_stageMatchService
+                                                .match.isPlayersTurn,
+                                            handleAttackPlayerDirectly:
+                                                _stageMatchService.match
+                                                    .handleAttackPlayerDirectly)),
                               ],
                             ),
                           ),
                           SizedBox(height: 12),
                           // Game Board
-                          GameBoardWidget(
-                              player: _stageMatchService.match.player,
-                              enemy: _stageMatchService.match.opponent,
-                              isPlayersTurn:
-                                  _stageMatchService.match.isPlayersTurn,
-                              onCardDrop: _stageMatchService.playCard,
-                              onCardTap: _stageMatchService.showCardDetails,
-                              onMonsterAttack: (monster, i){
-                                //PLay animation
-                                //AnimationService().playAnimation(context, AttackAnimation());
-                                //Action Gamelogic
-                                _stageMatchService.match.attackMonster(monster, i);
+                          DragTarget<GameCard>(
+                              onWillAcceptWithDetails: (details) =>
+                                  _stageMatchService.match.isPlayersTurn &&
+                                  details.data.canBePlayed() &&
+                                  details.data.isAction(),
+                              onAcceptWithDetails: (details) {
+                                _stageMatchService.playCard(details.data, 0);
+                              },
+                              builder: (context, candidateData, rejectedData) {
+                                return GameBoardWidget(
+                                    player: _stageMatchService.match.player,
+                                    enemy: _stageMatchService.match.opponent,
+                                    isPlayersTurn:
+                                        _stageMatchService.match.isPlayersTurn,
+                                    isHovered: candidateData.isNotEmpty,
+                                    onCardDrop: _stageMatchService.playCard,
+                                    onCardTap:
+                                        _stageMatchService.showCardDetails,
+                                    onMonsterAttack: (monster, i) {
+                                      //PLay animation
+                                      //AnimationService().playAnimation(context, AttackAnimation());
+                                      //Action Gamelogic
+                                      _stageMatchService.match
+                                          .attackMonster(monster, i);
+                                    });
                               }),
                         ],
                       ),
