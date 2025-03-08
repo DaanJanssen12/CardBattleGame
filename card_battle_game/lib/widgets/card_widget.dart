@@ -1,4 +1,5 @@
 import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/widgets/outlined_text.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/cards/card.dart';
@@ -26,18 +27,8 @@ class CardWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/card_front.png'),
-            fit: BoxFit.fill,
-          ),
-          // gradient: LinearGradient(
-          //   colors: [Colors.blue.shade200, Colors.blue.shade100],
-          //   begin: Alignment.topCenter,
-          //   end: Alignment.bottomCenter,
-          // ),
-          borderRadius: BorderRadius.circular(16),
           border: isSelected
-              ? Border.all(color: Colors.yellowAccent, width: 3)
+              ? Border.all(color: Colors.yellowAccent, width: 1)
               : null,
           boxShadow: const [
             BoxShadow(
@@ -47,23 +38,88 @@ class CardWidget extends StatelessWidget {
             ),
           ],
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildNameHeader(),
-                const SizedBox(height: 4), // Space between icon and number
-                _buildImage(constraints),
-                if (card is MonsterCard) ...[
-                  _buildStatsSection(card as MonsterCard),
-                ] else ...[
-                  _buildDescriptionSection()
-                ]
-              ],
-            );
-          },
+        child: ClipRect(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  Positioned(
+                      top: 2.5,
+                      left: 4,
+                      child: Center(
+                        child: _buildImage(constraints),
+                      )),
+                  Container(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(card.isMonster()
+                              ? 'assets/images/card_front.png'
+                              : 'assets/images/card_front.png'),
+                          fit: BoxFit.fill,
+                        ),
+                        //borderRadius: BorderRadius.circular(16),
+                      )),
+                  if (card is MonsterCard) ...[
+                    Positioned(
+                        right: 5,
+                        bottom: 5,
+                        child: _buildStatsSection(card as MonsterCard))
+                  ],
+                  if (amount != null) ...[
+                    Positioned(
+                      top: 2,
+                      left: 2,
+                      child: Container(
+                        width: 18, // Adjust size of circle
+                        height: 18, // Adjust size of circle
+                        decoration: BoxDecoration(
+                          color:
+                              Colors.deepPurple, // Background color for crown
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: Colors.white, width: 1), // Optional border
+                        ),
+                        child: Center(
+                          child: Text('${amount}x',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ),
+                  ],
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: constraints.maxHeight * 0.5,
+                      ),
+                      _buildNameHeader(),
+                      const SizedBox(
+                          height: 4), // Space between icon and number
+                      //_buildImage(constraints),
+
+                      _buildDescriptionSection()
+                      // Padding(
+                      //     padding: EdgeInsets.fromLTRB(5, 1, 0, 0),
+                      //     child: Text('${card.cost}',
+                      //         textAlign: TextAlign.left,
+                      //         style: TextStyle(
+                      //             fontSize: 12, fontWeight: FontWeight.bold)))
+                    ],
+                  ),
+                  Positioned(
+                      left: 5,
+                      bottom: 0,
+                      child: OutlinedText.render('${card.cost}', null, null))
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -82,59 +138,35 @@ class CardWidget extends StatelessWidget {
             softWrap: false,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black87,
             ),
           ),
         ),
-        if(card.isMonster() && card.toMonster().isMascot)...[
+        if (card.isMonster() && card.toMonster().isMascot) ...[
           Positioned(
-          top: -6, // Moves the crown above
-          right: -6, // Moves it slightly outward for floating effect
-          child: Container(
-            width: 18, // Adjust size of circle
-            height: 18, // Adjust size of circle
-            decoration: BoxDecoration(
-              color: Colors.deepPurple, // Background color for crown
-              shape: BoxShape.circle,
-              border:
-                  Border.all(color: Colors.white, width: 1), // Optional border
-            ),
-            child: const Center(
-              child: Icon(
-                FontAwesomeIcons.crown, // Crown icon
-                size: 10, // Smaller for fitting inside
-                color: Colors.amber, // Gold color for effect
+            top: -6, // Moves the crown above
+            right: -6, // Moves it slightly outward for floating effect
+            child: Container(
+              width: 18, // Adjust size of circle
+              height: 18, // Adjust size of circle
+              decoration: BoxDecoration(
+                color: Colors.deepPurple, // Background color for crown
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: Colors.white, width: 1), // Optional border
+              ),
+              child: const Center(
+                child: Icon(
+                  FontAwesomeIcons.crown, // Crown icon
+                  size: 10, // Smaller for fitting inside
+                  color: Colors.amber, // Gold color for effect
+                ),
               ),
             ),
           ),
-        ),
         ],
-        if(amount != null)...[
-          Positioned(
-          top: -6, // Moves the crown above
-          left: -6, // Moves it slightly outward for floating effect
-          child: Container(
-            width: 18, // Adjust size of circle
-            height: 18, // Adjust size of circle
-            decoration: BoxDecoration(
-              color: Colors.deepPurple, // Background color for crown
-              shape: BoxShape.circle,
-              border:
-                  Border.all(color: Colors.white, width: 1), // Optional border
-            ),
-            child: Center(
-              child: Text('${amount}x',
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.white,
-                fontWeight: FontWeight.bold
-              )),
-            ),
-          ),
-        ),
-        ]
       ],
     );
   }
@@ -144,28 +176,25 @@ class CardWidget extends StatelessWidget {
       alignment:
           Alignment.bottomLeft, // Positioning the badge to the bottom-left
       children: [
-        SizedBox(
-          height: constraints.maxHeight * 0.4,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              card.imagePath.isNotEmpty == true
-                  ? card.imagePath
-                  : 'assets/images/placeholder.png',
-              width: 200,
-              height: 100,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  Icons.image_not_supported,
-                  size: 50,
-                  color: Colors.grey,
-                );
-              },
-            ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(
+            card.imagePath.isNotEmpty == true
+                ? card.imagePath
+                : 'assets/images/placeholder.png',
+            width: constraints.maxWidth * 0.9,
+            height: constraints.maxHeight * 0.6,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(
+                Icons.image_not_supported,
+                size: 50,
+                color: Colors.grey,
+              );
+            },
           ),
         ),
-        _buildCostBadge(), // Cost badge now overlaying slightly on the image
+        //_buildCostBadge(), // Cost badge now overlaying slightly on the image
       ],
     );
   }
@@ -199,17 +228,18 @@ class CardWidget extends StatelessWidget {
 
   Widget _buildDescriptionSection() {
     var description = card.shortDescription;
-    if(description == null || (card.fullDescription != null && card.fullDescription!.length < 50)){
+    if (description == null ||
+        (card.fullDescription != null && card.fullDescription!.length < 50)) {
       description = card.fullDescription;
     }
-    double fontSize = 8;
-    if(description!.length > 50){
-      fontSize = 6;
+    double fontSize = 7;
+    if (description!.length > 50) {
+      fontSize = 5;
     }
     return Container(
-        height: 60,
+        //height: 60,
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
         // decoration: BoxDecoration(
         //   color: Colors.deepPurple.shade700,
         //   borderRadius: BorderRadius.circular(8),
@@ -217,55 +247,43 @@ class CardWidget extends StatelessWidget {
         child: Text(
           description,
           style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            //fontWeight: FontWeight.bold,
             fontSize: fontSize,
           ),
         ));
   }
 
   Widget _buildStatsSection(MonsterCard monster) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      // decoration: BoxDecoration(
-      //   color: Colors.deepPurple.shade700,
-      //   borderRadius: BorderRadius.circular(8),
-      // ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
-              monster.currentHealth, Colors.redAccent),
-          _buildStatRow(FontAwesomeIcons.handFist, 'Attack',
-              monster.currentAttack, Colors.orangeAccent),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
+            monster.currentHealth, Colors.red),
+        _buildStatRow(FontAwesomeIcons.solidHandBackFist, 'Attack',
+            monster.currentAttack, Colors.indigoAccent),
+      ],
     );
   }
 
   Widget _buildStatRow(IconData icon, String label, int? value, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 10),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              '$label: ${value ?? 0}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 10,
-              ),
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-            ),
-          ),
-        ],
-      ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Icon(icon,
+        //   color: Colors.black,
+        //   size: 20),
+        Icon(icon, color: color, size: 14),
+        OutlinedText.render('${value ?? 0}', 8, FontWeight.bold)
+        // Text(
+        //     '${value ?? 0}',
+        //     style: const TextStyle(
+        //       color: Colors.black,
+        //       fontWeight: FontWeight.bold,
+        //       fontSize: 12,
+        //     ),
+        //   ),
+      ],
     );
   }
 }

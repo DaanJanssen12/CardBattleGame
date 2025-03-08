@@ -27,40 +27,31 @@ class PlayerHandWidget extends StatelessWidget {
             card = player.hand[index];
           }
 
-          // Offset the card slightly based on the index to create the overlap effect
-          double offset =
-              index * -30.0; // Adjust the value for more/less overlap
-
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: GestureDetector(
-              onTap: () => onCardTap(card),
-              child: LongPressDraggable<GameCard>(
-                data: card,
-                delay: Duration(
-                    milliseconds:
-                        Constants.longPressDraggableDelayInMilliseconds),
-                feedback: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 100, // Define max width for feedback
-                      maxHeight: 180, // Define max height for feedback
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            child: Align(
+              alignment: Alignment.center, // Keeps cards at the bottom
+              child: GestureDetector(
+                onTap: () => onCardTap(card),
+                child: SizedBox(
+                  width: 100,
+                  height: 160, // Ensures the card stays at 160 height
+                  child: LongPressDraggable<GameCard>(
+                    data: card,
+                    delay: Duration(
+                        milliseconds:
+                            Constants.longPressDraggableDelayInMilliseconds),
+                    feedback: Material(
+                      color: Colors.transparent,
+                      child: SizedBox(
+                        width: 100,
+                        height: 160,
+                        child: CardWidget(card: card),
+                      ),
                     ),
-                    child: Transform.translate(
-                      offset:
-                          Offset(offset, 0), // Apply the offset to the feedback
-                      child: CardWidget(card: card),
-                    ),
+                    childWhenDragging: Container(),
+                    child: CardWidget(card: card),
                   ),
-                ),
-                childWhenDragging: Container(),
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: 100, // Define max width for static card
-                    maxHeight: 180, // Define max height for static card
-                  ),
-                  child: CardWidget(card: card),
                 ),
               ),
             ),

@@ -191,6 +191,35 @@ class _ShopScreenState extends State<ShopScreen>
   }
 
   Widget _buildCardGrid(List<GameCard> cards, bool isShop) {
+    return Center(
+      child: Container(
+        margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+        height: 500, // Give it some space to render
+        child: SingleChildScrollView(
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: cards.map((card) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCard = card;
+                  });
+                },
+                child: SizedBox(
+                  width: 100,
+                  height: 160,
+                  child: CardWidget(
+                    card: card,
+                    isSelected: selectedCard == card,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: GridView.builder(
@@ -233,6 +262,7 @@ class _ShopScreenState extends State<ShopScreen>
     VoidCallback? action = isShop ? buyCard : removeCard;
 
     return Container(
+      height: 160,
       padding: EdgeInsets.all(10),
       color: Colors.black54,
       child: Column(
@@ -271,7 +301,7 @@ class _ShopScreenState extends State<ShopScreen>
               style: TextStyle(color: Colors.white70)),
           SizedBox(height: 10),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(

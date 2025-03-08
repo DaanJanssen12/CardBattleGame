@@ -273,7 +273,7 @@ class StageMatchService {
                           showCards(gameCards, msg, false, 750);
                         },
                         child: SizedBox(
-                          width: 120, // Ensures finite size
+                          width: 100, // Ensures finite size
                           height: 160,
                           child: Stack(
                             children: List.generate(
@@ -284,7 +284,7 @@ class StageMatchService {
                                 right: 0,
                                 child: Image.asset(
                                   'assets/images/card_back.png',
-                                  width: 120, // Must be fixed
+                                  width: 100, // Must be fixed
                                   height: 160, // Must be fixed
                                   fit: BoxFit.cover,
                                 ),
@@ -331,15 +331,15 @@ class StageMatchService {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
-                        width: 120,
-                        height: 200,
+                        width: 100,
+                        height: 160,
                         child: CardWidget(card: cards[i * 2]),
                       ),
                       SizedBox(width: 10),
                       if (((i * 2) + 1) < cards.length) ...[
                         SizedBox(
-                          width: 120,
-                          height: 200,
+                          width: 100,
+                          height: 160,
                           child: CardWidget(card: cards[(i * 2) + 1]),
                         ),
                       ]

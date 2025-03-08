@@ -1,5 +1,6 @@
 import 'package:card_battle_game/models/game/game_effect.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/widgets/outlined_text.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -11,35 +12,61 @@ class MonsterCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        // gradient: LinearGradient(
-        //   colors: [Colors.blue.shade200, Colors.blue.shade100],
-        //   begin: Alignment.topCenter,
-        //   end: Alignment.bottomCenter,
-        // ),
-        image: DecorationImage(
-            image: AssetImage('assets/images/card_front.png'),
-            fit: BoxFit.fill,
-          ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          const BoxShadow(
-            color: Colors.black45,
-            offset: Offset(4, 4),
-            blurRadius: 6,
-          ),
-        ],
-      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          return Stack(
             children: [
-              _buildNameHeader(),
               _buildImage(constraints),
-              _buildStatsSection(),
+              Container(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/monstercard_front2.png'),
+                      fit: BoxFit.fill,
+                    ),
+                    //borderRadius: BorderRadius.circular(16),
+                  )),
+              Positioned(
+                  left: 7,
+                  child: OutlinedText.render(
+                      monster!.currentHealth.toString(), null, null)),
+              Positioned(
+                  right: 7,
+                  child: OutlinedText.render(
+                      monster!.currentAttack.toString(), null, null)),
+              if (monster!.isMascot && !monster!.isOpponentCard) ...[
+                _buildMascotBadge(),
+              ],
+              if (monster!.effects.isNotEmpty) ...[
+                for (var i = 0; i < monster!.effects.length; i++) ...[
+                  _buildEffectBadge(monster!.effects[i], i)
+                ]
+              ],
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: constraints.maxHeight * 0.5,
+                  ),
+                  _buildNameHeader(),
+                  const SizedBox(height: 4), // Space between icon and number
+                  //_buildImage(constraints),
+                  // if (card is MonsterCard) ...[
+                  //   _buildStatsSection(card as MonsterCard),
+                  // ] else ...[
+                  // ],
+                  _buildDescriptionSection(),
+
+                  // Padding(
+                  //     padding: EdgeInsets.fromLTRB(5, 1, 0, 0),
+                  //     child: Text('${card.cost}',
+                  //         textAlign: TextAlign.left,
+                  //         style: TextStyle(
+                  //             fontSize: 12, fontWeight: FontWeight.bold)))
+                ],
+              )
             ],
           );
         },
@@ -47,73 +74,65 @@ class MonsterCardWidget extends StatelessWidget {
     );
   }
 
-  // Widget _buildNameHeader() {
-  //   return Container(
-  //     width: double.infinity,
-  //     padding: const EdgeInsets.symmetric(vertical: 6),
-  //     decoration: BoxDecoration(
-  //       color: Colors.deepPurple,
-  //       borderRadius: BorderRadius.circular(8),
-  //     ),
-  //     child: Text(
-  //       monster?.name ?? 'Unknown',
-  //       textAlign: TextAlign.center,
-  //       softWrap: false,
-  //       overflow: TextOverflow.ellipsis,
-  //       style: const TextStyle(
-  //           fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-  //     ),
-  //   );
-  // }
+  Widget _buildDescriptionSection() {
+    var description = monster!.shortDescription;
+    if (description == null ||
+        (monster!.fullDescription != null &&
+            monster!.fullDescription!.length < 50)) {
+      description = monster!.fullDescription;
+    }
+    double fontSize = 8;
+    if (description!.length > 50) {
+      fontSize = 6;
+    }
+    return Container(
+        //height: 60,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+        // decoration: BoxDecoration(
+        //   color: Colors.deepPurple.shade700,
+        //   borderRadius: BorderRadius.circular(8),
+        // ),
+        child: Text(
+          description,
+          style: TextStyle(
+            color: Colors.black,
+            //fontWeight: FontWeight.bold,
+            fontSize: fontSize,
+          ),
+        ));
+  }
+
   Widget _buildNameHeader() {
     double fontSize = 12;
-    if(monster!.name.length > 10){
+    if (monster!.name.length > 10) {
       fontSize = 10;
     }
-    if(monster!.name.length > 15){
+    if (monster!.name.length > 15) {
       fontSize = 8;
     }
     return Stack(
       clipBehavior: Clip.none, // Allows the crown to slightly overflow
       children: [
         Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(
-            monster!.name,
-            textAlign: TextAlign.center,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        if(monster!.isMascot && !monster!.isOpponentCard)...[
-          Positioned(
-          top: -6, // Moves the crown above
-          right: -6, // Moves it slightly outward for floating effect
-          child: Container(
-            width: 18, // Adjust size of circle
-            height: 18, // Adjust size of circle
-            decoration: BoxDecoration(
-              color: Colors.deepPurple, // Background color for crown
-              shape: BoxShape.circle,
-              border:
-                  Border.all(color: Colors.white, width: 1), // Optional border
-            ),
-            child: const Center(
-              child: Icon(
-                FontAwesomeIcons.crown, // Crown icon
-                size: 10, // Smaller for fitting inside
-                color: Colors.amber, // Gold color for effect
-              ),
-            ),
-          ),
-        ),
-        ]
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  monster!.name,
+                  textAlign: TextAlign.center,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            )),
       ],
     );
   }
@@ -124,7 +143,7 @@ class MonsterCardWidget extends StatelessWidget {
           Alignment.bottomLeft, // Positioning the badge to the bottom-left
       children: [
         SizedBox(
-          height: constraints.maxHeight * 0.4,
+          height: constraints.maxHeight * 0.6,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
@@ -142,12 +161,26 @@ class MonsterCardWidget extends StatelessWidget {
             ),
           ),
         ),
-        if (monster!.effects.isNotEmpty) ...[
-          for (var i = 0; i < monster!.effects.length; i++) ...[
-            _buildEffectBadge(monster!.effects[i], i)
-          ]
-        ] // Cost badge now overlaying slightly on the image
       ],
+    );
+  }
+
+  Widget _buildMascotBadge() {
+    return Positioned(
+      right: 5, // Adjusted to be closer to the bottom-left corner
+      bottom: 5, // Added a slight left offset for more overlap
+      child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(FontAwesomeIcons.crown, color: Colors.yellow, size: 8),
+            ],
+          )),
     );
   }
 

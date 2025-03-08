@@ -78,31 +78,59 @@ class _MascotSelectionScreenState extends State<MascotSelectionScreen> {
           ),
 
           // Card Selection Grid
+          // Center(
+          //   child: Padding(
+          //     padding: EdgeInsets.fromLTRB(20, 80, 20, 0),
+          //     child: GridView.builder(
+          //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          //         crossAxisCount: 3,
+          //         crossAxisSpacing: 10,
+          //         mainAxisSpacing: 10,
+          //       ),
+          //       itemCount: deck.length,
+          //       itemBuilder: (context, index) {
+          //         final card = deck[index];
+          //         return GestureDetector(
+          //           onTap: () {
+          //             setState(() {
+          //               _selectedMascot = card;
+          //             });
+          //           },
+          //           child: CardWidget(
+          //             card: card,
+          //             isSelected:
+          //                 _selectedMascot == card, // Highlight selected card
+          //           ),
+          //         );
+          //       },
+          //     ),
+          //   ),
+          // ),
+
           Center(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 80, 20, 0),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
+            child: Container(
+              height: 500, // Give it some space to render
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: deck.map((card) {
+                    return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedMascot = card;
+                          });
+                        },
+                        child: Container(
+                          width: 100,
+                          height: 160,
+                          child: CardWidget(
+                            card: card,
+                            isSelected: _selectedMascot == card,
+                          ),
+                        ));
+                  }).toList(),
                 ),
-                itemCount: deck.length,
-                itemBuilder: (context, index) {
-                  final card = deck[index];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedMascot = card;
-                      });
-                    },
-                    child: CardWidget(
-                      card: card,
-                      isSelected:
-                          _selectedMascot == card, // Highlight selected card
-                    ),
-                  );
-                },
               ),
             ),
           ),

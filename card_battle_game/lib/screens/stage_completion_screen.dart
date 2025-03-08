@@ -288,33 +288,35 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                       ))
                 ]),
               ),
-            ]
-            else if (!gameOver) ...[
+            ] else if (!gameOver) ...[
               Center(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+                child: Container(
+                  height: 500, // Give it some space to render
+                  child: SingleChildScrollView(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: rewardCards.map((card) {
+                        if (card.isMonster()) {
+                          card.toMonster().isMascot = false;
+                        }
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedReward = card;
+                            });
+                          },
+                          child: SizedBox(
+                              width: 100,
+                              height: 160,
+                              child: CardWidget(
+                                card: card,
+                                isSelected: _selectedReward ==
+                                    card, // Highlight selected card
+                              )),
+                        );
+                      }).toList(),
                     ),
-                    itemCount: rewardCards.length,
-                    itemBuilder: (context, index) {
-                      final card = rewardCards[index];
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedReward = card;
-                          });
-                        },
-                        child: CardWidget(
-                          card: card,
-                          isSelected: _selectedReward ==
-                              card, // Highlight selected card
-                        ),
-                      );
-                    },
                   ),
                 ),
               ),
@@ -374,39 +376,30 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                 widget.userData.activeGame!.player.deck.length >=
                     Constants.playerMaxDeckSize) ...[
               Center(
-                child: Padding(
-                    padding: EdgeInsets.fromLTRB(20, 120, 20, 200),
-                    child: Scrollbar(
-                      thickness: 10,
-                      radius: Radius.circular(10),
-                      thumbVisibility: true,
-                      interactive: true,
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
-                        itemCount:
-                            widget.userData.activeGame!.player.deck.length,
-                        itemBuilder: (context, index) {
-                          final card =
-                              widget.userData.activeGame!.player.deck[index];
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedCardToRemoveFromDeck = card;
-                              });
-                            },
-                            child: CardWidget(
-                              card: card,
-                              isSelected: _selectedCardToRemoveFromDeck ==
-                                  card, // Highlight selected card
-                            ),
-                          );
-                        },
-                      ),
-                    )),
+                child: Container(
+                  height: 500, // Give it some space to render
+                  child: SingleChildScrollView(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children:
+                          widget.userData.activeGame!.player.deck.map((card) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedCardToRemoveFromDeck = card;
+                            });
+                          },
+                          child: CardWidget(
+                            card: card,
+                            isSelected: _selectedCardToRemoveFromDeck ==
+                                card, // Highlight selected card
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
               ),
               Positioned(
                 bottom: 120, // Adjust the position
@@ -455,23 +448,27 @@ class _StageCompletionScreenState extends State<StageCompletionScreen> {
                     padding: EdgeInsets.fromLTRB(20, 150, 20, 200),
                     child: widget.userData.activeGame!.rewards.length > 0
                         ? ListView.separated(
-                separatorBuilder: (context, index) =>
-                    SizedBox(height: 10), // Space between items
-                padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                itemCount: widget.userData.activeGame!.rewards.length,
-                itemBuilder: (context, index) {
-                  var reward = widget.userData.activeGame!.rewards[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      title: Text(reward, style: TextStyle(color: Colors.white)),
-                    ),
-                  );
-                },
-              )
-                        : Text('No rewards accumulated :(', style: TextStyle(color: Colors.white))),
+                            separatorBuilder: (context, index) =>
+                                SizedBox(height: 10), // Space between items
+                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                            itemCount:
+                                widget.userData.activeGame!.rewards.length,
+                            itemBuilder: (context, index) {
+                              var reward =
+                                  widget.userData.activeGame!.rewards[index];
+                              return Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: ListTile(
+                                  title: Text(reward,
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                              );
+                            },
+                          )
+                        : Text('No rewards accumulated :(',
+                            style: TextStyle(color: Colors.white))),
               ),
             ],
           ],

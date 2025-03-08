@@ -529,7 +529,8 @@ class _DeckBuilderScreenState extends State<DeckBuilderScreen>
           "To exchange your cards for a booster pack you need to add a total of $maxExchangeCards cards to exchange.");
       return;
     }
-    if (allCards.length - maxExchangeCards < Constants.playerMinDeckSize) {
+    var amountOfCards = deck.length + availableCards.length;
+    if (amountOfCards - maxExchangeCards < Constants.playerMinDeckSize) {
       NotificationService.showSnackbar(context,
           "You can't exchange, you need to have at least ${Constants.playerMinDeckSize} cards left after exchanging.");
       return;

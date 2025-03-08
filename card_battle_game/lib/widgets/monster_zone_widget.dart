@@ -58,7 +58,7 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         width: 120,
-        height: 220,
+        height: 192,
         margin: EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -92,8 +92,8 @@ class _MonsterZoneWidgetState extends State<MonsterZoneWidget>
                   }
                 },
                 child: SizedBox(
-                  width: 100, // Fixed size
-                  height: 180,
+                  width: 120, // Fixed size
+                  height: 192,
                   child: widget.card!.isBeingAttacked 
                     ? AttackEffect(child: MonsterCardWidget(monster: widget.card!.toMonster()))
                     : MonsterCardWidget(monster: widget.card!.toMonster()),

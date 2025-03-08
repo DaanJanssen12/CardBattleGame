@@ -1,5 +1,8 @@
 import 'package:card_battle_game/models/cards/card.dart';
 import 'package:card_battle_game/models/cards/monster_card.dart';
+import 'package:card_battle_game/painter/curved_text_painter.dart';
+import 'package:card_battle_game/widgets/arced_text.dart';
+import 'package:card_battle_game/widgets/outlined_text.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -14,69 +17,79 @@ class CardDetailsDialog extends StatelessWidget {
     var dialogWidth = MediaQuery.of(context).size.width * 0.9;
     return Dialog(
         backgroundColor: Colors.transparent, // Removes default white background
-        child: Container(
-          width: dialogWidth, // 90% of screen width
-          height: dialogHeight, // 60% of screen height
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/card_front.png'),
-              fit: BoxFit.fill,
+        child: Stack(
+          children: [
+            Padding(
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: SizedBox(
+                  height: dialogHeight * 0.6,
+                  width: dialogWidth * 0.9,
+                  child: Center(
+                    child: _buildImage(BoxConstraints.tightFor(
+                        height: dialogHeight, width: dialogWidth * 0.9)),
+                  ),
+                )),
+            Container(
+              width: dialogWidth, // 90% of screen width
+              height: dialogHeight, // 60% of screen height
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/card_front.png'),
+                  fit: BoxFit.fill,
+                ),
+                //borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                      padding:
+                          EdgeInsets.fromLTRB(0, dialogHeight * 0.47, 0, 0),
+                      child: SizedBox(
+                        height: dialogHeight * 0.25,
+                        width: dialogWidth,
+                        child: Center(
+                          child: _buildNameHeader(dialogWidth),
+                        ),
+                      )),
+                  SizedBox(
+                        height: dialogHeight * 0.25,
+                        width: dialogWidth,
+                        child: _buildDescriptionSection(dialogWidth * 0.65),
+                      )
+                ],
+              ),
             ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: dialogHeight * 0.25,
-                width: dialogWidth * 0.9,
-                child: Center(
-                  child: _buildNameHeader(),
-                ),
-              ),
-              SizedBox(
-                height: dialogHeight * 0.35,
-                width: dialogWidth * 0.9,
-                child: Center(
-                  child: _buildImage(BoxConstraints.tightFor(
-                      height: dialogHeight * 0.4, width: dialogWidth * 0.9)),
-                ),
-              ),
-              Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      dialogWidth * 0.1,
-                      dialogHeight * 0.02,
-                      dialogWidth * 0.1,
-                      dialogHeight * 0.02),
-                  child: SizedBox(
-                    height: dialogHeight * 0.35,
-                    width: dialogWidth * 0.9,
-                    child: _buildDescriptionSection(dialogWidth * 0.65),
-                  ))
-            ],
-          ),
+            Positioned(
+                    left: 20,
+                    bottom: 8,
+                    child: OutlinedText.render('${card.cost}', 36, FontWeight.bold))
+          ],
         ));
   }
 
-  Widget _buildNameHeader() {
-    return Stack(
-      clipBehavior: Clip.none, // Allows the crown to slightly overflow
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(
-            card.name,
-            textAlign: TextAlign.center,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+  Widget _buildNameHeader(width) {
+    // return Center(
+    //   child: CustomPaint(
+    //     size: Size(width, 50),
+    //     painter: CurvedTextPainter(
+    //       card.name,
+    //       TextStyle(
+    //           fontSize: 24,
+    //           fontWeight: FontWeight.bold,
+    //           color: Colors.black87,
+    //         )
+    //     ),
+    //   )
+    // );
+    return Center(
+      child: Padding(padding: EdgeInsets.fromLTRB(15, 0,0,0),
+      child: ArcedText(text: card.name, 
+          textStyle: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black87,
             ),
-          ),
-        ),
-      ],
+            width: width))
     );
   }
 
@@ -91,7 +104,7 @@ class CardDetailsDialog extends StatelessWidget {
             card.imagePath.isNotEmpty == true
                 ? card.imagePath
                 : 'assets/images/placeholder.png',
-            width: constraints.maxWidth * 0.8,
+            width: constraints.maxWidth * 0.9,
             height: constraints.maxHeight * 0.9,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
@@ -103,7 +116,7 @@ class CardDetailsDialog extends StatelessWidget {
             },
           ),
         ),
-        _buildCostBadge(), // Cost badge now overlaying slightly on the image
+        //_buildCostBadge(), // Cost badge now overlaying slightly on the image
       ],
     );
   }
@@ -138,37 +151,40 @@ class CardDetailsDialog extends StatelessWidget {
   Widget _buildDescriptionSection(double width) {
     var description = card.fullDescription ?? card.shortDescription ?? '';
     double fontSize = 16;
-    if(description.length > 30){
+    if (description.length > 30) {
       fontSize = 14;
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(
+            Padding(
+              padding: EdgeInsets.fromLTRB(25, 0, 25, 0),
+              child: SizedBox(
               width: width,
               child: Text(description,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize,
-                ),
-                softWrap: true),
-            ),
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize,
+                  ),
+                  softWrap: true),
+            )),
           ],
         ),
-        if (card.isMonster()) ...[_buildStatsSection(card.toMonster())],
+        // if (card.isMonster()) ...[_buildStatsSection(card.toMonster())],
       ],
     );
   }
 
   Widget _buildStatsSection(MonsterCard monster) {
     return Column(mainAxisSize: MainAxisSize.min, children: [
-      _buildStatRow(FontAwesomeIcons.solidHeart, 'Health',
-          monster.health, Colors.redAccent),
+      _buildStatRow(FontAwesomeIcons.solidHeart, 'Health', monster.health,
+          Colors.redAccent),
       _buildStatRow(FontAwesomeIcons.handFist, 'Attack', monster.attack,
           Colors.orangeAccent),
     ]);
